@@ -196,7 +196,7 @@ const Analytics = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-3 border-purple-500 border-t-transparent" />
+        <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent" />
       </div>
     );
   }
@@ -216,7 +216,7 @@ const Analytics = () => {
                 <button
                   key={fmt}
                   onClick={() => handleExport(fmt)}
-                  className="text-xs px-3 py-2 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-purple-500 transition-colors"
+                  className="text-xs px-3 py-2 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-blue-500 transition-colors"
                 >
                   {fmt}
                 </button>

@@ -20,7 +20,7 @@ const reviewerTypes = [
 ];
 
 const generateOptions = [
-  { value: 'reviewer', label: 'Generate Reviewer', icon: '🤖', color: 'from-purple-500 to-pink-500' },
+  { value: 'reviewer', label: 'Generate Reviewer', icon: '🤖', color: 'from-blue-500 to-cyan-500' },
   { value: 'flashcards', label: 'Generate Flashcards', icon: '🎴', color: 'from-blue-500 to-cyan-500' },
   { value: 'quiz', label: 'Generate Quiz', icon: '📝', color: 'from-green-500 to-emerald-500' },
 ];

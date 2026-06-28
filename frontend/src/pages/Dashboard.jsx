@@ -14,12 +14,12 @@ const quotes = [
 ];
 
 const quickCards = [
-  { icon: '🤖', label: 'AI Reviewer', path: '/reviewer', color: 'from-purple-500 to-indigo-500' },
+  { icon: '🤖', label: 'AI Reviewer', path: '/reviewer', color: 'from-blue-500 to-indigo-500' },
   { icon: '🎴', label: 'Flashcards', path: '/flashcards', color: 'from-blue-500 to-cyan-500' },
-  { icon: '🧠', label: 'Quizzes', path: '/quiz', color: 'from-pink-500 to-rose-500' },
+  { icon: '🧠', label: 'Quizzes', path: '/quiz', color: 'from-sky-500 to-cyan-500' },
   { icon: '📄', label: 'PDF Reviewer', path: '/pdf-reviewer', color: 'from-amber-500 to-orange-500' },
   { icon: '📈', label: 'Analytics', path: '/analytics', color: 'from-emerald-500 to-green-500' },
-  { icon: '⏱️', label: 'Pomodoro', path: '/pomodoro', color: 'from-violet-500 to-purple-500' },
+  { icon: '⏱️', label: 'Pomodoro', path: '/pomodoro', color: 'from-violet-500 to-blue-500' },
 ];
 
 const Dashboard = () => {

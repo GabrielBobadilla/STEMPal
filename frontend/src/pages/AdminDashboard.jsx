@@ -54,7 +54,7 @@ const AdminDashboard = () => {
   if (!user || user.role !== 'admin') return null;
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent" />
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent" />
     </div>
   );
 
@@ -75,9 +75,9 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: '👥', label: 'Total Users', value: users.length, color: 'from-purple-500 to-indigo-500' },
+          { icon: '👥', label: 'Total Users', value: users.length, color: 'from-blue-500 to-indigo-500' },
           { icon: '🤖', label: 'Reviewers', value: notes.length, color: 'from-blue-500 to-cyan-500' },
-          { icon: '📝', label: 'Quizzes', value: quizzes.length, color: 'from-pink-500 to-rose-500' },
+          { icon: '📝', label: 'Quizzes', value: quizzes.length, color: 'from-sky-500 to-cyan-500' },
           { icon: '⏱️', label: 'Sessions', value: sessions.length, color: 'from-emerald-500 to-green-500' },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }} className="glass-card p-4 sm:p-5 text-center">
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
                     <td className="py-3 pr-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         u.role === 'admin'
-                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                           : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                       }`}>
                         {u.role || 'user'}

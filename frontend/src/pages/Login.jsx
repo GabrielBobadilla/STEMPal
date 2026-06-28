@@ -31,7 +31,7 @@ const Login = () => {
         navigate('/preferences');
       }
     } catch (err) {
-      const message = err.response?.data?.message || 'Login failed. Please try again.';
+      const message = err.response?.data?.message || 'Cannot connect to server. Make sure the backend is running.';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -69,11 +69,13 @@ const Login = () => {
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer" />
+              className="w-4 h-4 rounded border-gray-300 text-blue-600
+              focus:ring-blue-500 cursor-pointer" />
             <span className="text-sm text-[var(--text-secondary)]">Remember Me</span>
           </label>
           <Link to="/forgot-password"
-            className="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium transition-colors">
+            className="text-sm text-blue-600 hover:text-blue-700
+dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
             Forgot Password?
           </Link>
         </div>
@@ -88,7 +90,8 @@ const Login = () => {
       <p className="text-center mt-6 text-sm text-[var(--text-secondary)]">
         Don&apos;t have an account?{' '}
         <Link to="/register"
-          className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium transition-colors">
+          className="text-blue-600 hover:text-blue-700
+dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
           Sign Up
         </Link>
       </p>

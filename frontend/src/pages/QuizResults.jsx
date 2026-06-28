@@ -81,7 +81,7 @@ const suggestionCards = [
     desc: 'Check your saved notes and reviewers',
     icon: '📝',
     path: '/reviewer',
-    color: 'from-purple-500 to-pink-500'
+    color: 'from-blue-500 to-cyan-500'
   },
   {
     title: 'Generate Flashcards',

@@ -299,4 +299,4 @@ INSERT INTO levels (level_name, min_xp, max_xp) VALUES
 -- INSERT DEFAULT ADMIN (password: admin123)
 -- ================================================
 INSERT INTO users (fullname, email, password, role) VALUES
-('STEMPal Admin', 'admin@stempal.com', '$2a$10$8KzQMGx5C5Kc5Qy5Q5z5Q.5z5Q5z5Q5z5Q5z5Q5z5Q5z5Q5z5Q5z', 'admin');
+('STEMPal Admin', 'admin@stempal.com', '$2a$10$Pvxxj0px7Vif0MAsc.tp2eQqqRLlFEcUqiSrYzr6hH2h6MA0AZHN6', 'admin');

@@ -95,7 +95,7 @@ const Notifications = () => {
 
       {loading ? (
         <motion.div variants={itemVariants} className="glass-card p-12 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent" />
         </motion.div>
       ) : notifications.length === 0 ? (
         <motion.div variants={itemVariants} className="glass-card p-12 text-center">

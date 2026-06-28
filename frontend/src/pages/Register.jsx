@@ -185,7 +185,8 @@ const Register = () => {
       <p className="text-center mt-6 text-sm text-[var(--text-secondary)]">
         Already have an account?{' '}
         <Link to="/login"
-          className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium transition-colors">
+          className="text-blue-600 hover:text-blue-700
+dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
           Sign In
         </Link>
       </p>
