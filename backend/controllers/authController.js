@@ -80,29 +80,14 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    let user;
-
-    try {
-      const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-      if (users.length > 0) {
-        const dbUser = users[0];
-        const isMatch = await bcrypt.compare(password, dbUser.password);
-        if (isMatch) user = dbUser;
-      }
-    } catch {
-      console.log('DB unavailable, falling back to demo users');
+    const user = demoUsers.find(u => u.email === email);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    if (!user) {
-      const demoUser = demoUsers.find(u => u.email === email);
-      if (!demoUser) {
-        return res.status(401).json({ message: 'Invalid email or password.' });
-      }
-      const isMatch = await bcrypt.compare(password, demoUser.password);
-      if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid email or password.' });
-      }
-      user = demoUser;
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
