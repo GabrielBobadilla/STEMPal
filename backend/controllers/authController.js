@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
+const JWT_SECRET = JWT_SECRET || 'stempal_jwt_secret_key_2024_change_in_production';
+
 const demoUsers = [
   {
     id: 1,
@@ -55,7 +57,7 @@ const register = async (req, res) => {
 
     await pool.query('INSERT INTO streaks (user_id, current_streak, longest_streak) VALUES (?, 0, 0)', [result.insertId]);
 
-    const token = jwt.sign({ id: result.insertId, role: 'student' }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: result.insertId, role: 'student' }, JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     });
 
@@ -103,7 +105,7 @@ const login = async (req, res) => {
       user = demoUser;
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     });
 
@@ -133,7 +135,7 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: 'Email not found.' });
     }
 
-    const resetToken = jwt.sign({ id: users[0].id, purpose: 'reset' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const resetToken = jwt.sign({ id: users[0].id, purpose: 'reset' }, JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ message: 'Password reset link sent.', resetToken });
   } catch (error) {
@@ -146,7 +148,7 @@ const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     if (decoded.purpose !== 'reset') {
       return res.status(400).json({ message: 'Invalid reset token.' });
     }
