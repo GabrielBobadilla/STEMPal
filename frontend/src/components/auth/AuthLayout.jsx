@@ -16,11 +16,11 @@ const shapes = [
   { type: 'triangle', size: 30, x: '25%', y: '35%', dur: 6, delay: 2.2, rot: 10 },
 ];
 
-const particles = Array.from({ length: 30 }, (_, i) => ({
-  size: Math.random() * 4 + 2,
+const particles = Array.from({ length: 40 }, (_, i) => ({
+  size: Math.random() * 6 + 3,
   x: `${Math.random() * 100}%`,
-  dur: Math.random() * 8 + 6,
-  delay: Math.random() * 5,
+  dur: Math.random() * 6 + 4,
+  delay: Math.random() * 4,
 }));
 
 const lines = [
@@ -45,49 +45,69 @@ const AuthLayout = ({ children }) => (
   <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
     style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' }}>
 
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.2 }}>
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.5 }}>
       {lines.map((l, i) => (
         <motion.line key={i} x1={`${l.x1}%`} y1={`${l.y1}%`} x2={`${l.x2}%`} y2={`${l.y2}%`}
-          stroke="white" strokeWidth="1.5" strokeLinecap="round"
+          stroke="white" strokeWidth="2.5" strokeLinecap="round" filter="url(#glow)"
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: [0, 1, 0], opacity: [0, 0.6, 0] }}
-          transition={{ duration: 6, delay: l.delay, repeat: Infinity, ease: 'easeInOut' }} />
+          animate={{ pathLength: [0, 1, 0], opacity: [0, 0.9, 0] }}
+          transition={{ duration: 5, delay: l.delay, repeat: Infinity, ease: 'easeInOut' }} />
       ))}
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
     </svg>
 
     {shapes.map((s, i) => (
       <motion.div key={i} className="absolute"
-        style={{ width: s.size, height: s.size, clipPath: getClipPath(s.type),
-          background: `rgba(255,255,255,${0.06 + Math.random() * 0.08})`,
-          border: s.type === 'square' ? '1px solid rgba(255,255,255,0.12)' : 'none',
-          borderRadius: s.type === 'square' ? '4px' : '0' }}
-        initial={{ x: s.x, y: s.y, rotate: s.rot, opacity: 0, scale: 0.5 }}
+        style={{
+          width: s.size, height: s.size,
+          clipPath: getClipPath(s.type),
+          background: `linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))`,
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: s.type === 'square' ? '6px' : '0',
+          boxShadow: '0 0 20px rgba(255,255,255,0.15)',
+        }}
+        initial={{ x: s.x, y: s.y, rotate: s.rot, opacity: 0, scale: 0.3 }}
         animate={{
-          x: [s.x, `calc(${s.x} + ${60 + i * 10}px)`, `calc(${s.x} - ${30 + i * 5}px)`, s.x],
-          y: [s.y, `calc(${s.y} - ${50 + i * 8}px)`, `calc(${s.y} + ${70 + i * 6}px)`, s.y],
-          rotate: [s.rot, s.rot + 180, s.rot + 360],
-          opacity: [0, 0.5 - i * 0.02, 0.3, 0.5 - i * 0.02, 0],
-          scale: [0.5, 1, 0.8, 1, 0.5],
+          x: [s.x, `calc(${s.x} + ${120 + i * 15}px)`, `calc(${s.x} - ${80 + i * 8}px)`, s.x],
+          y: [s.y, `calc(${s.y} - ${100 + i * 12}px)`, `calc(${s.y} + ${130 + i * 10}px)`, s.y],
+          rotate: [s.rot, s.rot + 360, s.rot + 720],
+          opacity: [0, 0.9, 0.5, 0.9, 0],
+          scale: [0.3, 1.1, 0.7, 1.1, 0.3],
         }}
         transition={{ duration: s.dur, delay: s.delay, repeat: Infinity, ease: 'easeInOut' }} />
     ))}
 
     {particles.map((p, i) => (
-      <motion.div key={`p${i}`} className="absolute rounded-full bg-white"
-        style={{ width: p.size, height: p.size, left: p.x }}
+      <motion.div key={`p${i}`} className="absolute rounded-full"
+        style={{
+          width: p.size, height: p.size, left: p.x,
+          background: 'radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0.2))',
+          boxShadow: '0 0 6px rgba(255,255,255,0.4)',
+        }}
         initial={{ y: '110%', opacity: 0 }}
-        animate={{ y: ['110%', '-10%'], opacity: [0, 0.3 - i * 0.008, 0] }}
+        animate={{ y: ['110%', '-10%'], opacity: [0, 0.6, 0] }}
         transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: 'linear' }} />
     ))}
 
-    <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 0.1 }}
-      transition={{ duration: 1.5 }}
+    <motion.div initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: [0, 1, 1.1, 1], opacity: [0, 0.18, 0.12, 0.18] }}
+      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-white rounded-full" />
-    <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 0.08 }}
-      transition={{ duration: 1.5, delay: 0.3 }}
+    <motion.div initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: [0, 1, 1.15, 1], opacity: [0, 0.15, 0.08, 0.15] }}
+      transition={{ duration: 3.5, delay: 0.5, repeat: Infinity, ease: 'easeInOut' }}
       className="absolute -bottom-40 -left-40 w-[450px] h-[450px] bg-sky-300 rounded-full" />
-    <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 0.06 }}
-      transition={{ duration: 1.5, delay: 0.6 }}
+    <motion.div initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: [0, 1, 1.2, 1], opacity: [0, 0.12, 0.06, 0.12] }}
+      transition={{ duration: 4, delay: 1, repeat: Infinity, ease: 'easeInOut' }}
       className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-sky-200 rounded-full" />
 
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
