@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { quizAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -279,8 +279,7 @@ const Quiz = () => {
         ))}
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div key={currentIndex} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
+      <motion.div key={currentIndex} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }} className="glass-card p-6 md:p-8">
           <div className="flex items-start gap-4 mb-6">
             <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
@@ -320,7 +319,6 @@ const Quiz = () => {
               className="input-field w-full resize-none text-lg" />
           )}
         </motion.div>
-      </AnimatePresence>
 
       <div className="flex items-center justify-between gap-3">
         <button onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))} disabled={currentIndex === 0}
