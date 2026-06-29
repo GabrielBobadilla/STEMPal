@@ -14,10 +14,10 @@ const quotes = [
 ];
 
 const quickCards = [
-  { icon: '🤖', label: 'AI Reviewer', path: '/reviewer', color: 'from-sky-500 to-indigo-500' },
+  { icon: '🤖', label: 'AI Study Hub', path: '/ai-study', color: 'from-sky-500 to-indigo-500' },
   { icon: '🎴', label: 'Flashcards', path: '/flashcards', color: 'from-sky-500 to-cyan-500' },
   { icon: '🧠', label: 'Quizzes', path: '/quiz', color: 'from-sky-500 to-cyan-500' },
-  { icon: '📈', label: 'Analytics', path: '/analytics', color: 'from-emerald-500 to-green-500' },
+  { icon: '📈', label: 'Analytics', path: '/profile', color: 'from-emerald-500 to-green-500' },
   { icon: '⏱️', label: 'Pomodoro', path: '/pomodoro', color: 'from-violet-500 to-sky-500' },
 ];
 
