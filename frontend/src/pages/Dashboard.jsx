@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { analyticsAPI, streakAPI, quizAPI } from '../services/api';
-import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { analyticsAPI, quizAPI, streakAPI } from '../services/api';
 
 const quotes = [
   "The only way to learn mathematics is to do mathematics. — Paul Halmos",
