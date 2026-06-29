@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { reviewerAPI, pdfAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { reviewerAPI, pdfAPI, flashcardAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import ReviewTypeCard from '../components/reviewer/ReviewTypeCard';
 import SectionCard from '../components/reviewer/SectionCard';
@@ -86,7 +87,20 @@ const Reviewer = () => {
     } catch { toast.error('Failed to load reviewer'); }
   };
 
-  const handleCopy = useCallback(() => {
+  const navigate = useNavigate();
+
+const handleGenerateFlashcards = async () => {
+  const topicToUse = topic || result?.topic || (activePdf?.filename || '');
+  if (!topicToUse) return toast.error('No topic available');
+  setLoading(true);
+  try {
+    await flashcardAPI.generate({ topic: topicToUse, count: 10 });
+    toast.success('Flashcards generated!');
+    navigate('/flashcards');
+  } catch { toast.error('Failed to generate flashcards'); } finally { setLoading(false); }
+};
+
+const handleCopy = useCallback(() => {
     if (!result) return;
     navigator.clipboard.writeText(JSON.stringify(result, null, 2))
       .then(() => toast.success('Copied to clipboard'))
@@ -240,8 +254,12 @@ const Reviewer = () => {
               <h2 className="text-xl font-bold gradient-text">Generated Content</h2>
               <p className="text-sm text-[var(--text-secondary)]">{sections.length} sections</p>
             </div>
-            <button onClick={handleCopy}
-              className="px-4 py-2 rounded-xl bg-[var(--bg-secondary)] hover:bg-sky-500/10 text-sm font-medium border border-[var(--glass-border)] transition-all">Copy</button>
+            <div className="flex gap-2">
+              <button onClick={handleGenerateFlashcards}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-sm font-medium transition-all hover:shadow-lg">Generate Flashcards</button>
+              <button onClick={handleCopy}
+                className="px-4 py-2 rounded-xl bg-[var(--bg-secondary)] hover:bg-sky-500/10 text-sm font-medium border border-[var(--glass-border)] transition-all">Copy</button>
+            </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {sections.map((section) => (
