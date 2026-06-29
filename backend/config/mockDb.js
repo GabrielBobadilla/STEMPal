@@ -74,17 +74,18 @@ function parseWhere(sql, params) {
   let pIdx = 0;
 
   return (row) => {
-    const expr = condition.replace(/\?/g, () => {
+    let expr = condition.replace(/\?/g, () => {
       const val = params ? params[pIdx++] : undefined;
-      if (typeof val === 'string') return `'${val.replace(/'/g, "''")}'`;
+      if (typeof val === 'string') return `'${val.replace(/'/g, "\\'")}'`;
       return val;
     });
+    expr = expr.replace(/\bAND\b/g, '&&').replace(/\bOR\b/g, '||').replace(/=/g, '===').replace(/<>/g, '!==');
     try {
       const ctx = { ...row };
       for (const k of Object.keys(ctx)) {
         if (typeof ctx[k] === 'string') ctx[k] = `'${ctx[k]}'`;
       }
-      const fn = new Function(...Object.keys(ctx), `return ${expr.replace(/=/g, '===').replace(/<>/g, '!==')}`);
+      const fn = new Function(...Object.keys(ctx), `return ${expr}`);
       return fn(...Object.values(ctx));
     } catch { return true; }
   };
