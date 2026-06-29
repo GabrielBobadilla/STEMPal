@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
-const JWT_SECRET = JWT_SECRET || 'stempal_jwt_secret_key_2024_change_in_production';
+const JWT_SECRET = process.env.JWT_SECRET || 'stempal_jwt_secret_key_2024_change_in_production';
 
 const demoUsers = [
   {
@@ -80,7 +80,21 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    const user = demoUsers.find(u => u.email === email);
+    let user;
+    try {
+      const [users] = await pool.query(
+        'SELECT id, fullname, email, password, role, profile_picture, theme_preference FROM users WHERE email = ?',
+        [email]
+      );
+      user = users[0];
+    } catch (dbErr) {
+      const found = demoUsers.find(u => u.email === email);
+      if (found) {
+        const isMatch = await bcrypt.compare(password, found.password);
+        if (isMatch) user = found;
+      }
+    }
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }

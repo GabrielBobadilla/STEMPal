@@ -1,3 +1,16 @@
+if (process.env.USE_MOCK_DB === 'true') {
+  const { createMockDb } = require('./mockDb');
+  const poolPromise = createMockDb();
+  module.exports = new Proxy({}, {
+    get(_, prop) {
+      if (prop === 'query') return async (...args) => (await poolPromise).query(...args);
+      if (prop === 'execute') return async (...args) => (await poolPromise).query(...args);
+      return undefined;
+    }
+  });
+  return;
+}
+
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
