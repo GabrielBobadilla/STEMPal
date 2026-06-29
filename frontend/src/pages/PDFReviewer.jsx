@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { pdfAPI, reviewerAPI, flashcardAPI, quizAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import SectionCard from '../components/reviewer/SectionCard';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -127,6 +128,7 @@ const PDFReviewer = () => {
   const handleGenerate = async (option) => {
     if (!activePdf?.id) return toast.error('No processed PDF available');
     setGenerating(option);
+    setResult(null);
     try {
       const payload = {
         pdfId: activePdf.id,
@@ -137,7 +139,7 @@ const PDFReviewer = () => {
       switch (option) {
         case 'reviewer':
           res = await reviewerAPI.generate({ ...payload, topic: pdfData?.title || 'PDF Content' });
-          setResult(res?.data);
+          setResult(res?.data?.content || res?.data);
           toast.success('Reviewer generated from PDF');
           break;
         case 'flashcards':
@@ -297,17 +299,34 @@ const PDFReviewer = () => {
           ) : result ? (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">{result.title || 'Generated Reviewer'}</h2>
+                <h2 className="text-lg font-semibold">Generated Reviewer</h2>
                 <button onClick={() => {
+                  const text = Object.entries(result).map(([k, v]) => `${k.replace(/_/g, ' ').toUpperCase()}\n${Array.isArray(v) ? v.map(i => typeof i === 'object' ? JSON.stringify(i, null, 2) : i).join('\n') : typeof v === 'object' ? JSON.stringify(v, null, 2) : v}`).join('\n\n');
                   const win = window.open('', '_blank');
-                  win.document.write(`<html><head><title>Reviewer</title><style>body{font-family:sans-serif;padding:2rem;max-width:800px;margin:auto;line-height:1.6}h2{color:#7c3aed}</style></head><body>${(result.full_content || result.content || '').replace(/\n/g, '<br>')}</body></html>`);
+                  win.document.write(`<html><head><title>Reviewer</title><style>body{font-family:sans-serif;padding:2rem;max-width:800px;margin:auto;line-height:1.6}h2{color:#7c3aed}</style></head><body><pre>${text}</pre></body></html>`);
                   win.document.close(); win.print();
                 }} className="btn-secondary text-sm px-3 py-1.5">
                   🖨️ Print
                 </button>
               </div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {result.full_content || result.content || ''}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {(() => {
+                  const sectionDefs = [
+                    { title: 'Summary', key: 'summary', icon: '📝' },
+                    { title: 'Key Concepts', key: 'key_concepts', icon: '💡' },
+                    { title: 'Definitions', key: 'definitions', icon: '📖' },
+                    { title: 'Important Definitions', key: 'important_definitions', icon: '📖' },
+                    { title: 'Formula Sheet', key: 'formula_sheet', icon: '📐' },
+                    { title: 'Formulas', key: 'formulas', icon: '📐' },
+                    { title: 'Practice Questions', key: 'practice_questions', icon: '✍️' },
+                    { title: 'Key Formulas', key: 'key_formulas', icon: '📐' },
+                    { title: 'Common Mistakes', key: 'common_mistakes', icon: '⚠️' },
+                    { title: 'Detailed Explanations', key: 'detailed_explanations', icon: '🔬' },
+                  ];
+                  return sectionDefs
+                    .filter(s => result[s.key])
+                    .map(s => <SectionCard key={s.key} sectionKey={s.key} icon={s.icon} title={s.title} content={result[s.key]} />);
+                })()}
               </div>
             </div>
           ) : pdfData ? (

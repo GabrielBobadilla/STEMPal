@@ -193,10 +193,16 @@ const generateKeyTerms = async (topic) => {
 
 const extractTextFromPDF = async (text) => {
   const truncated = text.substring(0, 15000);
-  return await generateContent(
-    `Organize the following extracted text into a well-structured study format with clear sections, bullet points, and summaries:\n\n${truncated}`,
-    'You are a document processing assistant that organizes educational content.'
-  );
+  try {
+    return await generateContent(
+      `Organize the following extracted text into a well-structured study format with clear sections, bullet points, and summaries:\n\n${truncated}`,
+      'You are a document processing assistant that organizes educational content.'
+    );
+  } catch {
+    const lines = truncated.split('\n').filter(Boolean);
+    const summary = lines.slice(0, Math.min(5, lines.length)).join(' ');
+    return `# Extracted Content Summary\n\n${summary}\n\n## Key Points\n${lines.slice(0, 10).map((l, i) => `- ${l}`).join('\n')}\n\n## Full Content\n${truncated}`;
+  }
 };
 
 module.exports = {
