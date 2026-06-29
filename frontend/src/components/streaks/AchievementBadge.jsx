@@ -10,7 +10,7 @@ const BADGE_TIERS = [
   { key: 'bronze', label: 'Bronze', days: 3, icon: '🥉', color: 'from-amber-600 to-amber-400' },
   { key: 'silver', label: 'Silver', days: 7, icon: '🥈', color: 'from-gray-400 to-gray-300' },
   { key: 'gold', label: 'Gold', days: 14, icon: '🥇', color: 'from-yellow-500 to-yellow-300' },
-  { key: 'platinum', label: 'Platinum', days: 30, icon: '💎', color: 'from-cyan-500 to-blue-400' },
+  { key: 'platinum', label: 'Platinum', days: 30, icon: '💎', color: 'from-cyan-500 to-sky-400' },
   { key: 'master', label: 'Master', days: 100, icon: '👑', color: 'from-purple-500 to-pink-400' }
 ];
 

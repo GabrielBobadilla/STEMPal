@@ -2,7 +2,7 @@ import React from 'react';
 
 const PhaseLabel = ({ phase }) => {
   const labels = {
-    study: { text: 'Focus Time', color: 'text-blue-500' },
+    study: { text: 'Focus Time', color: 'text-sky-500' },
     break: { text: 'Short Break', color: 'text-green-500' },
     longBreak: { text: 'Long Break', color: 'text-purple-500' }
   };

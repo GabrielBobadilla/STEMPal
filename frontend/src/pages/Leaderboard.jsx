@@ -76,7 +76,7 @@ const Leaderboard = () => {
 
       {loading ? (
         <motion.div variants={itemVariants} className="glass-card p-12 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent" />
         </motion.div>
       ) : leaderboard.length === 0 ? (
         <motion.div variants={itemVariants} className="glass-card p-12 text-center">
@@ -93,7 +93,7 @@ const Leaderboard = () => {
                 key={entry._id || entry.userId || index}
                 variants={itemVariants}
                 className={`glass-card p-4 flex items-center gap-4 transition-all duration-300 ${
-                  isCurrentUser ? 'ring-2 ring-blue-500 bg-blue-500/5' : ''
+                  isCurrentUser ? 'ring-2 ring-sky-500 bg-sky-500/5' : ''
                 }`}
               >
                 <div className="w-10 text-center">
@@ -104,14 +104,14 @@ const Leaderboard = () => {
                   )}
                 </div>
 
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
+<div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-sky-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
                   {(entry.fullname || entry.name || entry.username || '?').charAt(0).toUpperCase()}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm truncate">
                     {entry.fullname || entry.name || entry.username || 'Unknown'}
-                    {isCurrentUser && <span className="text-blue-400 text-xs ml-2">(You)</span>}
+                    {isCurrentUser && <span className="text-sky-400 text-xs ml-2">(You)</span>}
                   </p>
                   <p className="text-xs text-[var(--text-secondary)]">
                     Level {entry.level || entry.levelInfo?.level || 1}
@@ -129,17 +129,17 @@ const Leaderboard = () => {
       )}
 
       {ranking && ranking.rank && ranking.rank > 20 && (
-        <motion.div variants={itemVariants} className="glass-card p-4 flex items-center gap-4 ring-2 ring-blue-500 bg-blue-500/5">
+        <motion.div variants={itemVariants} className="glass-card p-4 flex items-center gap-4 ring-2 ring-sky-500 bg-sky-500/5">
           <div className="w-10 text-center">
             <span className="text-sm font-bold text-[var(--text-secondary)]">#{ranking.rank}</span>
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-sky-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
             {(user?.fullname || '?').charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm truncate">
               {user?.fullname || 'You'}
-              <span className="text-blue-400 text-xs ml-2">(You)</span>
+              <span className="text-sky-400 text-xs ml-2">(You)</span>
             </p>
             <p className="text-xs text-[var(--text-secondary)]">Level {ranking.level || ranking.levelInfo?.level || 1}</p>
           </div>

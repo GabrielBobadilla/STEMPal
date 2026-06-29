@@ -68,8 +68,8 @@ const ForgotPassword = () => {
           <p className="text-center mt-6 text-sm text-[var(--text-secondary)]">
             Remember your password?{' '}
             <Link to="/login"
-              className="text-blue-600 hover:text-blue-700
-dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
+              className="text-sky-600 hover:text-sky-700
+dark:text-sky-400 dark:hover:text-sky-300 font-medium transition-colors">
               Sign In
             </Link>
           </p>

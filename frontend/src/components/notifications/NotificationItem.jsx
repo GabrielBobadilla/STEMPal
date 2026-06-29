@@ -6,7 +6,7 @@ const TYPE_ICONS = {
 };
 
 const TYPE_COLORS = {
-  study_reminder: 'from-blue-500 to-indigo-500', break: 'from-green-500 to-teal-500',
+  study_reminder: 'from-sky-500 to-indigo-500', break: 'from-green-500 to-teal-500',
   streak: 'from-orange-500 to-red-500', quiz: 'from-purple-500 to-pink-500',
   achievement: 'from-yellow-500 to-amber-500'
 };

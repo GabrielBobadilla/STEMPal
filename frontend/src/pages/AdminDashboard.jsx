@@ -54,7 +54,7 @@ const AdminDashboard = () => {
   if (!user || user.role !== 'admin') return null;
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent" />
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent" />
     </div>
   );
 
@@ -75,8 +75,8 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: '👥', label: 'Total Users', value: users.length, color: 'from-blue-500 to-indigo-500' },
-          { icon: '🤖', label: 'Reviewers', value: notes.length, color: 'from-blue-500 to-cyan-500' },
+          { icon: '👥', label: 'Total Users', value: users.length, color: 'from-sky-500 to-indigo-500' },
+          { icon: '🤖', label: 'Reviewers', value: notes.length, color: 'from-sky-500 to-cyan-500' },
           { icon: '📝', label: 'Quizzes', value: quizzes.length, color: 'from-sky-500 to-cyan-500' },
           { icon: '⏱️', label: 'Sessions', value: sessions.length, color: 'from-emerald-500 to-green-500' },
         ].map((s, i) => (
@@ -166,8 +166,8 @@ const AdminDashboard = () => {
                     <td className="py-3 pr-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         u.role === 'admin'
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                          : 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
                       }`}>
                         {u.role || 'user'}
                       </span>

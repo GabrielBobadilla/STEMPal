@@ -69,13 +69,13 @@ const Login = () => {
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-blue-600
-              focus:ring-blue-500 cursor-pointer" />
+              className="w-4 h-4 rounded border-gray-300 text-sky-600
+              focus:ring-sky-500 cursor-pointer" />
             <span className="text-sm text-[var(--text-secondary)]">Remember Me</span>
           </label>
           <Link to="/forgot-password"
-            className="text-sm text-blue-600 hover:text-blue-700
-dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
+            className="text-sm text-sky-600 hover:text-sky-700
+dark:text-sky-400 dark:hover:text-sky-300 font-medium transition-colors">
             Forgot Password?
           </Link>
         </div>
@@ -90,8 +90,8 @@ dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
       <p className="text-center mt-6 text-sm text-[var(--text-secondary)]">
         Don&apos;t have an account?{' '}
         <Link to="/register"
-          className="text-blue-600 hover:text-blue-700
-dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
+          className="text-sky-600 hover:text-sky-700
+dark:text-sky-400 dark:hover:text-sky-300 font-medium transition-colors">
           Sign Up
         </Link>
       </p>

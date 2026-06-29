@@ -74,14 +74,14 @@ const suggestionCards = [
     desc: 'Generate a new quiz on similar topics',
     icon: '📚',
     path: '/quiz',
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-sky-500 to-cyan-500'
   },
   {
     title: 'Review Notes',
     desc: 'Check your saved notes and reviewers',
     icon: '📝',
     path: '/reviewer',
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-sky-500 to-cyan-500'
   },
   {
     title: 'Generate Flashcards',

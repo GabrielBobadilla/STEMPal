@@ -26,8 +26,8 @@ const getSourceIcon = (source) => {
 };
 
 const getSourceColor = (source) => {
-  if (source === 'ai') return 'from-blue-500 to-cyan-500';
-  if (source === 'pdf') return 'from-blue-500 to-cyan-500';
+  if (source === 'ai') return 'from-sky-500 to-cyan-500';
+  if (source === 'pdf') return 'from-sky-500 to-cyan-500';
   return 'from-green-500 to-emerald-500';
 };
 
@@ -76,8 +76,8 @@ const SearchPage = () => {
   }, [debouncedQuery, sourceFilter]);
 
   const getSourceBadge = (source) => {
-    if (source === 'human') return { label: 'Human Note', className: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
-    if (source === 'ai') return { label: 'AI Generated', className: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
+    if (source === 'human') return { label: 'Human Note', className: 'bg-sky-500/20 text-sky-400 border-sky-500/30' };
+    if (source === 'ai') return { label: 'AI Generated', className: 'bg-sky-500/20 text-sky-400 border-sky-500/30' };
     if (source === 'pdf') return { label: 'PDF', className: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
     return { label: source || 'Note', className: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
   };

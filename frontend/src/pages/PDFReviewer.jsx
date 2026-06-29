@@ -20,8 +20,8 @@ const reviewerTypes = [
 ];
 
 const generateOptions = [
-  { value: 'reviewer', label: 'Generate Reviewer', icon: '🤖', color: 'from-blue-500 to-cyan-500' },
-  { value: 'flashcards', label: 'Generate Flashcards', icon: '🎴', color: 'from-blue-500 to-cyan-500' },
+  { value: 'reviewer', label: 'Generate Reviewer', icon: '🤖', color: 'from-sky-500 to-cyan-500' },
+  { value: 'flashcards', label: 'Generate Flashcards', icon: '🎴', color: 'from-sky-500 to-cyan-500' },
   { value: 'quiz', label: 'Generate Quiz', icon: '📝', color: 'from-green-500 to-emerald-500' },
 ];
 
@@ -378,7 +378,7 @@ const PDFReviewer = () => {
                   <span className={`text-xs px-2 py-1 rounded-full ${
                     item.status === 'processed' ? 'bg-green-500/20 text-green-400' :
                     item.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-blue-500/20 text-blue-400'
+                    'bg-sky-500/20 text-sky-400'
                   }`}>
                     {item.status || 'uploaded'}
                   </span>

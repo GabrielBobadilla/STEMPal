@@ -151,7 +151,7 @@ const Profile = () => {
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400">
                 🔥 {streak} day streak
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400">
                 ⚡ {totalXp} XP
               </span>
             </div>
