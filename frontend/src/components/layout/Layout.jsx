@@ -12,7 +12,6 @@ const navItems = [
   { path: '/streaks', label: 'Streaks', icon: '🔥' },
   { path: '/analytics', label: 'Analytics', icon: '📈' },
   { path: '/history', label: 'History', icon: '📚' },
-  { path: '/search', label: 'Search', icon: '🔍' },
   { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
 ];
 

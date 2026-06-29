@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { analyticsAPI, quizAPI, streakAPI } from '../services/api';
+import { analyticsAPI, quizAPI, streakAPI, searchAPI } from '../services/api';
 
 const quotes = [
   "The only way to learn mathematics is to do mathematics. — Paul Halmos",
@@ -17,7 +17,6 @@ const quickCards = [
   { icon: '🤖', label: 'AI Reviewer', path: '/reviewer', color: 'from-sky-500 to-indigo-500' },
   { icon: '🎴', label: 'Flashcards', path: '/flashcards', color: 'from-sky-500 to-cyan-500' },
   { icon: '🧠', label: 'Quizzes', path: '/quiz', color: 'from-sky-500 to-cyan-500' },
-  { icon: '📄', label: 'PDF Reviewer', path: '/pdf-reviewer', color: 'from-amber-500 to-orange-500' },
   { icon: '📈', label: 'Analytics', path: '/analytics', color: 'from-emerald-500 to-green-500' },
   { icon: '⏱️', label: 'Pomodoro', path: '/pomodoro', color: 'from-violet-500 to-sky-500' },
 ];
@@ -29,6 +28,11 @@ const Dashboard = () => {
   const [data, setData] = useState(null);
   const [streak, setStreak] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -51,6 +55,19 @@ const Dashboard = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) { setSearchResults([]); setSearching(false); return; }
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchAPI.search({ q: searchQuery.trim() });
+        setSearchResults(res.data.results || res.data || []);
+        setSearchOpen(true);
+      } catch { setSearchResults([]); } finally { setSearching(false); }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const todayStudy = data?.todayStudyTime || 0;
   const avgFocus = data?.avgFocus || 75;
@@ -87,6 +104,41 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
+
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03 }}
+        className="relative">
+        <div className="glass-card p-3 flex items-center gap-3">
+          <span className="text-lg text-[var(--text-secondary)]">🔍</span>
+          <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
+            placeholder="Search topics, notes, reviewers..."
+            className="flex-1 bg-transparent border-none outline-none text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)]"
+          />
+          {searching && <div className="w-4 h-4 rounded-full border-2 border-sky-500 border-t-transparent animate-spin" />}
+          {searchQuery && !searching && (
+            <button onClick={() => { setSearchQuery(''); setSearchResults([]); setSearchOpen(false); }}
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm">✕</button>
+          )}
+        </div>
+        <AnimatePresence>
+          {searchOpen && searchResults.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+              className="absolute top-full left-0 right-0 mt-2 glass-card p-2 z-50 max-h-80 overflow-y-auto border border-[var(--glass-border)]">
+              {searchResults.map((r, i) => (
+                <Link key={r._id || i} to={r.source === 'ai' || r.type === 'reviewer' ? `/reviewer/${r._id}` : r.source === 'human' || r.type === 'note' ? `/notes/${r._id}` : r.type === 'flashcard' ? `/flashcards/${r._id}` : r.type === 'quiz' ? `/quiz/${r._id}` : '#'}
+                  onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}
+                  className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors">
+                  <span className="text-lg">{r.source === 'ai' ? '🤖' : '📝'}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{r.title || r.name || 'Untitled'}</p>
+                    {r.preview && <p className="text-xs text-[var(--text-secondary)] truncate">{r.preview}</p>}
+                  </div>
+                </Link>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
         className="glass-card p-4 border border-primary-500/20">

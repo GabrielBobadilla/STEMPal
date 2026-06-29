@@ -20,7 +20,6 @@ import Streaks from './pages/Streaks';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import History from './pages/History';
-import SearchPage from './pages/SearchPage';
 import Leaderboard from './pages/Leaderboard';
 import Notifications from './pages/Notifications';
 import AdminDashboard from './pages/AdminDashboard';
@@ -64,7 +63,6 @@ function AppRoutes() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
-        <Route path="/search" element={<SearchPage />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
