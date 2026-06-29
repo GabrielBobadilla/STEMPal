@@ -81,12 +81,8 @@ function parseWhere(sql, params) {
     });
     expr = expr.replace(/\bAND\b/g, '&&').replace(/\bOR\b/g, '||').replace(/=/g, '===').replace(/<>/g, '!==');
     try {
-      const ctx = { ...row };
-      for (const k of Object.keys(ctx)) {
-        if (typeof ctx[k] === 'string') ctx[k] = `'${ctx[k]}'`;
-      }
-      const fn = new Function(...Object.keys(ctx), `return ${expr}`);
-      return fn(...Object.values(ctx));
+      const fn = new Function(...Object.keys(row), `return ${expr}`);
+      return fn(...Object.values(row));
     } catch { return true; }
   };
 }
