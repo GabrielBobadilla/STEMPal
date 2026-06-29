@@ -16,8 +16,6 @@ import Quiz from './pages/Quiz';
 import QuizResults from './pages/QuizResults';
 import Pomodoro from './pages/Pomodoro';
 import BreakPage from './pages/BreakPage';
-import Streaks from './pages/Streaks';
-import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import History from './pages/History';
 import Leaderboard from './pages/Leaderboard';
@@ -59,8 +57,6 @@ function AppRoutes() {
         <Route path="/quiz-results" element={<QuizResults />} />
         <Route path="/pomodoro" element={<Pomodoro />} />
         <Route path="/breaks" element={<BreakPage />} />
-        <Route path="/streaks" element={<Streaks />} />
-        <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
         <Route path="/leaderboard" element={<Leaderboard />} />

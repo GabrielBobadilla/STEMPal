@@ -9,9 +9,8 @@ const navItems = [
   { path: '/quiz', label: 'Quiz', icon: '📝' },
   { path: '/pomodoro', label: 'Pomodoro', icon: '⏱️' },
   { path: '/breaks', label: 'Break', icon: '☕' },
-  { path: '/streaks', label: 'Streaks', icon: '🔥' },
-  { path: '/analytics', label: 'Analytics', icon: '📈' },
   { path: '/history', label: 'History', icon: '📚' },
+  { path: '/profile', label: 'Profile', icon: '👤' },
   { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
 ];
 
