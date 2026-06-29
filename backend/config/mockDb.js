@@ -1,236 +1,247 @@
-const initSqlJs = require('sql.js');
+class MemDB {
+  constructor() {
+    this.tables = {};
+  }
 
-const SCHEMA = `
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    phone TEXT,
-    password TEXT NOT NULL,
-    role TEXT DEFAULT 'student',
-    profile_picture TEXT DEFAULT 'default.png',
-    grade_level TEXT,
-    school TEXT,
-    stem_strand TEXT,
-    theme_preference TEXT DEFAULT 'light',
-    notification_enabled INTEGER DEFAULT 1,
-    total_xp INTEGER DEFAULT 0,
-    level INTEGER DEFAULT 1,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS preferences (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER UNIQUE NOT NULL,
-    subjects TEXT, hobbies TEXT, learning_style TEXT DEFAULT 'mixed',
-    study_duration TEXT DEFAULT '1hour', preferred_break TEXT, study_goals TEXT,
-    created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS notes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    title TEXT NOT NULL, content TEXT, category TEXT, source TEXT DEFAULT 'ai',
-    difficulty TEXT DEFAULT 'medium', tags TEXT, is_saved INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS pdf_uploads (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    filename TEXT NOT NULL, original_name TEXT NOT NULL, file_size INTEGER,
-    file_path TEXT NOT NULL, extracted_text TEXT, ocr_used INTEGER DEFAULT 0,
-    upload_date TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS generated_reviewers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, pdf_id INTEGER,
-    title TEXT NOT NULL, topic TEXT, reviewer_type TEXT DEFAULT 'basic', content TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (pdf_id) REFERENCES pdf_uploads(id) ON DELETE SET NULL
-);
-CREATE TABLE IF NOT EXISTS quizzes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, topic TEXT,
-    quiz_type TEXT DEFAULT 'multiple_choice', questions TEXT, answers TEXT,
-    score REAL, accuracy REAL, total_questions INTEGER, correct_answers INTEGER,
-    time_taken INTEGER, difficulty TEXT DEFAULT 'medium', weak_topics TEXT, strong_topics TEXT,
-    date TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS flashcards (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    question TEXT NOT NULL, answer TEXT NOT NULL, topic TEXT,
-    difficulty TEXT DEFAULT 'medium', is_favorite INTEGER DEFAULT 0,
-    mastery_level INTEGER DEFAULT 0, last_reviewed TEXT, next_review TEXT,
-    review_count INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS study_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    activity TEXT NOT NULL, activity_type TEXT NOT NULL, duration INTEGER DEFAULT 0, details TEXT,
-    date TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS break_recommendations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    recommendation TEXT NOT NULL, reason TEXT, benefits TEXT, duration INTEGER NOT NULL,
-    study_time INTEGER, focus_level TEXT, is_taken INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS streaks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER UNIQUE NOT NULL,
-    current_streak INTEGER DEFAULT 0, longest_streak INTEGER DEFAULT 0,
-    last_active_date TEXT, weekly_progress TEXT, monthly_calendar TEXT,
-    updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS achievements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    badge_name TEXT NOT NULL, badge_type TEXT DEFAULT 'bronze', description TEXT,
-    unlocked_date TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS notifications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    title TEXT NOT NULL, message TEXT, type TEXT DEFAULT 'study_reminder',
-    is_read INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS levels (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, level_name TEXT NOT NULL,
-    min_xp INTEGER NOT NULL, max_xp INTEGER NOT NULL
-);
-CREATE TABLE IF NOT EXISTS xp_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    xp_earned INTEGER NOT NULL, reason TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS leaderboard (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER UNIQUE NOT NULL,
-    total_xp INTEGER DEFAULT 0, weekly_xp INTEGER DEFAULT 0, monthly_xp INTEGER DEFAULT 0,
-    week_start TEXT, month_start TEXT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS focus_scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    score REAL, session_type TEXT, date TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS pomodoro_sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-    study_duration INTEGER NOT NULL, break_duration INTEGER NOT NULL,
-    sessions_completed INTEGER DEFAULT 0, mode TEXT DEFAULT 'traditional',
-    date TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_notes_user ON notes(user_id);
-CREATE INDEX IF NOT EXISTS idx_quizzes_user ON quizzes(user_id);
-CREATE INDEX IF NOT EXISTS idx_flashcards_user ON flashcards(user_id);
-CREATE INDEX IF NOT EXISTS idx_study_history_user ON study_history(user_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_study_history_date ON study_history(date);
-CREATE INDEX IF NOT EXISTS idx_quizzes_date ON quizzes(date);
-`;
+  createTable(name, schema) {
+    this.tables[name] = { schema, rows: [], nextId: 1 };
+  }
 
-function translateSQL(sql) {
-  let s = sql;
-  s = s.replace(/`/g, '');
-  s = s.replace(/\bCURDATE\(\)/gi, "date('now')");
-  s = s.replace(/\bNOW\(\)/gi, "datetime('now')");
-  s = s.replace(/DATE_SUB\(CURDATE\(\),\s*INTERVAL\s*(\d+)\s*DAY\)/gi, "date('now', '-$1 days')");
-  s = s.replace(/DATE_SUB\(NOW\(\),\s*INTERVAL\s*(\d+)\s*DAY\)/gi, "datetime('now', '-$1 days')");
-  s = s.replace(/DATE_SUB\(CURDATE\(\),\s*INTERVAL\s*(\d+)\s*WEEK\)/gi, "date('now', '-$1 weeks')");
-  s = s.replace(/\bINSERT\s+IGNORE\b/gi, 'INSERT OR IGNORE');
-  return s;
+  insert(table, data) {
+    const t = this.tables[table];
+    if (!t) return { insertId: 0, affectedRows: 0 };
+    const row = { id: t.nextId++ };
+    const keys = Object.keys(data);
+    for (let i = 0; i < keys.length; i++) {
+      row[keys[i]] = data[keys[i]];
+    }
+    row.created_at = new Date().toISOString().replace('T', ' ').split('.')[0];
+    row.updated_at = row.created_at;
+    t.rows.push(row);
+    return { insertId: row.id, affectedRows: 1 };
+  }
+
+  select(table, fields, whereFn, opts = {}) {
+    const t = this.tables[table];
+    if (!t) return [];
+    let rows = t.rows;
+    if (whereFn) rows = rows.filter(whereFn);
+    if (opts.orderBy) {
+      rows = [...rows].sort((a, b) => {
+        for (const { field, dir } of opts.orderBy) {
+          if (a[field] < b[field]) return dir === 'desc' ? 1 : -1;
+          if (a[field] > b[field]) return dir === 'desc' ? -1 : 1;
+        }
+        return 0;
+      });
+    }
+    if (opts.limit) rows = rows.slice(0, opts.limit);
+    if (!fields || fields[0] === '*') return rows.map(r => ({ ...r }));
+    return rows.map(r => {
+      const obj = {};
+      for (const f of fields) obj[f] = r[f];
+      return obj;
+    });
+  }
+
+  update(table, updates, whereFn) {
+    const t = this.tables[table];
+    if (!t) return { affectedRows: 0 };
+    let count = 0;
+    for (const row of t.rows) {
+      if (whereFn(row)) {
+        Object.assign(row, updates);
+        row.updated_at = new Date().toISOString().replace('T', ' ').split('.')[0];
+        count++;
+      }
+    }
+    return { affectedRows: count };
+  }
+
+  delete(table, whereFn) {
+    const t = this.tables[table];
+    if (!t) return { affectedRows: 0 };
+    const before = t.rows.length;
+    t.rows = t.rows.filter(r => !whereFn(r));
+    return { affectedRows: before - t.rows.length };
+  }
+}
+
+function parseWhere(sql, params) {
+  const match = sql.match(/WHERE\s+(.+?)(?:\s*ORDER\s+BY|\s*LIMIT|\s*$)/i);
+  if (!match) return () => true;
+  const condition = match[1].trim();
+  let pIdx = 0;
+
+  return (row) => {
+    const expr = condition.replace(/\?/g, () => {
+      const val = params ? params[pIdx++] : undefined;
+      if (typeof val === 'string') return `'${val.replace(/'/g, "''")}'`;
+      return val;
+    });
+    try {
+      const ctx = { ...row };
+      for (const k of Object.keys(ctx)) {
+        if (typeof ctx[k] === 'string') ctx[k] = `'${ctx[k]}'`;
+      }
+      const fn = new Function(...Object.keys(ctx), `return ${expr.replace(/=/g, '===').replace(/<>/g, '!==')}`);
+      return fn(...Object.values(ctx));
+    } catch { return true; }
+  };
+}
+
+function extractFields(sql) {
+  const m = sql.match(/SELECT\s+(.+?)\s+FROM/i);
+  if (!m) return ['*'];
+  return m[1].split(',').map(s => s.trim().split(' AS ')[0].trim().replace(/`/g, ''));
+}
+
+function extractTable(sql) {
+  const m = sql.match(/FROM\s+(\w+)/i);
+  return m ? m[1].toLowerCase() : '';
+}
+
+function extractOrderBy(sql) {
+  const m = sql.match(/ORDER\s+BY\s+(.+?)(?:\s+LIMIT|\s*$)/i);
+  if (!m) return [];
+  return m[1].split(',').map(s => {
+    const parts = s.trim().split(/\s+/);
+    return { field: parts[0], dir: (parts[1] || '').toLowerCase() === 'desc' ? 'desc' : 'asc' };
+  });
+}
+
+function extractLimit(sql) {
+  const m = sql.match(/LIMIT\s+(\d+)/i);
+  return m ? parseInt(m[1]) : undefined;
+}
+
+function extractInsert(sql) {
+  const m = sql.match(/INSERT\s+INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES?\s*\(([^)]+)\)/i);
+  return m ? { table: m[1].toLowerCase(), fields: m[2].split(',').map(s => s.trim()), values: m[3].split(',').map(s => s.trim()) } : null;
+}
+
+function extractUpdate(sql) {
+  const m = sql.match(/UPDATE\s+(\w+)\s+SET\s+(.+?)(?:\s+WHERE|\s*$)/i);
+  return m ? { table: m[1].toLowerCase(), sets: m[2] } : null;
+}
+
+function extractDelete(sql) {
+  const m = sql.match(/DELETE\s+FROM\s+(\w+)/i);
+  return m ? m[1].toLowerCase() : '';
+}
+
+const db = new MemDB();
+
+db.createTable('users', {});
+db.createTable('preferences', {});
+db.createTable('notes', {});
+db.createTable('pdf_uploads', {});
+db.createTable('generated_reviewers', {});
+db.createTable('quizzes', {});
+db.createTable('flashcards', {});
+db.createTable('study_history', {});
+db.createTable('break_recommendations', {});
+db.createTable('streaks', {});
+db.createTable('achievements', {});
+db.createTable('notifications', {});
+db.createTable('levels', {});
+db.createTable('xp_log', {});
+db.createTable('leaderboard', {});
+db.createTable('focus_scores', {});
+db.createTable('pomodoro_sessions', {});
+
+db.insert('users', { fullname: 'STEMPal Admin', email: 'admin@stempal.com', password: '$2a$10$eSI3tD37goN17fRe9ZoES.BlOys8uHUUVJa6HVHUax.PWFCr2jh92', role: 'admin', profile_picture: 'default.png', notification_enabled: 1, total_xp: 0, level: 1, theme_preference: 'light' });
+db.insert('users', { fullname: 'Juan Dela Cruz', email: 'juan@gmail.com', password: '$2a$10$wr033wFhp9Tl46/RJq/wH.tYc0KAWSkxP/.pqseRAr.ThTH5JewNO', role: 'student', profile_picture: 'default.png', notification_enabled: 1, total_xp: 0, level: 1, theme_preference: 'light' });
+db.insert('streaks', { user_id: 1, current_streak: 0, longest_streak: 0 });
+db.insert('streaks', { user_id: 2, current_streak: 0, longest_streak: 0 });
+db.insert('levels', { level_name: 'Beginner', min_xp: 0, max_xp: 99 });
+db.insert('levels', { level_name: 'Learner', min_xp: 100, max_xp: 299 });
+db.insert('levels', { level_name: 'Achiever', min_xp: 300, max_xp: 599 });
+db.insert('levels', { level_name: 'Scholar', min_xp: 600, max_xp: 999 });
+db.insert('levels', { level_name: 'STEM Expert', min_xp: 1000, max_xp: 1999 });
+db.insert('levels', { level_name: 'STEM Master', min_xp: 2000, max_xp: 999999 });
+
+function buildParams(params, values) {
+  if (!params || !values) return {};
+  const obj = {};
+  for (let i = 0; i < params.length; i++) {
+    obj[params[i]] = values[i] !== undefined ? values[i] : null;
+  }
+  return obj;
+}
+
+async function query(sql, params) {
+  const normalized = sql.trim().toUpperCase();
+  try {
+    if (normalized.startsWith('SELECT') || normalized.startsWith('WITH')) {
+      const table = extractTable(sql);
+      const fields = extractFields(sql);
+      const whereFn = parseWhere(sql, params);
+      const orderBy = extractOrderBy(sql);
+      const limit = extractLimit(sql);
+      const rows = db.select(table, fields, whereFn, { orderBy, limit });
+      return [rows, []];
+    }
+
+    if (normalized.startsWith('INSERT')) {
+      const info = extractInsert(sql);
+      if (info) {
+        const values = info.values.map((v, i) => {
+          if (v === '?') return params ? params[i] : null;
+          return v.replace(/^'(.*)'$/, '$1');
+        });
+        const data = {};
+        for (let i = 0; i < info.fields.length; i++) {
+          data[info.fields[i]] = values[i];
+        }
+        const result = db.insert(info.table, data);
+        return [{ insertId: result.insertId, affectedRows: result.affectedRows }, []];
+      }
+      return [{ insertId: 1, affectedRows: 1 }, []];
+    }
+
+    if (normalized.startsWith('UPDATE')) {
+      const info = extractUpdate(sql);
+      if (info) {
+        const setMatch = info.sets.match(/(\w+)\s*=\s*(?:\?|'[^']*'|(\d+))/g);
+        const updates = {};
+        if (setMatch) {
+          let pIdx = 0;
+          for (const s of setMatch) {
+            const [, field, val] = s.match(/(\w+)\s*=\s*(.+)/);
+            if (val === '?') updates[field] = params ? params[pIdx++] : null;
+            else updates[field] = val.replace(/^'(.*)'$/, '$1');
+          }
+        }
+        const whereFn = parseWhere(sql, params ? params.slice(Object.keys(updates).length) : []);
+        const result = db.update(info.table, updates, whereFn);
+        return [{ affectedRows: result.affectedRows }, []];
+      }
+      return [{ affectedRows: 0 }, []];
+    }
+
+    if (normalized.startsWith('DELETE')) {
+      const table = extractDelete(sql);
+      const whereFn = parseWhere(sql, params);
+      const result = db.delete(table, whereFn);
+      return [{ affectedRows: result.affectedRows }, []];
+    }
+
+    return [[], []];
+  } catch (e) {
+    console.error('MockDB error:', e.message);
+    return [[], []];
+  }
 }
 
 class MockPool {
-  constructor(db) { this.db = db; }
-
-  async query(sql, params) {
-    const translated = translateSQL(sql);
-    const normalized = translated.trim().toUpperCase();
-    if (normalized.startsWith('SELECT') || normalized.startsWith('WITH')) return this._select(translated, params);
-    if (normalized.startsWith('INSERT')) return this._insert(translated, params);
-    if (normalized.startsWith('UPDATE')) return this._update(translated, params);
-    if (normalized.startsWith('DELETE')) return this._delete(translated, params);
-    return [[], []];
-  }
-
-  _select(sql, params) {
-    try {
-      const stmt = this.db.prepare(sql);
-      if (params) stmt.bind(params);
-      const rows = [];
-      while (stmt.step()) rows.push(stmt.getAsObject());
-      stmt.free();
-      return [rows, []];
-    } catch (e) {
-      console.error('MockDB SELECT error:', e.message);
-      return [[], []];
-    }
-  }
-
-  _insert(sql, params) {
-    try {
-      if (params) { const stmt = this.db.prepare(sql); stmt.bind(params); stmt.step(); stmt.free(); }
-      else this.db.exec(sql);
-      const r = this.db.exec("SELECT last_insert_rowid() as id, changes() as affected");
-      return [{ insertId: r[0]?.values[0]?.[0] || 1, affectedRows: r[0]?.values[0]?.[1] || 1 }, []];
-    } catch (e) {
-      console.error('MockDB INSERT error:', e.message);
-      return [{ insertId: 1, affectedRows: 1 }, []];
-    }
-  }
-
-  _update(sql, params) {
-    try {
-      if (params) { const stmt = this.db.prepare(sql); stmt.bind(params); stmt.step(); stmt.free(); }
-      else this.db.exec(sql);
-      const r = this.db.exec("SELECT changes() as affected");
-      return [{ affectedRows: r[0]?.values[0]?.[0] || 1 }, []];
-    } catch (e) {
-      console.error('MockDB UPDATE error:', e.message);
-      return [{ affectedRows: 1 }, []];
-    }
-  }
-
-  _delete(sql, params) {
-    try {
-      if (params) { const stmt = this.db.prepare(sql); stmt.bind(params); stmt.step(); stmt.free(); }
-      else this.db.exec(sql);
-      const r = this.db.exec("SELECT changes() as affected");
-      return [{ affectedRows: r[0]?.values[0]?.[0] || 1 }, []];
-    } catch (e) {
-      console.error('MockDB DELETE error:', e.message);
-      return [{ affectedRows: 1 }, []];
-    }
-  }
+  async query(sql, params) { return query(sql, params); }
+  async execute(sql, params) { return query(sql, params); }
 }
 
 async function createMockDb() {
-  const SQL = await initSqlJs();
-  const db = new SQL.Database();
-  db.run('PRAGMA foreign_keys = OFF');
-  db.run('PRAGMA journal_mode = MEMORY');
-
-  const statements = SCHEMA.split(';').filter(s => s.trim());
-  for (const stmt of statements) {
-    try { db.run(stmt + ';'); } catch (e) { console.error('Schema error:', e.message); }
-  }
-
-  db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['STEMPal Admin', 'admin@stempal.com', '$2a$10$eSI3tD37goN17fRe9ZoES.BlOys8uHUUVJa6HVHUax.PWFCr2jh92', 'admin']);
-  db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['Juan Dela Cruz', 'juan@gmail.com', '$2a$10$wr033wFhp9Tl46/RJq/wH.tYc0KAWSkxP/.pqseRAr.ThTH5JewNO', 'student']);
-  db.run('INSERT INTO streaks (user_id, current_streak, longest_streak) VALUES (1,0,0)');
-  db.run('INSERT INTO streaks (user_id, current_streak, longest_streak) VALUES (2,0,0)');
-  db.run("INSERT INTO levels (level_name, min_xp, max_xp) VALUES ('Beginner',0,99),('Learner',100,299),('Achiever',300,599),('Scholar',600,999),('STEM Expert',1000,1999),('STEM Master',2000,999999)");
-
-  db.run('PRAGMA foreign_keys = ON');
   console.log('Mock DB initialized — credentials: admin@stempal.com / adminstempal | juan@gmail.com / userstempal');
-  return new MockPool(db);
+  return new MockPool();
 }
 
 module.exports = { createMockDb };
