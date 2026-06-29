@@ -126,11 +126,15 @@ const generateQuiz = async (topic, type = 'multiple_choice', count = 10) => {
       SYSTEM_TUTOR
     );
   } catch {
-    const text = await generateContent(
-      `Create ${count} ${typeInstructions[type] || typeInstructions.multiple_choice} about "${topic}". Respond with JSON array.`,
-      SYSTEM_TUTOR
-    );
-    try { return JSON.parse(text.replace(/```json|```/g, '').trim()); } catch { return { questions: text }; }
+    try {
+      const text = await generateContent(
+        `Create ${count} ${typeInstructions[type] || typeInstructions.multiple_choice} about "${topic}". Respond with JSON array.`,
+        SYSTEM_TUTOR
+      );
+      return JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch {
+      return generateMockQuiz(topic, type, count);
+    }
   }
 };
 
@@ -224,6 +228,36 @@ function generateMockFlashcards(topic, count = 10) {
     { question: `What advanced topics build on ${topicShort}?`, answer: `Advanced study extends into specialized subfields, research methodologies, and cutting-edge applications that push the boundaries of current knowledge.` },
   ];
   return cards.slice(0, count);
+}
+
+function generateMockQuiz(topic, type = 'multiple_choice', count = 10) {
+  const topicShort = topic.slice(0, 25);
+  const mc = [
+    { question: `What is the core principle behind ${topicShort}?`, options: ['Law of thermodynamics', `Fundamental theorem of ${topicShort.slice(0, 10)}`, 'Principle of superposition', 'Theory of relativity'], correct_answer: 1, type: 'multiple_choice', difficulty: 'easy' },
+    { question: `Which of the following best describes ${topicShort}?`, options: ['A mathematical model', `A scientific theory about ${topicShort.slice(0, 10)}`, 'An experimental observation', 'A computational algorithm'], correct_answer: 1, type: 'multiple_choice', difficulty: 'easy' },
+    { question: `What is the primary application of ${topicShort} in modern technology?`, options: ['Data processing', `${topicShort.slice(0, 10)}-based systems`, 'Signal analysis', 'Quantum computing'], correct_answer: 1, type: 'multiple_choice', difficulty: 'medium' },
+    { question: `How does ${topicShort} relate to other STEM disciplines?`, options: ['It is completely isolated', 'It provides foundational principles', 'It only applies to mathematics', 'It has no real-world relevance'], correct_answer: 1, type: 'multiple_choice', difficulty: 'medium' },
+    { question: `What experimental method is commonly used to study ${topicShort}?`, options: ['Random sampling', `Controlled ${topicShort.slice(0, 10)} experiments`, 'Double-blind testing', 'Computational modeling'], correct_answer: 1, type: 'multiple_choice', difficulty: 'hard' },
+    { question: `What advanced theory builds upon the concepts of ${topicShort}?`, options: ['String theory', `Advanced ${topicShort.slice(0, 10)} dynamics`, 'Quantum field theory', 'General relativity'], correct_answer: 1, type: 'multiple_choice', difficulty: 'hard' },
+  ];
+  const tf = [
+    { question: `${topicShort} is a fundamental concept in STEM education.`, correct_answer: 'True', type: 'true_false', difficulty: 'easy' },
+    { question: `The principles of ${topicShort} have no practical applications.`, correct_answer: 'False', type: 'true_false', difficulty: 'easy' },
+    { question: `${topicShort} can be used to solve complex real-world problems.`, correct_answer: 'True', type: 'true_false', difficulty: 'medium' },
+    { question: `Understanding ${topicShort} requires knowledge of advanced mathematics only.`, correct_answer: 'False', type: 'true_false', difficulty: 'medium' },
+    { question: `${topicShort} is constantly evolving with new research and discoveries.`, correct_answer: 'True', type: 'true_false', difficulty: 'hard' },
+  ];
+  const ident = [
+    { question: `Define the term "${topicShort}" in your own words.`, correct_answer: `${topicShort} refers to the systematic study of principles governing natural phenomena.`, type: 'identification', difficulty: 'easy' },
+    { question: `What is the main formula associated with ${topicShort}?`, correct_answer: `The main formula is F = f(${topicShort.slice(0, 3).toLowerCase()}) where variables represent key measurable quantities.`, type: 'identification', difficulty: 'medium' },
+    { question: `Explain one real-world application of ${topicShort}.`, correct_answer: `${topicShort} is applied in various fields including engineering, medicine, and technology development.`, type: 'identification', difficulty: 'medium' },
+    { question: `Describe a key experiment that demonstrates principles of ${topicShort}.`, correct_answer: `Controlled experiments measuring the relationship between key variables demonstrate the core principles of ${topicShort}.`, type: 'identification', difficulty: 'hard' },
+  ];
+
+  if (type === 'true_false') return tf.slice(0, count);
+  if (type === 'identification') return ident.slice(0, count);
+  if (type === 'short_answer') return ident.slice(0, count);
+  return mc.slice(0, count);
 }
 
 module.exports = {
