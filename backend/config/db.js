@@ -1,4 +1,4 @@
-if (process.env.USE_MOCK_DB === 'true') {
+if (process.env.USE_MOCK_DB === 'true' || process.env.VERCEL === '1') {
   const { createMockDb } = require('./mockDb');
   const poolPromise = createMockDb();
   module.exports = new Proxy({}, {
