@@ -11,7 +11,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import Preferences from './pages/Preferences';
 import Reviewer from './pages/Reviewer';
-import PDFReviewer from './pages/PDFReviewer';
 import Flashcards from './pages/Flashcards';
 import Quiz from './pages/Quiz';
 import QuizResults from './pages/QuizResults';
@@ -56,7 +55,6 @@ function AppRoutes() {
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/reviewer" element={<Reviewer />} />
-        <Route path="/pdf-reviewer" element={<PDFReviewer />} />
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/quiz-results" element={<QuizResults />} />
