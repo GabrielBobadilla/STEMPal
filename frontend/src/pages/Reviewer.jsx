@@ -46,13 +46,22 @@ const Reviewer = () => {
     setResult(null);
     try {
       const res = await reviewerAPI.generate({ topic: topic.trim(), type });
-      setResult(res.data);
+      setResult(res.data.content);
       toast.success('Reviewer generated successfully');
       fetchHistory();
     } catch {
       toast.error('Failed to generate reviewer');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelectReviewer = async (item) => {
+    try {
+      const res = await reviewerAPI.get(item.id);
+      setResult(res.data.content || res.data);
+    } catch {
+      toast.error('Failed to load reviewer');
     }
   };
 
@@ -149,7 +158,7 @@ const Reviewer = () => {
             Refresh
           </button>
         </div>
-        <HistoryList history={history} loading={historyLoading} onRefresh={fetchHistory} onSelect={setResult} />
+        <HistoryList history={history} loading={historyLoading} onRefresh={fetchHistory} onSelect={handleSelectReviewer} />
       </motion.div>
     </motion.div>
   );
