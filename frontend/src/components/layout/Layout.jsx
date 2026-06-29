@@ -4,8 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { path: '/ai-study', label: 'AI Study Hub', icon: '🤖' },
-  { path: '/reviewer', label: 'Reviewer', icon: '📋' },
+  { path: '/reviewer', label: 'AI Reviewer', icon: '🤖' },
   { path: '/flashcards', label: 'Flashcards', icon: '🎴' },
   { path: '/quiz', label: 'Quiz', icon: '📝' },
   { path: '/pomodoro', label: 'Pomodoro', icon: '⏱️' },
