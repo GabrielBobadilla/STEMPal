@@ -71,9 +71,9 @@ function parseWhere(sql, params) {
   const match = sql.match(/WHERE\s+(.+?)(?:\s*ORDER\s+BY|\s*LIMIT|\s*$)/i);
   if (!match) return () => true;
   const condition = match[1].trim();
-  let pIdx = 0;
 
   return (row) => {
+    let pIdx = 0;
     let expr = condition.replace(/\?/g, () => {
       const val = params ? params[pIdx++] : undefined;
       if (typeof val === 'string') return `'${val.replace(/'/g, "\\'")}'`;
