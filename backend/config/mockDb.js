@@ -223,8 +223,8 @@ async function createMockDb() {
     try { db.run(stmt + ';'); } catch (e) { console.error('Schema error:', e.message); }
   }
 
-  const hashedAdmin = await bcrypt.hash('stempaladmin', 10);
-  const hashedUser = await bcrypt.hash('stempaluser', 10);
+  const hashedAdmin = await bcrypt.hash('adminstempal', 10);
+  const hashedUser = await bcrypt.hash('userstempal', 10);
   db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['STEMPal Admin', 'admin@stempal.com', hashedAdmin, 'admin']);
   db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['Juan Dela Cruz', 'juan@gmail.com', hashedUser, 'student']);
   db.run('INSERT INTO streaks (user_id, current_streak, longest_streak) VALUES (1,0,0)');
@@ -232,7 +232,7 @@ async function createMockDb() {
   db.run("INSERT INTO levels (level_name, min_xp, max_xp) VALUES ('Beginner',0,99),('Learner',100,299),('Achiever',300,599),('Scholar',600,999),('STEM Expert',1000,1999),('STEM Master',2000,999999)");
 
   db.run('PRAGMA foreign_keys = ON');
-  console.log('Mock DB initialized — credentials: admin@stempal.com / stempaladmin | juan@gmail.com / stempaluser');
+  console.log('Mock DB initialized — credentials: admin@stempal.com / adminstempal | juan@gmail.com / userstempal');
   return new MockPool(db);
 }
 
