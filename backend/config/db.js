@@ -1,10 +1,27 @@
 if (process.env.USE_MOCK_DB === 'true' || process.env.VERCEL === '1') {
-  const { createMockDb } = require('./mockDb');
-  const poolPromise = createMockDb();
+  let poolPromise;
+  try {
+    const { createMockDb } = require('./mockDb');
+    poolPromise = createMockDb().catch(err => {
+      console.error('Mock DB init error:', err);
+      return null;
+    });
+  } catch (err) {
+    console.error('Mock DB load error:', err);
+    poolPromise = Promise.resolve(null);
+  }
   module.exports = new Proxy({}, {
     get(_, prop) {
-      if (prop === 'query') return async (...args) => (await poolPromise).query(...args);
-      if (prop === 'execute') return async (...args) => (await poolPromise).query(...args);
+      if (prop === 'query') return async (...args) => {
+        const p = await poolPromise;
+        if (p) return p.query(...args);
+        return [[], []];
+      };
+      if (prop === 'execute') return async (...args) => {
+        const p = await poolPromise;
+        if (p) return p.query(...args);
+        return [[], []];
+      };
       return undefined;
     }
   });

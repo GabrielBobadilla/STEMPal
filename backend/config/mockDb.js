@@ -1,5 +1,4 @@
 const initSqlJs = require('sql.js');
-const bcrypt = require('bcryptjs');
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -223,10 +222,8 @@ async function createMockDb() {
     try { db.run(stmt + ';'); } catch (e) { console.error('Schema error:', e.message); }
   }
 
-  const hashedAdmin = await bcrypt.hash('adminstempal', 10);
-  const hashedUser = await bcrypt.hash('userstempal', 10);
-  db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['STEMPal Admin', 'admin@stempal.com', hashedAdmin, 'admin']);
-  db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['Juan Dela Cruz', 'juan@gmail.com', hashedUser, 'student']);
+  db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['STEMPal Admin', 'admin@stempal.com', '$2a$10$eSI3tD37goN17fRe9ZoES.BlOys8uHUUVJa6HVHUax.PWFCr2jh92', 'admin']);
+  db.run('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['Juan Dela Cruz', 'juan@gmail.com', '$2a$10$wr033wFhp9Tl46/RJq/wH.tYc0KAWSkxP/.pqseRAr.ThTH5JewNO', 'student']);
   db.run('INSERT INTO streaks (user_id, current_streak, longest_streak) VALUES (1,0,0)');
   db.run('INSERT INTO streaks (user_id, current_streak, longest_streak) VALUES (2,0,0)');
   db.run("INSERT INTO levels (level_name, min_xp, max_xp) VALUES ('Beginner',0,99),('Learner',100,299),('Achiever',300,599),('Scholar',600,999),('STEM Expert',1000,1999),('STEM Master',2000,999999)");
