@@ -16,6 +16,9 @@ import Quiz from './pages/Quiz';
 import QuizResults from './pages/QuizResults';
 import Pomodoro from './pages/Pomodoro';
 import BreakPage from './pages/BreakPage';
+import Crossword from './pages/Crossword';
+import Multiplayer from './pages/Multiplayer';
+import ScanFile from './pages/ScanFile';
 import Profile from './pages/Profile';
 import History from './pages/History';
 import Leaderboard from './pages/Leaderboard';
@@ -56,6 +59,9 @@ function AppRoutes() {
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/quiz-results" element={<QuizResults />} />
         <Route path="/pomodoro" element={<Pomodoro />} />
+        <Route path="/crossword" element={<Crossword />} />
+        <Route path="/multiplayer" element={<Multiplayer />} />
+        <Route path="/scan" element={<ScanFile />} />
         <Route path="/breaks" element={<BreakPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />

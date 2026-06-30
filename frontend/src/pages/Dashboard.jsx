@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -120,7 +120,6 @@ const Dashboard = () => {
               className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm">✕</button>
           )}
         </div>
-        <AnimatePresence>
           {searchOpen && searchResults.length > 0 && (
             <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
               className="absolute top-full left-0 right-0 mt-2 glass-card p-2 z-50 max-h-80 overflow-y-auto border border-[var(--glass-border)]">
@@ -137,7 +136,6 @@ const Dashboard = () => {
               ))}
             </motion.div>
           )}
-        </AnimatePresence>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}

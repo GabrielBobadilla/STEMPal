@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { FiCheck, FiChevronLeft, FiChevronRight, FiZap } from 'react-icons/fi';
 import { preferenceAPI, streakAPI } from '../services/api';
@@ -19,7 +19,7 @@ const styles = [
   { value: 'practice', label: 'Practice', desc: 'Exercises & problems' },
   { value: 'mixed', label: 'Mixed', desc: 'All of the above' },
 ];
-const breakActivities = ['Stretching', 'Walking', 'Music', 'Drawing', 'Reading', 'Gaming', 'Meditation', 'Water Break'];
+const breakActivities = ['Stretching', 'Walking', 'Music', 'Drawing', 'Reading', 'Gaming', 'Meditation', 'Water Break', 'Other (Type Your Own)'];
 
 const Preferences = () => {
   const [step, setStep] = useState(0);
@@ -27,6 +27,7 @@ const Preferences = () => {
     grade_level: '', school: '', stem_strand: '',
     subjects: [], study_duration: '', learning_style: '',
     hobbies: '', preferred_breaks: [], study_goals: '',
+    custom_break: '',
   });
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
@@ -49,12 +50,17 @@ const Preferences = () => {
       const hobbiesArray = prefs.hobbies
         ? prefs.hobbies.split(',').map(h => h.trim()).filter(Boolean)
         : [];
+      const breaks = [...prefs.preferred_breaks];
+      if (prefs.custom_break && prefs.preferred_breaks.includes('Other (Type Your Own)')) {
+        const idx = breaks.indexOf('Other (Type Your Own)');
+        breaks[idx] = prefs.custom_break;
+      }
       await preferenceAPI.save({
         subjects: prefs.subjects,
         hobbies: hobbiesArray,
         learning_style: prefs.learning_style,
         study_duration: prefs.study_duration,
-        preferred_break: prefs.preferred_breaks,
+        preferred_break: breaks,
         study_goals: prefs.study_goals,
         grade_level: prefs.grade_level,
         school: prefs.school,
@@ -151,16 +157,35 @@ const Preferences = () => {
       subtitle: 'What do you enjoy during breaks?',
       content: (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {breakActivities.map(b => (
-              <motion.button key={b} whileTap={{ scale: 0.97 }} onClick={() => toggleArrayItem('preferred_breaks', b)}
-                className={`p-3 rounded-xl border-2 text-sm transition-all ${
-                  prefs.preferred_breaks.includes(b) ? 'border-primary-500 bg-primary-500/10' : 'border-[var(--glass-border)] hover:border-primary-300'
-                }`}
-              >
-                {b}
-              </motion.button>
-            ))}
+          <div>
+            <label className="block text-sm font-medium mb-2">Preferred Break Activities</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {breakActivities.map(b => (
+                <motion.button key={b} whileTap={{ scale: 0.97 }} onClick={() => {
+                  if (b === 'Other (Type Your Own)') {
+                    if (prefs.preferred_breaks.includes('Other (Type Your Own)')) {
+                      toggleArrayItem('preferred_breaks', 'Other (Type Your Own)');
+                      setPrefs(p => ({ ...p, custom_break: '' }));
+                    } else {
+                      toggleArrayItem('preferred_breaks', 'Other (Type Your Own)');
+                    }
+                  } else {
+                    toggleArrayItem('preferred_breaks', b);
+                  }
+                }}
+                  className={`p-3 rounded-xl border-2 text-sm transition-all ${
+                    prefs.preferred_breaks.includes(b) ? 'border-primary-500 bg-primary-500/10' : 'border-[var(--glass-border)] hover:border-primary-300'
+                  }`}
+                >
+                  {b === 'Other (Type Your Own)' ? '✏️ Other' : b}
+                </motion.button>
+              ))}
+            </div>
+            {prefs.preferred_breaks.includes('Other (Type Your Own)') && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3">
+                <input value={prefs.custom_break || ''} onChange={e => setPrefs(p => ({ ...p, custom_break: e.target.value }))} placeholder="Type your own break activity..." className="input-field" />
+              </motion.div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Hobbies</label>
@@ -168,6 +193,9 @@ const Preferences = () => {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Study Goals</label>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs text-[var(--text-secondary)]">Choose a preset or type your own</span>
+            </div>
             <textarea value={prefs.study_goals} onChange={e => setPrefs(p => ({ ...p, study_goals: e.target.value }))} placeholder="What do you want to achieve this semester?" rows={3} className="input-field min-h-[100px]" />
           </div>
         </div>
@@ -287,13 +315,11 @@ function getClipPath(type) {
         </div>
         <div className="text-xs text-[var(--text-secondary)] mb-6">Step {step + 1} of {steps.length}</div>
 
-        <AnimatePresence mode="wait">
-          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+        <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }}>
             <h2 className="text-xl font-bold mb-1">{steps[step].title}</h2>
             <p className="text-[var(--text-secondary)] text-sm mb-6">{steps[step].subtitle}</p>
             {steps[step].content}
           </motion.div>
-        </AnimatePresence>
 
         <div className="flex justify-between mt-8">
           <button onClick={() => setStep(s => s - 1)} disabled={step === 0}

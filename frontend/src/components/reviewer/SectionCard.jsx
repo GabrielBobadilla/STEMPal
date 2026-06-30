@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const sectionStyles = {
   summary: { gradient: 'from-sky-400/20 to-blue-500/10', icon: '📝', accent: 'border-l-sky-400' },
@@ -96,7 +96,6 @@ const SectionCard = ({ icon, title, content, sectionKey }) => {
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </motion.svg>
       </button>
-      <AnimatePresence>
         {open && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
@@ -107,7 +106,6 @@ const SectionCard = ({ icon, title, content, sectionKey }) => {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
     </motion.div>
   );
 };

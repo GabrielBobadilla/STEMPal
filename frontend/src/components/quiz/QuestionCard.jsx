@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const QuestionCard = ({ question, index, quizType, answers, onAnswer }) => {
   const renderQuestionInput = (q) => {
@@ -83,12 +83,10 @@ const QuestionCard = ({ question, index, quizType, answers, onAnswer }) => {
   };
 
   return (
-    <AnimatePresence mode="wait">
       <motion.div
         key={index}
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -50 }}
         className="glass-card p-6"
       >
         <div className="flex items-start gap-4">
@@ -101,7 +99,6 @@ const QuestionCard = ({ question, index, quizType, answers, onAnswer }) => {
           </div>
         </div>
       </motion.div>
-    </AnimatePresence>
   );
 };
 

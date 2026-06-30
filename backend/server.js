@@ -5,6 +5,8 @@ const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -24,9 +26,20 @@ const analyticsRoutes = require('./routes/analytics');
 const adminRoutes = require('./routes/admin');
 const searchRoutes = require('./routes/search');
 const gamificationRoutes = require('./routes/gamification');
+const crosswordRoutes = require('./routes/crosswords');
+const multiplayerRoutes = require('./routes/multiplayer');
 const pomodoroRoutes = require('./routes/pomodoro');
 
+const setupSocketHandlers = require('./socket/handlers');
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || true,
+    credentials: true,
+  },
+});
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -72,6 +85,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/gamification', gamificationRoutes);
+app.use('/api/crosswords', crosswordRoutes);
+app.use('/api/multiplayer', multiplayerRoutes);
 app.use('/api/pomodoro', pomodoroRoutes);
 
 app.use((err, req, res, next) => {
@@ -82,8 +97,10 @@ app.use((err, req, res, next) => {
   });
 });
 
+setupSocketHandlers(io);
+
 if (require.main === module) {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`STEMPal Server running on port ${PORT}`);
   });
 }

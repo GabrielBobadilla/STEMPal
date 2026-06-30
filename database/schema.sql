@@ -247,6 +247,88 @@ CREATE TABLE IF NOT EXISTS leaderboard (
 );
 
 -- ================================================
+-- CROSSWORD PUZZLES TABLE
+-- ================================================
+CREATE TABLE IF NOT EXISTS crossword_puzzles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    puzzle_data JSON NOT NULL,
+    difficulty ENUM('easy', 'medium', 'hard') DEFAULT 'medium',
+    score INT DEFAULT 0,
+    total_words INT DEFAULT 0,
+    completed_words INT DEFAULT 0,
+    hints_used INT DEFAULT 0,
+    time_taken INT DEFAULT 0,
+    completed BOOLEAN DEFAULT FALSE,
+    completed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ================================================
+-- MULTIPLAYER ROOMS TABLE
+-- ================================================
+CREATE TABLE IF NOT EXISTS multiplayer_rooms (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    room_code VARCHAR(10) UNIQUE NOT NULL,
+    host_id INT NOT NULL,
+    category VARCHAR(100),
+    difficulty ENUM('easy', 'medium', 'hard') DEFAULT 'medium',
+    status ENUM('waiting', 'starting', 'active', 'finished') DEFAULT 'waiting',
+    max_players INT DEFAULT 4,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ================================================
+-- MULTIPLAYER PARTICIPANTS TABLE
+-- ================================================
+CREATE TABLE IF NOT EXISTS multiplayer_participants (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    room_id INT NOT NULL,
+    user_id INT NOT NULL,
+    score INT DEFAULT 0,
+    correct_answers INT DEFAULT 0,
+    total_answers INT DEFAULT 0,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES multiplayer_rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ================================================
+-- MULTIPLAYER QUIZ HISTORY TABLE
+-- ================================================
+CREATE TABLE IF NOT EXISTS multiplayer_quiz_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    room_code VARCHAR(10),
+    category VARCHAR(100),
+    difficulty ENUM('easy', 'medium', 'hard') DEFAULT 'medium',
+    score INT DEFAULT 0,
+    correct_answers INT DEFAULT 0,
+    total_questions INT DEFAULT 0,
+    rank INT DEFAULT 0,
+    total_players INT DEFAULT 0,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ================================================
+-- SCANNED DOCUMENTS TABLE
+-- ================================================
+CREATE TABLE IF NOT EXISTS scanned_documents (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size INT,
+    file_type ENUM('pdf', 'image') DEFAULT 'pdf',
+    page_count INT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ================================================
 -- FOCUS SCORES TABLE
 -- ================================================
 CREATE TABLE IF NOT EXISTS focus_scores (

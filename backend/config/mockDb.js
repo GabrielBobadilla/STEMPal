@@ -146,6 +146,11 @@ db.createTable('xp_log', {});
 db.createTable('leaderboard', {});
 db.createTable('focus_scores', {});
 db.createTable('pomodoro_sessions', {});
+db.createTable('crossword_puzzles', {});
+db.createTable('multiplayer_rooms', {});
+db.createTable('multiplayer_participants', {});
+db.createTable('multiplayer_quiz_history', {});
+db.createTable('scanned_documents', {});
 
 db.insert('users', { fullname: 'STEMPal Admin', email: 'admin@stempal.com', password: '$2a$10$eSI3tD37goN17fRe9ZoES.BlOys8uHUUVJa6HVHUax.PWFCr2jh92', role: 'admin', profile_picture: 'default.png', notification_enabled: 1, total_xp: 0, level: 1, theme_preference: 'light' });
 db.insert('users', { fullname: 'Juan Dela Cruz', email: 'juan@gmail.com', password: '$2a$10$wr033wFhp9Tl46/RJq/wH.tYc0KAWSkxP/.pqseRAr.ThTH5JewNO', role: 'student', profile_picture: 'default.png', notification_enabled: 1, total_xp: 0, level: 1, theme_preference: 'light' });

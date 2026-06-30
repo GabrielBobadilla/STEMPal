@@ -157,6 +157,14 @@ export const adminAPI = {
   deleteNote: (id) => api.delete(`/admin/notes/${id}`)
 };
 
+export const multiplayerAPI = {
+  createRoom: (data) => api.post('/multiplayer/create', data),
+  joinRoom: (data) => api.post('/multiplayer/join', data),
+  getRoomInfo: (roomCode) => api.get(`/multiplayer/room/${roomCode}`),
+  getHistory: () => api.get('/multiplayer/history'),
+  saveResult: (data) => api.post('/multiplayer/save-result', data),
+};
+
 export const searchAPI = {
   search: (params) => api.get('/search', { params })
 };
@@ -167,6 +175,12 @@ export const gamificationAPI = {
   getLevelInfo: () => api.get('/gamification/level'),
   getXpHistory: () => api.get('/gamification/xp-history'),
   checkLevelUp: () => api.post('/gamification/check-level-up')
+};
+
+export const crosswordAPI = {
+  saveScore: (data) => api.post('/crosswords/save', data),
+  getHistory: () => api.get('/crosswords/history'),
+  getStats: () => api.get('/crosswords/stats'),
 };
 
 export const pomodoroAPI = {

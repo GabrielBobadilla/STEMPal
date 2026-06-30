@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { breakAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import BreakForm from '../components/breaks/BreakForm';
@@ -195,8 +195,7 @@ const BreakPage = () => {
         />
       </motion.div>
 
-      <AnimatePresence>
-        {recommendation && (
+      {recommendation && (
           <RecommendationCard
             recommendation={recommendation}
             breakState={breakState}
@@ -213,7 +212,6 @@ const BreakPage = () => {
             }}
           />
         )}
-      </AnimatePresence>
 
       {effectiveness && effectiveness.activities && effectiveness.activities.length > 0 && (
         <motion.div variants={itemVariants} className="glass-card p-6">
