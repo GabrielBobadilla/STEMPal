@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { FiGrid, FiCpu, FiLayers, FiHelpCircle, FiUsers, FiClock, FiGrid as FiGridIcon, FiFileText, FiCoffee, FiRefreshCw, FiUser, FiAward } from 'react-icons/fi';
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { path: '/reviewer', label: 'AI Reviewer', icon: '🤖' },
-  { path: '/flashcards', label: 'Flashcards', icon: '🎴' },
-  { path: '/quiz', label: 'Quiz', icon: '📝' },
-  { path: '/multiplayer', label: 'Multiplayer', icon: '👥' },
-  { path: '/pomodoro', label: 'Pomodoro', icon: '⏱️' },
-  { path: '/crossword', label: 'Crossword', icon: '🧩' },
-  { path: '/scan', label: 'Scan File', icon: '📄' },
-  { path: '/breaks', label: 'Break', icon: '☕' },
-  { path: '/history', label: 'History', icon: '📚' },
-  { path: '/profile', label: 'Profile', icon: '👤' },
-  { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+  { path: '/dashboard', label: 'Dashboard', icon: FiGrid },
+  { path: '/reviewer', label: 'AI Reviewer', icon: FiCpu },
+  { path: '/flashcards', label: 'Flashcards', icon: FiLayers },
+  { path: '/quiz', label: 'Quiz', icon: FiHelpCircle },
+  { path: '/multiplayer', label: 'Multiplayer', icon: FiUsers },
+  { path: '/pomodoro', label: 'Pomodoro', icon: FiClock },
+  { path: '/crossword', label: 'Crossword', icon: FiGridIcon },
+  { path: '/scan', label: 'Scan File', icon: FiFileText },
+  { path: '/breaks', label: 'Break', icon: FiCoffee },
+  { path: '/history', label: 'History', icon: FiRefreshCw },
+  { path: '/profile', label: 'Profile', icon: FiUser },
+  { path: '/leaderboard', label: 'Leaderboard', icon: FiAward },
 ];
 
 const Layout = () => {
@@ -51,7 +52,7 @@ const Layout = () => {
               {navItems.map((item) => (
                 <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive(item.path) ? 'gradient-bg text-white shadow-lg' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'}`}>
-                  <span className="text-xl">{item.icon}</span>
+                  <item.icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
                 </Link>
               ))}
