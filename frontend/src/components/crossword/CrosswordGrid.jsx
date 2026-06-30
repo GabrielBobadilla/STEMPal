@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
 
 function buildGrid(puzzle) {
   let maxRow = 0;
@@ -192,9 +191,8 @@ const CrosswordGrid = ({ puzzle, onComplete, onScoreUpdate, hintsUsed, onUseHint
           const displayChar = isRevealed ? cell.char : (cell.userLetter || '');
 
           return (
-            <motion.div
+            <div
               key={`${r}-${c}`}
-              whileTap={{ scale: 0.9 }}
               onClick={() => handleCellClick(r, c)}
               className={`relative flex items-center justify-center text-base sm:text-lg font-bold rounded-sm cursor-pointer transition-all select-none
                 ${isActive ? 'ring-2 ring-primary-400 bg-primary-500/25 z-10 scale-110 shadow-lg' : ''}
@@ -208,7 +206,7 @@ const CrosswordGrid = ({ puzzle, onComplete, onScoreUpdate, hintsUsed, onUseHint
               {cell.number && (
                 <span className="absolute top-[1px] left-[2px] text-[8px] leading-none text-[var(--text-secondary)] font-normal pointer-events-none">{cell.number}</span>
               )}
-            </motion.div>
+              </div>
           );
         }))}
       </div>

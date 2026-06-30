@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const CrosswordClues = ({ puzzle, completedWords, onHint, hintsUsed, maxHints }) => {
   return (
@@ -16,8 +15,7 @@ const CrosswordClues = ({ puzzle, completedWords, onHint, hintsUsed, maxHints })
               <span className={`flex-1 ${isCompleted ? 'line-through opacity-60' : ''}`}>{word.clue}</span>
               {isCompleted && <span className="text-green-400 text-xs shrink-0">✓</span>}
               {!isCompleted && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => onHint(idx)}
                   disabled={hintsUsed >= maxHints}
                   className={`text-xs px-2 py-1 rounded-lg transition-all shrink-0 ${
@@ -25,7 +23,7 @@ const CrosswordClues = ({ puzzle, completedWords, onHint, hintsUsed, maxHints })
                   }`}
                 >
                   💡
-                </motion.button>
+                </button>
               )}
             </div>
           );
