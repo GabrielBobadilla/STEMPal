@@ -9,7 +9,7 @@ const demoUsers = [
     id: 1,
     fullname: 'STEMPal Admin',
     email: 'admin@stempal.com',
-    password: '$2a$10$eSI3tD37goN17fRe9ZoES.BlOys8uHUUVJa6HVHUax.PWFCr2jh92',
+    password: '$2a$10$Fyy7rHPQQQ3H6P.PBcvT7Omyd4WbrmHylN2dpvJEE2O9Zsru2Lm3q',
     role: 'admin',
     profile_picture: null,
     theme_preference: null
@@ -18,7 +18,7 @@ const demoUsers = [
     id: 2,
     fullname: 'Juan Dela Cruz',
     email: 'juan@gmail.com',
-    password: '$2a$10$wr033wFhp9Tl46/RJq/wH.tYc0KAWSkxP/.pqseRAr.ThTH5JewNO',
+    password: '$2a$10$DfWekcLsJkMyyWJcRQrrD.S8DCkta1s27sf8cMmlRZAS1mrmaHzWi',
     role: 'student',
     profile_picture: null,
     theme_preference: null

@@ -381,5 +381,5 @@ INSERT INTO levels (level_name, min_xp, max_xp) VALUES
 -- INSERT DEFAULT USERS
 -- ================================================
 INSERT INTO users (fullname, email, password, role) VALUES
-('STEMPal Admin', 'admin@stempal.com', '$2a$10$eSI3tD37goN17fRe9ZoES.BlOys8uHUUVJa6HVHUax.PWFCr2jh92', 'admin'),
-('Juan Dela Cruz', 'juan@gmail.com', '$2a$10$wr033wFhp9Tl46/RJq/wH.tYc0KAWSkxP/.pqseRAr.ThTH5JewNO', 'student');
+('STEMPal Admin', 'admin@stempal.com', '$2a$10$Fyy7rHPQQQ3H6P.PBcvT7Omyd4WbrmHylN2dpvJEE2O9Zsru2Lm3q', 'admin'),
+('Juan Dela Cruz', 'juan@gmail.com', '$2a$10$DfWekcLsJkMyyWJcRQrrD.S8DCkta1s27sf8cMmlRZAS1mrmaHzWi', 'student');
