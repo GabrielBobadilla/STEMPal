@@ -49,7 +49,7 @@ const getAdaptiveSettings = async (req, res) => {
     );
 
     const quizScore = lastQuiz.length > 0 ? lastQuiz[0].score : 85;
-    const focusScore = focusData[0].avg_focus;
+    const focusScore = focusData.length > 0 ? (focusData[0].avg_focus || 0) : 0;
 
     let studyMinutes = 25;
     let breakMinutes = 5;
@@ -68,8 +68,9 @@ const getAdaptiveSettings = async (req, res) => {
     const needsRecoveryBreak = quizScore < 50 || focusScore < 40;
 
     res.json({
-      studyMinutes,
-      breakMinutes,
+      study_duration: studyMinutes,
+      break_duration: breakMinutes,
+      long_break_duration: Math.round(breakMinutes * 2),
       focusScore: Math.round(focusScore),
       quizScore: Math.round(quizScore),
       needsRecoveryBreak,

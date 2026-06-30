@@ -90,7 +90,22 @@ function parseWhere(sql, params) {
 function extractFields(sql) {
   const m = sql.match(/SELECT\s+(.+?)\s+FROM/i);
   if (!m) return ['*'];
-  return m[1].split(',').map(s => s.trim().split(' AS ')[0].trim().replace(/`/g, ''));
+  const part = m[1].trim();
+  const fields = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < part.length; i++) {
+    if (part[i] === '(') depth++;
+    else if (part[i] === ')') depth--;
+    else if (part[i] === ',' && depth === 0) {
+      fields.push(part.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  fields.push(part.slice(start).trim());
+  return fields.map(f => {
+    const alias = f.match(/\s+AS\s+(\w+)$/i);
+    return alias ? alias[1] : f.replace(/`/g, '');
+  });
 }
 
 function extractTable(sql) {
@@ -135,6 +150,8 @@ db.createTable('notes', {});
 db.createTable('pdf_uploads', {});
 db.createTable('generated_reviewers', {});
 db.createTable('quizzes', {});
+db.insert('quizzes', { user_id: 1, score: 85, accuracy: 85, total_questions: 10, correct_answers: 8, date: new Date().toISOString().split('T')[0] });
+db.insert('quizzes', { user_id: 2, score: 75, accuracy: 75, total_questions: 10, correct_answers: 7, date: new Date().toISOString().split('T')[0] });
 db.createTable('flashcards', {});
 db.createTable('study_history', {});
 db.createTable('break_recommendations', {});
@@ -145,6 +162,8 @@ db.createTable('levels', {});
 db.createTable('xp_log', {});
 db.createTable('leaderboard', {});
 db.createTable('focus_scores', {});
+db.insert('focus_scores', { user_id: 1, score: 80, session_type: 'study', date: new Date().toISOString().split('T')[0] });
+db.insert('focus_scores', { user_id: 2, score: 70, session_type: 'study', date: new Date().toISOString().split('T')[0] });
 db.createTable('pomodoro_sessions', {});
 db.createTable('crossword_puzzles', {});
 db.createTable('multiplayer_rooms', {});
