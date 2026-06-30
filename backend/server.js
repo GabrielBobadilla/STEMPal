@@ -5,8 +5,6 @@ const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const http = require('http');
-const { Server } = require('socket.io');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -30,21 +28,31 @@ const crosswordRoutes = require('./routes/crosswords');
 const multiplayerRoutes = require('./routes/multiplayer');
 const pomodoroRoutes = require('./routes/pomodoro');
 
-const setupSocketHandlers = require('./socket/handlers');
-
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || true,
-    credentials: true,
-  },
-});
-const PORT = process.env.PORT || 5000;
+const isVercel = process.env.VERCEL === '1';
+
+let io;
+if (!isVercel) {
+  const http = require('http');
+  const { Server } = require('socket.io');
+  const server = http.createServer(app);
+  io = new Server(server, {
+    cors: { origin: process.env.FRONTEND_URL || true, credentials: true },
+  });
+  const setupSocketHandlers = require('./socket/handlers');
+  setupSocketHandlers(io);
+
+  const PORT = process.env.PORT || 5000;
+  if (require.main === module) {
+    server.listen(PORT, () => {
+      console.log(`STEMPal Server running on port ${PORT}`);
+    });
+  }
+}
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(compression());
-app.use(morgan('dev'));
+if (!isVercel) app.use(morgan('dev'));
 app.use(cors({
   origin: process.env.FRONTEND_URL || true,
   credentials: true
@@ -96,13 +104,5 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === 'development' ? err : {}
   });
 });
-
-setupSocketHandlers(io);
-
-if (require.main === module) {
-  server.listen(PORT, () => {
-    console.log(`STEMPal Server running on port ${PORT}`);
-  });
-}
 
 module.exports = app;

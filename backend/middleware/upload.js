@@ -2,9 +2,11 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
+const uploadDir = process.env.VERCEL === '1' ? '/tmp' : path.join(__dirname, '..');
+
 const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/profiles'));
+    cb(null, path.join(uploadDir, 'uploads/profiles'));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -14,7 +16,7 @@ const profileStorage = multer.diskStorage({
 
 const pdfStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/pdfs'));
+    cb(null, path.join(uploadDir, 'uploads/pdfs'));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
