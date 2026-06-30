@@ -1,18 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { quizAPI } from '../services/api';
 import { toast } from 'react-toastify';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.1 } }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0 }
-};
 
 const CircularProgress = ({ value, max, size = 160, strokeWidth = 10 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -32,7 +21,7 @@ const CircularProgress = ({ value, max, size = 160, strokeWidth = 10 }) => {
         stroke="var(--bg-secondary)"
         strokeWidth={strokeWidth}
       />
-      <motion.circle
+      <circle
         cx={size / 2}
         cy={size / 2}
         r={radius}
@@ -41,9 +30,8 @@ const CircularProgress = ({ value, max, size = 160, strokeWidth = 10 }) => {
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeDasharray={circumference}
-        initial={{ strokeDashoffset: circumference }}
-        animate={{ strokeDashoffset: offset }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
+        strokeDashoffset={offset}
+        style={{ transition: 'stroke-dashoffset 1.2s ease-out' }}
       />
       <text
         x="50%"
@@ -106,14 +94,14 @@ const QuizResults = () => {
 
   if (!data) {
     return (
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-        <motion.div variants={itemVariants} className="glass-card p-12 text-center">
+      <div className="space-y-6">
+        <div className="glass-card p-12 text-center">
           <p className="text-4xl mb-4">📊</p>
           <p className="text-lg font-semibold mb-2">No Results Found</p>
           <p className="text-[var(--text-secondary)] mb-6">Complete a quiz first to see your results here.</p>
           <button onClick={() => navigate('/quiz')} className="btn-primary">Go to Quiz</button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     );
   }
 
@@ -138,8 +126,8 @@ const QuizResults = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={itemVariants} className="glass-card p-6 md:p-8">
+    <div className="space-y-6">
+      <div className="glass-card p-6 md:p-8">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold gradient-text mb-1">Quiz Complete!</h1>
           <p className="text-[var(--text-secondary)] text-sm capitalize">{topic} {quizType ? `• ${quizType.replace('-', ' ')}` : ''} {difficulty ? `• ${difficulty}` : ''}</p>
@@ -228,16 +216,14 @@ const QuizResults = () => {
             </button>
           </div>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <h2 className="text-lg font-semibold mb-4">AI Suggestions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {suggestionCards.map((card, i) => (
-            <motion.div
+            <div
               key={i}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
               onClick={() => navigate(card.path)}
               className="glass-card p-4 cursor-pointer group"
             >
@@ -246,20 +232,20 @@ const QuizResults = () => {
               </div>
               <h3 className="font-semibold text-sm mb-1">{card.title}</h3>
               <p className="text-xs text-[var(--text-secondary)]">{card.desc}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <button onClick={() => navigate('/dashboard')} className="btn-secondary flex-1 flex items-center justify-center gap-2">
           ← Back to Dashboard
         </button>
         <button onClick={handleRetake} className="btn-primary flex-1 flex items-center justify-center gap-2">
           Retake Quiz →
         </button>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

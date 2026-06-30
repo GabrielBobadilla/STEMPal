@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const QUIZ_TYPES = [
   { value: 'mixed', label: 'Mixed' },
@@ -25,26 +24,16 @@ const DIFFICULTIES = [
 
 const COUNT_OPTIONS = [5, 10, 15, 20];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.05 } }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
-
 const QuizSetup = ({ topic, category, quizType, difficulty, questionCount, generating, history,
   onTopicChange, onCategoryChange, onTypeChange, onDifficultyChange, onCountChange, onGenerate }) => (
-  <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-4xl mx-auto space-y-6">
-    <motion.div variants={itemVariants}>
+  <div className="max-w-4xl mx-auto space-y-6">
+    <div>
       <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">🧠 Adaptive Quizzes</h1>
       <p className="text-[var(--text-secondary)] text-sm mt-1">AI-powered quizzes that adapt to your level</p>
-    </motion.div>
+    </div>
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <h2 className="text-lg font-semibold mb-4">New Quiz</h2>
         <div className="space-y-5">
           <div>
@@ -151,9 +140,9 @@ const QuizSetup = ({ topic, category, quizType, difficulty, questionCount, gener
             )}
           </button>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <h2 className="text-lg font-semibold mb-4">Recent Quizzes</h2>
         {history.length === 0 ? (
           <div className="text-center py-8">
@@ -177,10 +166,10 @@ const QuizSetup = ({ topic, category, quizType, difficulty, questionCount, gener
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
-  </motion.div>
+  </div>
 );
 
-export { QUIZ_TYPES, CATEGORIES, DIFFICULTIES, COUNT_OPTIONS, containerVariants, itemVariants };
+export { QUIZ_TYPES, CATEGORIES, DIFFICULTIES, COUNT_OPTIONS };
 export default QuizSetup;

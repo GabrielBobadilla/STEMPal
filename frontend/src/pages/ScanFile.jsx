@@ -1,18 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { FiCamera, FiFileText, FiTrash2, FiEdit2, FiDownload, FiUpload, FiPlus, FiChevronLeft, FiChevronRight, FiImage } from 'react-icons/fi';
 import Scanner from '../components/scan/Scanner';
 import { pdfAPI } from '../services/api';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
 
 const ScanFile = () => {
   const [showScanner, setShowScanner] = useState(false);
@@ -103,17 +93,16 @@ const ScanFile = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 max-w-3xl mx-auto">
-      <motion.div variants={itemVariants} className="glass-card p-6">
+    <div className="space-y-6 max-w-3xl mx-auto">
+      <div className="glass-card p-6">
         <h1 className="text-2xl font-bold gradient-text mb-2">Scan Document</h1>
         <p className="text-sm text-[var(--text-secondary)] mb-6">Capture documents using your camera and upload as PDF</p>
 
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <motion.button whileTap={{ scale: 0.95 }}
-            onClick={() => setShowScanner(true)}
+          <button onClick={() => setShowScanner(true)}
             className="btn-primary flex items-center gap-2 text-sm px-4 py-2.5">
             <FiCamera className="w-4 h-4" /> Scan Page
-          </motion.button>
+          </button>
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-xs text-[var(--text-secondary)]">Export:</span>
             <button onClick={() => setExportFormat('pdf')}
@@ -128,14 +117,14 @@ const ScanFile = () => {
         </div>
 
         {showScanner && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <div className="mb-6">
             <Scanner onCapture={handleCapture} onClose={() => setShowScanner(false)} />
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
 
       {pages.length > 0 && (
-        <motion.div variants={itemVariants} className="glass-card p-6">
+        <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               {renameMode ? (
@@ -187,48 +176,47 @@ const ScanFile = () => {
                 <span className="absolute bottom-0 left-0 right-0 text-[8px] text-center bg-black/50 text-white">{idx + 1}</span>
               </div>
             ))}
-            <motion.button whileTap={{ scale: 0.9 }}
-              onClick={() => setShowScanner(true)}
+            <button onClick={() => setShowScanner(true)}
               className="flex-shrink-0 w-16 h-20 rounded-lg border-2 border-dashed border-[var(--glass-border)] flex items-center justify-center text-[var(--text-secondary)] hover:border-primary-500 hover:text-primary-500 transition-all">
               <FiPlus className="w-5 h-5" />
-            </motion.button>
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
-            <motion.button whileTap={{ scale: 0.97 }} onClick={handleDownload}
+            <button onClick={handleDownload}
               className="btn-secondary flex items-center gap-2 text-sm">
               <FiDownload className="w-4 h-4" /> Preview PDF
-            </motion.button>
-            <motion.button whileTap={{ scale: 0.97 }} onClick={handleUpload} disabled={uploading}
+            </button>
+            <button onClick={handleUpload} disabled={uploading}
               className="btn-primary flex items-center gap-2 text-sm">
               {uploading ? (
                 <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white" /> Uploading...</>
               ) : (
                 <><FiUpload className="w-4 h-4" /> Upload to STEMPal</>
               )}
-            </motion.button>
-            <motion.button whileTap={{ scale: 0.97 }} onClick={() => { setPages([]); setCurrentPage(0); }}
+            </button>
+            <button onClick={() => { setPages([]); setCurrentPage(0); }}
               className="btn-secondary text-sm text-red-400">
               <FiTrash2 className="w-4 h-4 inline mr-1" /> Clear All
-            </motion.button>
+            </button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {pages.length === 0 && !showScanner && (
-        <motion.div variants={itemVariants} className="glass-card p-8 text-center">
+        <div className="glass-card p-8 text-center">
           <div className="text-5xl mb-4">📄</div>
           <h3 className="text-lg font-semibold mb-2">No Pages Yet</h3>
           <p className="text-sm text-[var(--text-secondary)] mb-4">Tap "Scan Page" to capture a document with your camera</p>
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => setShowScanner(true)}
+          <button onClick={() => setShowScanner(true)}
             className="btn-primary inline-flex items-center gap-2 text-sm">
             <FiCamera className="w-4 h-4" /> Scan a Page
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       )}
 
       {recentScans.length > 0 && (
-        <motion.div variants={itemVariants} className="glass-card p-4 sm:p-6">
+        <div className="glass-card p-4 sm:p-6">
           <h2 className="text-lg font-semibold mb-4">Recent Uploads</h2>
           <div className="space-y-2">
             {recentScans.map((scan, i) => (
@@ -241,9 +229,9 @@ const ScanFile = () => {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

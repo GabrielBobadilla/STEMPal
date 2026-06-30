@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { notificationAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -8,17 +7,7 @@ const typeIcons = {
   study_reminder: '📖', break_reminder: '☕', streak_reminder: '🔥',
   goal_completion: '🎯', quiz_ready: '🧠', reviewer_generated: '✨',
   achievement: '🏆', study: '📖', break: '☕', streak: '🔥',
-  quiz: '🧠', achievement: '🏆'
-};
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.04 } }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
+  quiz: '🧠'
 };
 
 const Notifications = () => {
@@ -76,8 +65,8 @@ const Notifications = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
             🔔 Notifications
@@ -91,22 +80,22 @@ const Notifications = () => {
             ✅ Mark All Read
           </button>
         )}
-      </motion.div>
+      </div>
 
       {loading ? (
-        <motion.div variants={itemVariants} className="glass-card p-12 flex items-center justify-center">
+        <div className="glass-card p-12 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent" />
-        </motion.div>
+        </div>
       ) : notifications.length === 0 ? (
-        <motion.div variants={itemVariants} className="glass-card p-12 text-center">
+        <div className="glass-card p-12 text-center">
           <p className="text-5xl mb-4">🔔</p>
           <p className="text-lg font-semibold mb-1">No notifications yet</p>
           <p className="text-sm text-[var(--text-secondary)]">You'll be notified about study reminders, achievements, and more</p>
-        </motion.div>
+        </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n, i) => (
-            <motion.div key={n._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}>
+            <div key={n._id}>
               <div className={`glass-card p-4 flex items-start gap-3 transition-all ${!n.read ? 'border-primary-500/20 bg-primary-500/5' : ''}`}>
                 <span className="text-2xl">{typeIcons[n.type] || '📌'}</span>
                 <div className="flex-1 min-w-0">
@@ -127,11 +116,11 @@ const Notifications = () => {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
