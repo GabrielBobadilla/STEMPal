@@ -1,21 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { FiGrid, FiClock, FiStar, FiRefreshCw } from 'react-icons/fi';
+import { FiGrid, FiClock, FiStar, FiRefreshCw, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import CrosswordGrid from '../components/crossword/CrosswordGrid';
 import CrosswordClues from '../components/crossword/CrosswordClues';
 import crosswordData from '../components/crossword/crosswordData';
 import { crosswordAPI } from '../services/api';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
 
 const difficulties = ['easy', 'medium', 'hard'];
 
@@ -42,15 +31,10 @@ const Crossword = () => {
     return () => clearInterval(interval);
   }, [timerRunning]);
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
+  useEffect(() => { fetchHistory(); }, []);
 
   const fetchHistory = async () => {
-    try {
-      const res = await crosswordAPI.getHistory();
-      setHistory(res.data || []);
-    } catch {}
+    try { const res = await crosswordAPI.getHistory(); setHistory(res.data || []); } catch {}
   };
 
   const startNewPuzzle = useCallback((diff) => {
@@ -67,11 +51,7 @@ const Crossword = () => {
     setScore(0);
   }, [difficulty]);
 
-  useEffect(() => {
-    if (!puzzle) {
-      startNewPuzzle();
-    }
-  }, [puzzle, startNewPuzzle]);
+  useEffect(() => { if (!puzzle) startNewPuzzle(); }, [puzzle, startNewPuzzle]);
 
   const handleComplete = useCallback(async () => {
     setTimerRunning(false);
@@ -80,48 +60,31 @@ const Crossword = () => {
     const hintPenalty = hintsUsed * (difficulty === 'easy' ? 10 : 20);
     const timeBonus = Math.max(0, Math.floor((difficulty === 'easy' ? 300 : difficulty === 'medium' ? 600 : 900) - timeElapsed) / 10);
     const finalScore = Math.max(0, baseScore + Math.round(timeBonus) - hintPenalty);
-
     setScore(finalScore);
     try {
       await crosswordAPI.saveScore({
-        puzzle_data: puzzle,
-        difficulty,
-        score: finalScore,
-        total_words: totalWords,
-        completed_words: completedWords.size,
-        hints_used: hintsUsed,
-        time_taken: timeElapsed,
-        completed: true,
+        puzzle_data: puzzle, difficulty, score: finalScore, total_words: totalWords,
+        completed_words: completedWords.size, hints_used: hintsUsed, time_taken: timeElapsed, completed: true,
       });
       toast.success(`Puzzle complete! +${finalScore} XP`);
       fetchHistory();
-    } catch {
-      toast.error('Failed to save score');
-    }
+    } catch { toast.error('Failed to save score'); }
   }, [difficulty, puzzle, totalWords, completedWords, hintsUsed, timeElapsed]);
 
   const handleScoreUpdate = useCallback((correct, total) => {
     setCompletedWords(prev => {
       const next = new Set();
-      for (let i = 0; i < total; i++) {
-        if (i < correct) next.add(i);
-      }
+      for (let i = 0; i < total; i++) { if (i < correct) next.add(i); }
       return next;
     });
   }, []);
 
   const handleHint = useCallback((wordIdx) => {
-    if (hintsUsed >= maxHints) {
-      toast.warning('No hints remaining');
-      return;
-    }
+    if (hintsUsed >= maxHints) { toast.warning('No hints remaining'); return; }
     setHintsUsed(h => h + 1);
   }, [hintsUsed, maxHints]);
 
-  const changeDifficulty = (d) => {
-    setDifficulty(d);
-    setTimeout(() => startNewPuzzle(d), 100);
-  };
+  const changeDifficulty = (d) => { setDifficulty(d); setTimeout(() => startNewPuzzle(d), 100); };
 
   const formatTime = (s) => {
     const m = Math.floor(s / 60);
@@ -138,41 +101,36 @@ const Crossword = () => {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto space-y-5 p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold gradient-text">Crossword Puzzle</h1>
           <p className="text-sm text-[var(--text-secondary)]">Fill in the grid with STEM words</p>
         </div>
         <div className="flex items-center gap-2">
           {difficulties.map(d => (
-            <motion.button key={d} whileTap={{ scale: 0.95 }}
-              onClick={() => changeDifficulty(d)}
+            <button key={d} onClick={() => changeDifficulty(d)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
                 difficulty === d ? 'gradient-bg text-white shadow-lg' : 'glass text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              {d}
-            </motion.button>
+              }`}>{d}</button>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {puzzleCompleted && (
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card p-6 text-center">
-          <div className="text-4xl mb-2">🎉</div>
+        <div className="glass-card p-6 text-center">
+          <div className="text-4xl mb-2">{'\uD83C\uDF89'}</div>
           <h2 className="text-xl font-bold gradient-text mb-1">Puzzle Complete!</h2>
           <p className="text-[var(--text-secondary)] mb-3">You earned <span className="text-primary-500 font-bold">{score} XP</span></p>
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => startNewPuzzle()}
-            className="btn-primary inline-flex items-center gap-2 text-sm">
+          <button onClick={() => startNewPuzzle()} className="btn-primary inline-flex items-center gap-2 text-sm">
             <FiRefreshCw className="w-4 h-4" /> New Puzzle
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div variants={itemVariants} className="lg:col-span-2 glass-card p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 glass-card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <FiGrid className="w-5 h-5 text-primary-500" />
               {puzzle.title}
@@ -182,32 +140,19 @@ const Crossword = () => {
               <span className="flex items-center gap-1"><FiStar className="w-4 h-4" /> {completedWords.size}/{totalWords}</span>
             </div>
           </div>
-          <CrosswordGrid
-            puzzle={puzzle}
-            onComplete={handleComplete}
-            onScoreUpdate={handleScoreUpdate}
-            hintsUsed={hintsUsed}
-            onUseHint={() => {}}
-          />
-        </motion.div>
+          <CrosswordGrid puzzle={puzzle} onComplete={handleComplete} onScoreUpdate={handleScoreUpdate} hintsUsed={hintsUsed} onUseHint={() => {}} />
+        </div>
 
-        <motion.div variants={itemVariants} className="glass-card p-4 sm:p-6">
+        <div className="glass-card p-4 sm:p-6">
           <h2 className="text-lg font-semibold mb-4">Clues</h2>
-          <CrosswordClues
-            puzzle={puzzle}
-            completedWords={completedWords}
-            onHint={handleHint}
-            hintsUsed={hintsUsed}
-            maxHints={maxHints}
-          />
-        </motion.div>
+          <CrosswordClues puzzle={puzzle} completedWords={completedWords} onHint={handleHint} hintsUsed={hintsUsed} maxHints={maxHints} />
+        </div>
       </div>
 
-      <motion.div variants={itemVariants} className="glass-card p-4 sm:p-6">
-        <button onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center justify-between w-full text-left">
+      <div className="glass-card p-4 sm:p-6">
+        <button onClick={() => setShowHistory(!showHistory)} className="flex items-center justify-between w-full text-left">
           <h2 className="text-lg font-semibold">History</h2>
-          <span className="text-xs text-[var(--text-secondary)]">{showHistory ? '▲' : '▼'}</span>
+          <span className="text-xs text-[var(--text-secondary)]">{showHistory ? <FiChevronUp /> : <FiChevronDown />}</span>
         </button>
         {showHistory && (
           <div className="mt-4 space-y-2">
@@ -215,7 +160,7 @@ const Crossword = () => {
               <p className="text-sm text-[var(--text-secondary)] text-center py-4">No puzzles completed yet</p>
             ) : (
               history.map((h, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)] text-sm">
+                <div key={h._id || h.id || i} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)] text-sm">
                   <div>
                     <span className={`capitalize badge-${h.difficulty === 'easy' ? 'success' : h.difficulty === 'medium' ? 'warning' : 'danger'}`}>{h.difficulty}</span>
                     <span className="ml-2 text-[var(--text-secondary)]">{h.completed_words}/{h.total_words} words</span>
@@ -229,8 +174,8 @@ const Crossword = () => {
             )}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
