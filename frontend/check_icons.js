@@ -1,1 +1,0 @@
-try { const x = require('react-icons/fi'); const keys = Object.keys(x).filter(k => k.toLowerCase().includes('chevron')); console.log('Available:', keys); } catch(e) { console.log('Error:', e.message); }
