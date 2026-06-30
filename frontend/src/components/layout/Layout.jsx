@@ -59,10 +59,6 @@ const Layout = () => {
           </div>
 
           <div className="p-4 border-t border-[var(--glass-border)] space-y-2">
-            <div className="glass-card p-4 text-center">
-              <p className="text-xs text-[var(--text-secondary)] mb-2">XP Points</p>
-              <p className="text-2xl font-bold gradient-text">{user?.total_xp || 0}</p>
-            </div>
             <button onClick={handleLogout} className="w-full p-3 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all flex items-center justify-center gap-2">
               🚪 Logout
             </button>

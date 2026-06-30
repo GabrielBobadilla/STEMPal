@@ -17,8 +17,11 @@ const quickCards = [
   { icon: '🤖', label: 'AI Reviewer', path: '/reviewer', color: 'from-sky-500 to-indigo-500' },
   { icon: '🎴', label: 'Flashcards', path: '/flashcards', color: 'from-sky-500 to-cyan-500' },
   { icon: '🧠', label: 'Quizzes', path: '/quiz', color: 'from-sky-500 to-cyan-500' },
-  { icon: '📈', label: 'Analytics', path: '/profile', color: 'from-emerald-500 to-green-500' },
+  { icon: '👥', label: 'Multiplayer', path: '/multiplayer', color: 'from-purple-500 to-pink-500' },
+  { icon: '🧩', label: 'Crossword', path: '/crossword', color: 'from-emerald-500 to-teal-500' },
+  { icon: '📄', label: 'Scan File', path: '/scan', color: 'from-amber-500 to-orange-500' },
   { icon: '⏱️', label: 'Pomodoro', path: '/pomodoro', color: 'from-violet-500 to-sky-500' },
+  { icon: '🏆', label: 'Leaderboard', path: '/leaderboard', color: 'from-yellow-500 to-rose-500' },
 ];
 
 const Dashboard = () => {
