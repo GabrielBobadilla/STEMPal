@@ -1,32 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { userAPI, gamificationAPI, streakAPI, achievementAPI, analyticsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
 
 const BADGE_TIERS = [
-  { key: 'first_study', label: 'First Study', icon: '🌱', desc: 'Complete your first study session', xp: 50 },
-  { key: 'streak_3', label: '3-Day Streak', icon: '🔥', desc: 'Study 3 days in a row', xp: 100 },
-  { key: 'streak_7', label: 'Week Warrior', icon: '⚡', desc: 'Study 7 days in a row', xp: 200 },
-  { key: 'streak_30', label: 'Monthly Master', icon: '💎', desc: 'Study 30 days in a row', xp: 500 },
-  { key: 'quiz_perfect', label: 'Perfect Score', icon: '🎯', desc: 'Get 100% on a quiz', xp: 300 },
-  { key: 'xp_1000', label: 'Century', icon: '⭐', desc: 'Earn 1000 XP', xp: 400 },
-  { key: 'xp_5000', label: 'Powerhouse', icon: '🏆', desc: 'Earn 5000 XP', xp: 800 },
-  { key: 'xp_5000', label: 'All-Rounder', icon: '🌟', desc: 'Use all study tools', xp: 600 },
+  { key: 'first_study', label: 'First Study', icon: '\u{1F331}', desc: 'Complete your first study session', xp: 50 },
+  { key: 'streak_3', label: '3-Day Streak', icon: '\u{1F525}', desc: 'Study 3 days in a row', xp: 100 },
+  { key: 'streak_7', label: 'Week Warrior', icon: '\u26A1', desc: 'Study 7 days in a row', xp: 200 },
+  { key: 'streak_30', label: 'Monthly Master', icon: '\u{1F48E}', desc: 'Study 30 days in a row', xp: 500 },
+  { key: 'quiz_perfect', label: 'Perfect Score', icon: '\u{1F3AF}', desc: 'Get 100% on a quiz', xp: 300 },
+  { key: 'xp_1000', label: 'Century', icon: '\u2B50', desc: 'Earn 1000 XP', xp: 400 },
+  { key: 'xp_5000', label: 'Powerhouse', icon: '\u{1F3C6}', desc: 'Earn 5000 XP', xp: 800 },
+  { key: 'all_rounder', label: 'All-Rounder', icon: '\u{1F31F}', desc: 'Use all study tools', xp: 600 },
 ];
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.05 } }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
 
 const Profile = () => {
   const { user, updateUser, logout } = useAuth();
@@ -65,6 +54,7 @@ const Profile = () => {
     d.setDate(d.getDate() - i);
     weekDates.push(d);
   }
+
   const isActiveDay = (date) => activeDates.some(
     a => new Date(a).toDateString() === date.toDateString()
   );
@@ -94,6 +84,7 @@ const Profile = () => {
   }, [user]);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -104,15 +95,17 @@ const Profile = () => {
           achievementAPI.getAll().catch(() => ({ data: [] })),
           analyticsAPI.getMetrics().catch(() => ({ data: null }))
         ]);
+        if (cancelled) return;
         setLevelInfo(levelRes.data);
         setRanking(rankRes.data);
         setStreakData(streakRes.data);
         setAchievements(achievementRes.data || []);
         setMetrics(metricsRes.data);
       } catch {}
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     };
     fetchData();
+    return () => { cancelled = true; };
   }, []);
 
   const handleChange = (e) => {
@@ -175,10 +168,10 @@ const Profile = () => {
     : 0;
 
   const metricList = metrics ? [
-    { label: 'Study Time', value: `${metrics.total_study_time || 0}h`, icon: '⏰', color: 'from-sky-500 to-indigo-500' },
-    { label: 'Avg Quiz', value: `${metrics.avg_quiz_score || 0}%`, icon: '📝', color: 'from-emerald-500 to-teal-500' },
-    { label: 'Focus', value: `${metrics.focus_improvement || 0}%`, icon: '🎯', color: 'from-violet-500 to-purple-500' },
-    { label: 'Engagement', value: `${metrics.engagement_rate || 0}%`, icon: '💪', color: 'from-amber-500 to-orange-500' },
+    { label: 'Study Time', value: `${metrics.total_study_time || 0}h`, icon: '\u23F0', color: 'from-sky-500 to-indigo-500' },
+    { label: 'Avg Quiz', value: `${metrics.avg_quiz_score || 0}%`, icon: '\u{1F4DD}', color: 'from-emerald-500 to-teal-500' },
+    { label: 'Focus', value: `${metrics.focus_improvement || 0}%`, icon: '\u{1F3AF}', color: 'from-violet-500 to-purple-500' },
+    { label: 'Engagement', value: `${metrics.engagement_rate || 0}%`, icon: '\u{1F4AA}', color: 'from-amber-500 to-orange-500' },
   ] : [];
 
   if (loading) {
@@ -190,8 +183,8 @@ const Profile = () => {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-4xl mx-auto space-y-5 p-4">
-      <motion.div variants={itemVariants} className="glass-card p-6 md:p-8 relative overflow-hidden">
+    <div className="max-w-4xl mx-auto space-y-5 p-4">
+      <div className="glass-card p-6 md:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-sky-500/5 to-transparent rounded-bl-full" />
         <div className="relative flex flex-col md:flex-row items-center gap-6">
           <div className="relative shrink-0">
@@ -211,7 +204,7 @@ const Profile = () => {
               className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center text-sm hover:bg-sky-600 transition-all shadow-lg">
               {uploading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-              ) : '📷'}
+              ) : '\u{1F4F7}'}
             </button>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleUploadPicture} className="hidden" />
           </div>
@@ -235,14 +228,14 @@ const Profile = () => {
             )}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/10">
-                🔥 {currentStreak} day streak
+                {'\u{1F525}'} {currentStreak} day streak
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-sky-500/20 to-indigo-500/20 text-sky-400 border border-sky-500/10">
-                ⚡ {levelInfo?.currentXp || user?.total_xp || 0} XP
+                {'\u26A1'} {levelInfo?.currentXp || user?.total_xp || 0} XP
               </span>
               {ranking && (
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-400 border border-emerald-500/10">
-                  🏅 #{ranking.ranking} Leaderboard
+                  {'\u{1F3C5}'} #{ranking.rank || ranking.ranking} Leaderboard
                 </span>
               )}
             </div>
@@ -262,15 +255,15 @@ const Profile = () => {
             ) : (
               <button onClick={() => setEditing(true)}
                 className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5">
-                ✏️ Edit Profile
+                {'\u270F\uFE0F'} Edit Profile
               </button>
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {editing && (
-        <motion.div variants={itemVariants} className="glass-card p-6 md:p-8">
+        <div className="glass-card p-6 md:p-8">
           <h2 className="text-lg font-semibold mb-5 flex items-center gap-2">
             <span className="w-1 h-5 bg-sky-400 rounded-full" />
             Personal Information
@@ -292,15 +285,15 @@ const Profile = () => {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Level', value: levelInfo?.currentLevel || 1, icon: '🏅', sub: levelInfo?.nextLevelName || 'Next level', color: 'from-sky-500 to-cyan-500' },
-          { label: 'XP', value: levelInfo?.currentXp || user?.total_xp || 0, icon: '⚡', sub: `${levelInfo?.nextLevelXp || 100} to next`, color: 'from-amber-500 to-yellow-500' },
-          { label: 'Streak', value: `${currentStreak}d`, icon: '🔥', sub: `${longestStreak}d longest`, color: 'from-orange-500 to-red-500' },
-          { label: 'Ranking', value: ranking ? `#${ranking.ranking}` : '--', icon: '🏆', sub: `${ranking?.total || 0} total users`, color: 'from-emerald-500 to-green-500' },
+          { label: 'Level', value: levelInfo?.currentLevel || 1, icon: '\u{1F3C5}', sub: levelInfo?.nextLevelName || 'Next level', color: 'from-sky-500 to-cyan-500' },
+          { label: 'XP', value: levelInfo?.currentXp || user?.total_xp || 0, icon: '\u26A1', sub: `${levelInfo?.nextLevelXp || 100} to next`, color: 'from-amber-500 to-yellow-500' },
+          { label: 'Streak', value: `${currentStreak}d`, icon: '\u{1F525}', sub: `${longestStreak}d longest`, color: 'from-orange-500 to-red-500' },
+          { label: 'Ranking', value: ranking ? `#${ranking.rank || ranking.ranking}` : '--', icon: '\u{1F3C6}', sub: `${ranking?.total || 0} total users`, color: 'from-emerald-500 to-green-500' },
         ].map((stat, i) => (
           <div key={i} className="glass-card p-4 text-center relative overflow-hidden group hover:shadow-lg transition-all">
             <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl ${stat.color} opacity-[0.04] rounded-bl-full group-hover:opacity-[0.07] transition-opacity`} />
@@ -312,10 +305,10 @@ const Profile = () => {
             </div>
           </div>
         ))}
-      </motion.div>
+      </div>
 
       {levelInfo && (
-        <motion.div variants={itemVariants} className="glass-card p-4">
+        <div className="glass-card p-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-medium text-[var(--text-secondary)]">Level Progress</span>
             <span className="text-xs text-[var(--text-secondary)]">{levelInfo.currentXp} / {levelInfo.maxXp} XP</span>
@@ -328,27 +321,25 @@ const Profile = () => {
             <span>{levelInfo.currentLevel || 'Lvl 1'}</span>
             <span>{levelInfo.nextLevelName || 'Next'}</span>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {metricList.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {metricList.map((m, i) => (
-              <div key={i} className="glass-card p-4 relative overflow-hidden group hover:shadow-lg transition-all">
-                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl ${m.color} opacity-[0.04] rounded-bl-full`} />
-                <div className="relative">
-                  <div className="text-xl mb-1">{m.icon}</div>
-                  <div className="text-lg font-bold">{m.value}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">{m.label}</div>
-                </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {metricList.map((m, i) => (
+            <div key={i} className="glass-card p-4 relative overflow-hidden group hover:shadow-lg transition-all">
+              <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl ${m.color} opacity-[0.04] rounded-bl-full`} />
+              <div className="relative">
+                <div className="text-xl mb-1">{m.icon}</div>
+                <div className="text-lg font-bold">{m.value}</div>
+                <div className="text-xs text-[var(--text-secondary)]">{m.label}</div>
               </div>
-            ))}
-          </div>
-        </motion.div>
+            </div>
+          ))}
+        </div>
       )}
 
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <span className="w-1 h-5 bg-sky-400 rounded-full" />
           This Week
@@ -356,9 +347,7 @@ const Profile = () => {
         <div className="grid grid-cols-7 gap-2">
           {weekDates.map((d, i) => (
             <div key={i} className="text-center">
-              <div className="text-[10px] text-[var(--text-secondary)]/60 mb-1">
-                {WEEKDAYS[i]}
-              </div>
+              <div className="text-[10px] text-[var(--text-secondary)]/60 mb-1">{WEEKDAYS[i]}</div>
               <div className={`w-8 h-8 mx-auto rounded-lg flex items-center justify-center text-xs font-medium transition-all ${
                 isActiveDay(d)
                   ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
@@ -385,9 +374,9 @@ const Profile = () => {
             }).length}/7 days
           </span>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <span className="w-1 h-5 bg-sky-400 rounded-full" />
           Achievements
@@ -396,7 +385,7 @@ const Profile = () => {
           {BADGE_TIERS.map((tier, i) => {
             const unlocked = achievements.some(a => a.badge_key === tier.key || a.achievement_key === tier.key);
             return (
-              <div key={i} className={`p-3 rounded-xl text-center transition-all ${
+              <div key={tier.key} className={`p-3 rounded-xl text-center transition-all ${
                 unlocked
                   ? 'bg-gradient-to-b from-sky-500/10 to-indigo-500/5 border border-sky-500/20'
                   : 'bg-[var(--bg-secondary)] opacity-50'
@@ -404,22 +393,22 @@ const Profile = () => {
                 <div className={`text-2xl mb-1 ${unlocked ? '' : 'grayscale'}`}>{tier.icon}</div>
                 <div className="text-xs font-semibold">{tier.label}</div>
                 <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-tight">{tier.desc}</div>
-                {unlocked && <div className="text-[10px] text-sky-400 mt-1">✓ +{tier.xp} XP</div>}
+                {unlocked && <div className="text-[10px] text-sky-400 mt-1">{'\u2713'} +{tier.xp} XP</div>}
               </div>
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <span className="w-1 h-5 bg-sky-400 rounded-full" />
           Preferences
         </h3>
         <div className="space-y-3">
           {[
-            { label: 'Dark Mode', desc: 'Toggle between light and dark theme', enabled: darkMode, action: toggleTheme, icon: darkMode ? '🌙' : '☀️' },
-            { label: 'Notifications', desc: 'Receive study reminders and updates', enabled: notifications, action: handleNotificationsToggle, icon: '🔔' },
+            { label: 'Dark Mode', desc: 'Toggle between light and dark theme', enabled: darkMode, action: toggleTheme, icon: darkMode ? '\u{1F319}' : '\u2600\uFE0F' },
+            { label: 'Notifications', desc: 'Receive study reminders and updates', enabled: notifications, action: handleNotificationsToggle, icon: '\u{1F514}' },
           ].map((item, i) => (
             <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/80 transition-all">
               <div className="flex items-center gap-3">
@@ -430,9 +419,7 @@ const Profile = () => {
                 </div>
               </div>
               <button onClick={item.action}
-                className={`relative w-11 h-6 rounded-full transition-all ${
-                  item.enabled ? 'bg-sky-500' : 'bg-white/20'
-                }`}>
+                className={`relative w-11 h-6 rounded-full transition-all ${item.enabled ? 'bg-sky-500' : 'bg-white/20'}`}>
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${
                   item.enabled ? 'left-[22px]' : 'left-0.5'
                 }`} />
@@ -440,9 +427,9 @@ const Profile = () => {
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold flex items-center gap-2">
             <span className="w-1 h-5 bg-sky-400 rounded-full" />
@@ -470,9 +457,9 @@ const Profile = () => {
             <button type="submit" className="btn-primary text-sm px-6 py-2">Update Password</button>
           </form>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="glass-card p-6">
+      <div className="glass-card p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <span className="w-1 h-5 bg-sky-400 rounded-full" />
           Account
@@ -480,7 +467,7 @@ const Profile = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
             <div className="flex items-center gap-3">
-              <span className="text-lg">{darkMode ? '🌙' : '☀️'}</span>
+              <span className="text-lg">{darkMode ? '\u{1F319}' : '\u2600\uFE0F'}</span>
               <span className="text-sm font-medium">Theme</span>
             </div>
             <button onClick={toggleTheme}
@@ -490,7 +477,7 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
             <div className="flex items-center gap-3">
-              <span className="text-lg">🚪</span>
+              <span className="text-lg">{'\u{1F6AA}'}</span>
               <div>
                 <div className="text-sm font-medium">Sign Out</div>
                 <div className="text-xs text-[var(--text-secondary)]">Logout of your account</div>
@@ -502,8 +489,8 @@ const Profile = () => {
             </button>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
