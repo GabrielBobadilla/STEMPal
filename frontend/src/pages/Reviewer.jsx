@@ -146,7 +146,7 @@ const Reviewer = () => {
     setResult(null);
     try {
       const fd = new FormData();
-      fd.append('file', file);
+      fd.append('pdf', file);
       const res = await pdfAPI.upload(fd);
       setActivePdf(res.data);
       toast.success('File uploaded');
@@ -213,7 +213,7 @@ const Reviewer = () => {
     try {
       const pdfBlob = await generatePdfFromImages(scanPages);
       const formData = new FormData();
-      formData.append('file', pdfBlob, `${scanFileName}.pdf`);
+      formData.append('pdf', pdfBlob, `${scanFileName}.pdf`);
       formData.append('original_name', scanFileName);
       const res = await pdfAPI.upload(formData);
       setScanActivePdf(res.data);
