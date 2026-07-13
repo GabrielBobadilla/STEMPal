@@ -214,14 +214,14 @@ const Pomodoro = () => {
         <div className="text-6xl font-bold font-mono tracking-wider mb-4">{formatTime(timeLeft)}</div>
 
         <div className="w-full bg-[var(--bg-secondary)] rounded-full h-2 mb-5">
-          <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-500"
+          <div className="h-full rounded-full bg-gradient-to-r from-[#60C5FF] to-[#38BDF8]"
             style={{ width: `${progress}%`, transition: 'width 0.3s linear' }} />
         </div>
 
         <div className="flex justify-center gap-3">
           {!isRunning ? (
             <button onClick={startTimer} disabled={timeLeft <= 0}
-              className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-sky-500 to-blue-600 disabled:opacity-50">
+              className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-[#60C5FF] to-[#38BDF8] disabled:opacity-50">
               ▶ {phase === 'study' ? 'Start' : 'Start Break'}
             </button>
           ) : (

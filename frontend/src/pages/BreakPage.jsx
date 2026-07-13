@@ -198,7 +198,7 @@ const BreakPage = () => {
       {recommendation && breakState === 'idle' && (
         <div className="glass-card p-6 border border-sky-500/20">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-2xl">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#60C5FF] to-[#38BDF8] flex items-center justify-center text-2xl">
               {getActivityIcon(recommendation.activity)}
             </div>
             <div>

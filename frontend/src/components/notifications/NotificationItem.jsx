@@ -6,7 +6,7 @@ const TYPE_ICONS = {
 };
 
 const TYPE_COLORS = {
-  study_reminder: 'from-sky-500 to-indigo-500', break: 'from-green-500 to-teal-500',
+  study_reminder: 'from-[#60C5FF] to-[#38BDF8]', break: 'from-green-500 to-teal-500',
   streak: 'from-orange-500 to-red-500', quiz: 'from-purple-500 to-pink-500',
   achievement: 'from-yellow-500 to-amber-500'
 };
@@ -39,7 +39,7 @@ const NotificationItem = ({ notification, onClick, onDelete }) => {
       variants={itemVariants}
       onClick={() => !isRead && onClick(notification._id)}
       className={`glass-card p-4 flex items-start gap-4 cursor-pointer transition-all duration-300 ${
-        !isRead ? 'ring-1 ring-sky-500/30 bg-sky-500/5' : 'opacity-75'
+        !isRead ? 'ring-1 ring-[#60C5FF]/30 bg-[#60C5FF]/5' : 'opacity-75'
       }`}
     >
       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-lg shrink-0`}>
@@ -50,7 +50,7 @@ const NotificationItem = ({ notification, onClick, onDelete }) => {
           <h3 className={`font-semibold text-sm ${!isRead ? 'text-[var(--text-primary)]' : ''}`}>
             {notification.title || 'Notification'}
           </h3>
-          {!isRead && <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />}
+          {!isRead && <span className="w-2 h-2 rounded-full bg-[#60C5FF] shrink-0" />}
         </div>
         <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
           {notification.message || notification.body || ''}

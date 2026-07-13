@@ -43,12 +43,12 @@ function getClipPath(type) {
 
 const AuthLayout = ({ children }) => (
   <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-    style={{ background: 'linear-gradient(135deg, #BFDBFE 0%, #93C5FD 25%, #60A5FA 50%, #38BDF8 75%, #BFDBFE 100%)' }}>
+    style={{ background: 'linear-gradient(135deg, #D2ECFF 0%, #BFE3FF 25%, #60C5FF 50%, #38BDF8 75%, #D2ECFF 100%)' }}>
 
     <div className="absolute inset-0">
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-white/[0.08] -top-40 -right-40 animate-drift" />
-      <div className="absolute w-[450px] h-[450px] rounded-full bg-sky-300/[0.12] -bottom-40 -left-40 animate-drift" style={{ animationDelay: '-7s' }} />
-      <div className="absolute w-[600px] h-[600px] rounded-full bg-cyan-200/[0.08] top-1/3 left-1/2 -translate-x-1/2 animate-drift" style={{ animationDelay: '-14s' }} />
+      <div className="absolute w-[600px] h-[600px] rounded-full bg-white/[0.06] -top-40 -right-40 animate-drift" />
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-[#8EEBFF]/[0.10] -bottom-40 -left-40 animate-drift" style={{ animationDelay: '-7s' }} />
+      <div className="absolute w-[700px] h-[700px] rounded-full bg-[#60C5FF]/[0.06] top-1/3 left-1/2 -translate-x-1/2 animate-drift" style={{ animationDelay: '-14s' }} />
     </div>
 
     <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.4 }}>

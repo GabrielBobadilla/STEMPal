@@ -51,7 +51,7 @@ const UserTable = ({ users, searchQuery, onSearchChange, onRoleUpdate, onDelete,
                       <>
                         <button onClick={() => onRoleUpdate(u._id, u.role === 'moderator' ? 'user' : 'moderator')}
                           disabled={actionLoading}
-                          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-purple-400 hover:bg-purple-500/10 transition-all disabled:opacity-50">
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[#60C5FF] hover:bg-[#60C5FF]/10 transition-all disabled:opacity-50">
                           {u.role === 'moderator' ? 'Demote' : 'Promote'}
                         </button>
                         <button onClick={() => onRoleUpdate(u._id, 'admin')}

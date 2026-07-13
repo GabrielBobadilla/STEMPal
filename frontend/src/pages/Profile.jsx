@@ -168,7 +168,7 @@ const Profile = () => {
     : 0;
 
   const metricList = metrics ? [
-    { label: 'Study Time', value: `${metrics.total_study_time || 0}h`, icon: '\u23F0', color: 'from-sky-500 to-indigo-500' },
+    { label: 'Study Time', value: `${metrics.total_study_time || 0}h`, icon: '\u23F0', color: 'from-[#60C5FF] to-[#38BDF8]' },
     { label: 'Avg Quiz', value: `${metrics.avg_quiz_score || 0}%`, icon: '\u{1F4DD}', color: 'from-emerald-500 to-teal-500' },
     { label: 'Focus', value: `${metrics.focus_improvement || 0}%`, icon: '\u{1F3AF}', color: 'from-violet-500 to-purple-500' },
     { label: 'Engagement', value: `${metrics.engagement_rate || 0}%`, icon: '\u{1F4AA}', color: 'from-amber-500 to-orange-500' },
@@ -185,23 +185,23 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-5 p-4">
       <div className="glass-card p-6 md:p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-sky-500/5 to-transparent rounded-bl-full" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#60C5FF]/5 to-transparent rounded-bl-full" />
         <div className="relative flex flex-col md:flex-row items-center gap-6">
           <div className="relative shrink-0">
-            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 p-0.5">
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#60C5FF] to-[#8EEBFF] p-0.5">
               <div className="w-full h-full rounded-full bg-[var(--bg-secondary)] overflow-hidden">
                 {user?.profile_picture && user.profile_picture !== 'default.png' ? (
                   <img src={`http://localhost:5000/uploads/profiles/${user.profile_picture}`}
                     alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-sky-400">
+                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-[#60C5FF]">
                     {form.fullname?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                 )}
               </div>
             </div>
             <button onClick={() => fileRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center text-sm hover:bg-sky-600 transition-all shadow-lg">
+              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#60C5FF] text-white flex items-center justify-center text-sm hover:bg-[#38BDF8] transition-all shadow-lg">
               {uploading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
               ) : '\u{1F4F7}'}
@@ -230,7 +230,7 @@ const Profile = () => {
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/10">
                 {'\u{1F525}'} {currentStreak} day streak
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-sky-500/20 to-indigo-500/20 text-sky-400 border border-sky-500/10">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#60C5FF]/20 to-[#8EEBFF]/20 text-[#60C5FF] border border-[#60C5FF]/10">
                 {'\u26A1'} {levelInfo?.currentXp || user?.total_xp || 0} XP
               </span>
               {ranking && (
@@ -314,7 +314,7 @@ const Profile = () => {
             <span className="text-xs text-[var(--text-secondary)]">{levelInfo.currentXp} / {levelInfo.maxXp} XP</span>
           </div>
           <div className="w-full h-2.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-sky-400 via-blue-400 to-cyan-400 transition-all duration-500"
+            <div className="h-full rounded-full bg-gradient-to-r from-[#60C5FF] via-[#38BDF8] to-[#8EEBFF] transition-all duration-500"
               style={{ width: `${Math.min(xpProgress, 100)}%` }} />
           </div>
           <div className="flex justify-between text-[10px] text-[var(--text-secondary)]/50 mt-1">
@@ -362,7 +362,7 @@ const Profile = () => {
         </div>
         <div className="mt-3 flex items-center gap-2">
           <div className="flex-1 h-1.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-indigo-400 transition-all"
+            <div className="h-full rounded-full bg-gradient-to-r from-[#60C5FF] to-[#8EEBFF] transition-all"
               style={{ width: `${weekProgress}%` }} />
           </div>
           <span className="text-xs text-[var(--text-secondary)] shrink-0">

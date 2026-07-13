@@ -89,7 +89,7 @@ const Flashcards = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl bg-gradient-to-br from-sky-500 to-blue-700 p-8 text-white relative overflow-hidden">
+        className="rounded-3xl bg-gradient-to-br from-[#60C5FF] to-[#0EA5E9] p-8 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_70%)]" />
         <div className="relative z-10">
           <h1 className="text-2xl font-bold mb-1">Flashcards</h1>
@@ -231,7 +231,7 @@ const Flashcards = () => {
                 ))}
               </div>
               <button onClick={handleCreate} disabled={!newCard.question || !newCard.answer || creating}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium disabled:opacity-50 transition-all">
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#60C5FF] to-[#38BDF8] text-white font-medium disabled:opacity-50 transition-all">
                 {creating ? 'Creating...' : 'Create Flashcard'}
               </button>
             </div>

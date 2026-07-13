@@ -39,7 +39,7 @@ const Layout = () => {
       )}
 
       <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 flex-shrink-0 transform transition-all duration-300 lg:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-full flex flex-col m-3 ml-0 rounded-2xl overflow-hidden" style={{ background: 'var(--glass-bg-strong)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.25)' }}>
+        <div className="h-full flex flex-col m-3 ml-0 rounded-3xl overflow-hidden glass-panel" style={{ boxShadow: 'var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.20)' }}>
           <div className="p-5 flex-1 overflow-y-auto scrollbar-hide">
             <Link to="/dashboard" className="flex items-center gap-3 mb-8 group" onClick={() => setSidebarOpen(false)}>
               <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
@@ -58,11 +58,11 @@ const Layout = () => {
                   <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       active
-                        ? 'bg-gradient-to-r from-sky-500/15 to-blue-500/10 text-[var(--text-primary)] shadow-sm border border-sky-500/20'
+                        ? 'bg-gradient-to-r from-[#60C5FF]/15 to-[#8EEBFF]/10 text-[var(--text-primary)] shadow-sm border border-[#60C5FF]/20'
                         : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]/60 hover:text-[var(--text-primary)]'
                     }`}>
                     {active && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-sky-400 to-cyan-400" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-[#60C5FF] to-[#8EEBFF]" />
                     )}
                     <item.icon className={`w-[18px] h-[18px] ${active ? item.color : ''}`} />
                     <span className="font-medium text-sm">{item.label}</span>

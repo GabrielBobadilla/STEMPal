@@ -75,9 +75,9 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: '👥', label: 'Total Users', value: users.length, color: 'from-sky-500 to-indigo-500' },
-          { icon: '🤖', label: 'Reviewers', value: notes.length, color: 'from-sky-500 to-cyan-500' },
-          { icon: '📝', label: 'Quizzes', value: quizzes.length, color: 'from-sky-500 to-cyan-500' },
+          { icon: '👥', label: 'Total Users', value: users.length, color: 'from-[#60C5FF] to-[#38BDF8]' },
+          { icon: '🤖', label: 'Reviewers', value: notes.length, color: 'from-[#8EEBFF] to-[#60C5FF]' },
+          { icon: '📝', label: 'Quizzes', value: quizzes.length, color: 'from-[#8EEBFF] to-[#60C5FF]' },
           { icon: '⏱️', label: 'Sessions', value: sessions.length, color: 'from-emerald-500 to-green-500' },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }} className="glass-card p-4 sm:p-5 text-center">

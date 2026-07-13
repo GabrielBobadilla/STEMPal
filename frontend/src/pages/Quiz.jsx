@@ -132,7 +132,7 @@ const Quiz = () => {
     return (
       <div className="max-w-5xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl bg-gradient-to-br from-sky-500 to-blue-700 p-8 text-white relative overflow-hidden">
+          className="rounded-3xl bg-gradient-to-br from-[#60C5FF] to-[#0EA5E9] p-8 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_70%)]" />
           <div className="relative z-10">
             <h1 className="text-2xl font-bold mb-1">AI-Powered Quiz Generator</h1>
@@ -230,7 +230,7 @@ const Quiz = () => {
 
         <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
           onClick={handleGenerate} disabled={!topic.trim() || generating}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-xl hover:shadow-sky-500/20">
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#60C5FF] to-[#38BDF8] text-white font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-xl hover:shadow-sky-500/20">
           {generating ? (
             <span className="flex items-center justify-center gap-3">
               <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
@@ -249,7 +249,7 @@ const Quiz = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 p-6 text-white relative overflow-hidden">
+        className="rounded-2xl bg-gradient-to-br from-[#60C5FF] to-[#0EA5E9] p-6 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_70%)]" />
         <div className="relative z-10">
           <div className="flex items-center justify-between">
@@ -282,7 +282,7 @@ const Quiz = () => {
       <motion.div key={currentIndex} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }} className="glass-card p-6 md:p-8">
           <div className="flex items-start gap-4 mb-6">
-            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#60C5FF] to-[#38BDF8] flex items-center justify-center text-white text-sm font-bold shrink-0">
               {currentIndex + 1}
             </span>
             <p className="text-lg font-medium flex-1">{currentQuestion.question}</p>

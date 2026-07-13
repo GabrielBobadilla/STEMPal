@@ -15,9 +15,9 @@ const quotes = [
 ];
 
 const quickCards = [
-  { icon: FiCpu, label: 'AI Reviewer', path: '/reviewer', gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/25', desc: 'Generate study materials' },
-  { icon: FiLayers, label: 'Flashcards', path: '/flashcards', gradient: 'from-cyan-500 to-blue-500', shadow: 'shadow-cyan-500/25', desc: 'Review with spaced repetition' },
-  { icon: FiHelpCircle, label: 'Quiz', path: '/quiz', gradient: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/25', desc: 'Test your knowledge' },
+  { icon: FiCpu, label: 'AI Reviewer', path: '/reviewer', gradient: 'from-[#60C5FF] to-[#38BDF8]', shadow: 'shadow-[#60C5FF]/25', desc: 'Generate study materials' },
+  { icon: FiLayers, label: 'Flashcards', path: '/flashcards', gradient: 'from-[#8EEBFF] to-[#60C5FF]', shadow: 'shadow-[#8EEBFF]/25', desc: 'Review with spaced repetition' },
+  { icon: FiHelpCircle, label: 'Quiz', path: '/quiz', gradient: 'from-[#818CF8] to-[#6366F1]', shadow: 'shadow-[#818CF8]/25', desc: 'Test your knowledge' },
   { icon: FiUsers, label: 'Multiplayer', path: '/multiplayer', gradient: 'from-pink-500 to-rose-500', shadow: 'shadow-pink-500/25', desc: 'Compete with friends' },
   { icon: FiGrid, label: 'Crossword', path: '/crossword', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-500/25', desc: 'AI-powered puzzles' },
   { icon: FiClockIcon, label: 'Pomodoro', path: '/pomodoro', gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-500/25', desc: 'Focused study sessions' },
@@ -25,11 +25,11 @@ const quickCards = [
 ];
 
 const statColors = [
-  { bg: 'from-blue-500/10 to-indigo-500/5', icon: 'text-blue-500', ring: 'ring-blue-500/20' },
-  { bg: 'from-sky-500/10 to-blue-500/5', icon: 'text-sky-500', ring: 'ring-sky-500/20' },
-  { bg: 'from-cyan-500/10 to-teal-500/5', icon: 'text-cyan-500', ring: 'ring-cyan-500/20' },
-  { bg: 'from-amber-500/10 to-orange-500/5', icon: 'text-amber-500', ring: 'ring-amber-500/20' },
-  { bg: 'from-emerald-500/10 to-green-500/5', icon: 'text-emerald-500', ring: 'ring-emerald-500/20' },
+  { bg: 'from-[#60C5FF]/15 to-[#38BDF8]/5', icon: 'text-[#38BDF8]', ring: 'ring-[#60C5FF]/20' },
+  { bg: 'from-[#818CF8]/15 to-[#6366F1]/5', icon: 'text-[#818CF8]', ring: 'ring-[#818CF8]/20' },
+  { bg: 'from-[#8EEBFF]/15 to-[#60C5FF]/5', icon: 'text-[#22D3EE]', ring: 'ring-[#8EEBFF]/20' },
+  { bg: 'from-amber-500/15 to-orange-500/5', icon: 'text-amber-500', ring: 'ring-amber-500/20' },
+  { bg: 'from-emerald-500/15 to-green-500/5', icon: 'text-emerald-500', ring: 'ring-emerald-500/20' },
 ];
 
 const container = {
@@ -120,12 +120,15 @@ const Dashboard = () => {
     <div className="space-y-6 max-w-6xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
         className="relative rounded-3xl overflow-hidden p-6 sm:p-8 hero-gradient text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.18),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(34,211,238,0.15),transparent_60%)]" />
-        <svg className="absolute top-4 right-8 w-32 h-32 text-white/[0.06] animate-float" viewBox="0 0 24 24" fill="currentColor">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.20),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(142,235,255,0.18),transparent_55%)]" />
+        <div className="absolute top-[-50px] right-[-30px] w-[200px] h-[200px] rounded-full bg-white/[0.08] animate-float-slow" />
+        <div className="absolute bottom-[-40px] left-[15%] w-[150px] h-[150px] rounded-full bg-[#8EEBFF]/[0.10] animate-float-reverse" />
+        <div className="absolute top-[20%] right-[15%] w-[100px] h-[100px] rounded-full border border-white/[0.10] animate-float" />
+        <svg className="absolute top-4 right-8 w-32 h-32 text-white/[0.05] animate-float" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
         </svg>
-        <svg className="absolute bottom-4 left-8 w-20 h-20 text-white/[0.05] animate-float-delayed" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="absolute bottom-4 left-8 w-20 h-20 text-white/[0.04] animate-float-delayed" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
         </svg>
 
@@ -141,19 +144,19 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 flex items-center gap-2 border border-white/10">
+              <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-2 flex items-center gap-2 border border-white/10">
                 <FiClock className="w-4 h-4 text-white/60" />
                 <span className="font-mono text-sm font-medium">
                   {time.toLocaleTimeString()}
                 </span>
               </div>
-              <button onClick={toggleTheme} className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center hover:bg-white/25 transition-all border border-white/10">
+              <button onClick={toggleTheme} className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center hover:bg-white/25 transition-all border border-white/10">
                 {darkMode ? <FiSun className="w-4 h-4" /> : <FiMoon className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 max-w-xl">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/10 max-w-xl">
             <p className="text-sm italic text-white/70">&ldquo;{quote}&rdquo;</p>
           </div>
         </div>
@@ -161,7 +164,7 @@ const Dashboard = () => {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
         className="relative">
-        <div className="glass-card p-3 flex items-center gap-3">
+        <div className="glass-card p-3 flex items-center gap-3 rounded-2xl" style={{ boxShadow: '0 4px 20px rgba(0,70,140,0.06)' }}>
           <FiSearch className="w-5 h-5 text-[var(--text-secondary)] shrink-0" />
           <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
@@ -196,7 +199,7 @@ const Dashboard = () => {
         {stats.map((stat, i) => (
           <motion.div key={stat.label} variants={item}
             className={`glass-card p-4 text-center group cursor-default`}>
-            <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.color.bg} ring-1 ${stat.color.ring} mx-auto mb-3 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+            <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${stat.color.bg} ring-1 ${stat.color.ring} mx-auto mb-3 flex items-center justify-center group-hover:scale-110 transition-transform`}>
               <stat.icon className={`w-5 h-5 ${stat.color.icon}`} />
             </div>
             <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
@@ -209,7 +212,7 @@ const Dashboard = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <FiBookOpen className="w-5 h-5 text-sky-500" />
+              <FiBookOpen className="w-5 h-5 text-[#60C5FF]" />
             Quick Access
           </h2>
           <span className="text-xs text-[var(--text-secondary)]">{quickCards.length} tools</span>
@@ -222,7 +225,7 @@ const Dashboard = () => {
                 whileTap={{ scale: 0.97 }}
                 className="glass-card p-4 text-center cursor-pointer group"
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} ${card.shadow} shadow-lg mx-auto mb-3 flex items-center justify-center text-white group-hover:scale-110 group-hover:shadow-xl transition-all`}>
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${card.gradient} ${card.shadow} shadow-lg mx-auto mb-3 flex items-center justify-center text-white group-hover:scale-110 group-hover:shadow-xl transition-all`}>
                   <card.icon className="w-6 h-6" />
                 </div>
                 <span className="text-sm font-semibold block">{card.label}</span>
@@ -238,7 +241,7 @@ const Dashboard = () => {
           className="glass-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <FiAward className="w-5 h-5 text-sky-500" /> Recent Quizzes
+              <FiAward className="w-5 h-5 text-[#60C5FF]" /> Recent Quizzes
             </h3>
             {completedQuizzes.length > 0 && (
               <Link to="/quiz" className="text-xs text-sky-500 hover:text-sky-400 font-medium flex items-center gap-1">
@@ -248,8 +251,8 @@ const Dashboard = () => {
           </div>
           {completedQuizzes.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500/10 to-blue-500/5 flex items-center justify-center mx-auto mb-3">
-                <FiHelpCircle className="w-7 h-7 text-sky-400" />
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#60C5FF]/15 to-[#38BDF8]/5 flex items-center justify-center mx-auto mb-3">
+                <FiHelpCircle className="w-7 h-7 text-[#60C5FF]" />
               </div>
               <p className="text-sm text-[var(--text-secondary)]">No quizzes taken yet</p>
               <Link to="/quiz" className="text-xs text-sky-500 hover:text-sky-400 font-medium mt-1 inline-block">Start one now</Link>

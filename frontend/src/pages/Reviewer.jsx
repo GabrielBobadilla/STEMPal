@@ -248,7 +248,7 @@ const Reviewer = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl bg-gradient-to-br from-sky-500 to-blue-700 p-8 text-white relative overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl bg-gradient-to-br from-[#60C5FF] to-[#0EA5E9] p-8 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_70%)]" />
         <div className="relative z-10">
           <h1 className="text-2xl font-bold mb-1">AI Reviewer Generator</h1>
@@ -429,7 +429,7 @@ const Reviewer = () => {
         <ReviewTypeCard type={type} onTypeChange={setType} />
         <button onClick={tab === 'text' ? handleGenerate : handleGenerateFromPdf}
           disabled={loading || !canGenerate}
-          className="mt-6 w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="mt-6 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#60C5FF] to-[#38BDF8] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {loading ? 'Generating...' : `Generate Reviewer${tab === 'pdf' ? ' from PDF' : tab === 'scan' ? ' from Scan' : ''}`}
         </button>
@@ -452,7 +452,7 @@ const Reviewer = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={handleGenerateFlashcards}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-sm font-medium transition-all hover:shadow-lg">Generate Flashcards</button>
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#60C5FF] to-[#38BDF8] text-white text-sm font-medium transition-all hover:shadow-lg">Generate Flashcards</button>
               <button onClick={handleCopy}
                 className="px-4 py-2 rounded-xl bg-[var(--bg-secondary)] hover:bg-sky-500/10 text-sm font-medium border border-[var(--glass-border)] transition-all">Copy</button>
             </div>
