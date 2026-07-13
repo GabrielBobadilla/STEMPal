@@ -1,6 +1,5 @@
 const supabase = require('../config/supabase');
-const { deleteFile } = require('../middleware/upload');
-const path = require('path');
+const { deleteFile, uploadToSupabase, getPublicUrl } = require('../middleware/upload');
 
 const getProfile = async (req, res) => {
   try {
@@ -54,19 +53,22 @@ const uploadProfilePicture = async (req, res) => {
       .single();
 
     if (userData && userData.profile_picture) {
-      deleteFile(userData.profile_picture);
+      await deleteFile(userData.profile_picture);
     }
 
-    const filename = req.file.filename;
-    const filePath = `/uploads/profiles/${filename}`;
+    const ext = req.file.originalname.split('.').pop();
+    const filePath = `${req.user.id}/${Date.now()}.${ext}`;
+    await uploadToSupabase('profiles', filePath, req.file.buffer, req.file.mimetype);
+    const publicUrl = getPublicUrl('profiles', filePath);
 
     await supabase.from('users').update({
-      profile_picture: filePath,
+      profile_picture: publicUrl,
       updated_at: new Date().toISOString()
     }).eq('id', req.user.id);
 
-    res.json({ message: 'Profile picture updated.', filename: filePath });
+    res.json({ message: 'Profile picture updated.', filename: publicUrl });
   } catch (error) {
+    console.error('Upload profile picture error:', error);
     res.status(500).json({ message: 'Server error.' });
   }
 };

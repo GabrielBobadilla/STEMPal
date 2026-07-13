@@ -1,1 +1,7 @@
-Fix admin routes import: authorizeAdmin -> requireAdmin
+Migrate file uploads from disk to Supabase Storage
+
+- upload.js: multer memoryStorage instead of diskStorage, Supabase Storage upload/delete helpers
+- userController: profile pictures upload to Supabase Storage 'profiles' bucket
+- pdfController: PDFs upload to Supabase Storage 'pdfs' bucket, processPDF downloads from URL
+- Profile.jsx: use Supabase public URL directly for profile pictures
+- Add database/storage-setup.sql for bucket RLS policies

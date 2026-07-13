@@ -1,5 +1,5 @@
 const supabase = require('../config/supabase');
-const { deleteFile } = require('../middleware/upload');
+const { deleteFile, uploadToSupabase, getPublicUrl } = require('../middleware/upload');
 const pdfService = require('../utils/pdfService');
 const aiService = require('../utils/aiService');
 
@@ -7,21 +7,24 @@ const uploadPDF = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No PDF file uploaded.' });
 
-    const filePath = `/uploads/pdfs/${req.file.filename}`;
+    const filePath = `${req.user.id}/${Date.now()}-${req.file.originalname}`;
+    await uploadToSupabase('pdfs', filePath, req.file.buffer, req.file.mimetype);
+    const publicUrl = getPublicUrl('pdfs', filePath);
 
     const { data: row } = await supabase.from('pdf_uploads').insert({
       user_id: req.user.id,
-      filename: req.file.filename,
+      filename: req.file.originalname,
       original_name: req.file.originalname,
       file_size: req.file.size,
-      file_path: filePath,
+      file_path: publicUrl,
       extracted_text: null,
       ocr_used: false,
       created_at: new Date().toISOString()
     }).select().single();
 
-    res.status(201).json({ message: 'PDF uploaded.', id: row?.id, filename: req.file.filename });
+    res.status(201).json({ message: 'PDF uploaded.', id: row?.id, filename: req.file.originalname });
   } catch (error) {
+    console.error('Upload PDF error:', error);
     res.status(500).json({ message: 'Upload failed.' });
   }
 };
@@ -34,12 +37,33 @@ const processPDF = async (req, res) => {
       return res.status(404).json({ message: 'PDF not found.' });
     }
 
-    const fullPath = require('path').resolve(__dirname, '..', pdf.file_path);
-    const { text, ocrUsed } = await pdfService.extractTextWithOCR(fullPath);
+    let text = '';
+    let ocrUsed = false;
 
-    await supabase.from('pdf_uploads').update({ extracted_text: text, ocr_used: ocrUsed }).eq('id', id);
+    if (pdf.extracted_text) {
+      text = pdf.extracted_text;
+    } else if (pdfService.extractTextWithOCR) {
+      try {
+        if (pdf.file_path && pdf.file_path.startsWith('http')) {
+          const response = await fetch(pdf.file_path);
+          const buffer = Buffer.from(await response.arrayBuffer());
+          const tmpPath = `/tmp/${Date.now()}.pdf`;
+          require('fs').writeFileSync(tmpPath, buffer);
+          const result = await pdfService.extractTextWithOCR(tmpPath);
+          text = result.text;
+          ocrUsed = result.ocrUsed;
+          try { require('fs').unlinkSync(tmpPath); } catch {}
+        }
+      } catch (e) {
+        console.warn('OCR failed, using stored text:', e.message);
+      }
+    }
 
-    const organized = await aiService.extractTextFromPDF(text);
+    if (text) {
+      await supabase.from('pdf_uploads').update({ extracted_text: text, ocr_used: ocrUsed }).eq('id', id);
+    }
+
+    const organized = text ? await aiService.extractTextFromPDF(text) : null;
     res.json({ message: 'PDF processed.', extracted_text: text, organized, ocr_used: ocrUsed });
   } catch (error) {
     console.error('Process PDF error:', error);
@@ -82,7 +106,7 @@ const deletePDF = async (req, res) => {
       return res.status(404).json({ message: 'PDF not found.' });
     }
     if (row.file_path) {
-      deleteFile(row.file_path);
+      await deleteFile(row.file_path);
     }
     await supabase.from('pdf_uploads').delete().eq('id', req.params.id);
     res.json({ message: 'PDF deleted.' });

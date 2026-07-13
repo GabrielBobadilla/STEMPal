@@ -1,26 +1,7 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const supabase = require('../config/supabase');
 
-const UPLOAD_DIR = path.join(__dirname, '../uploads');
-
-['profiles', 'pdfs', 'scanned'].forEach(dir => {
-  const dirPath = path.join(UPLOAD_DIR, dir);
-  try { if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true }); } catch (e) {}
-});
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let sub = 'pdfs';
-    if (req.path.includes('profile')) sub = 'profiles';
-    else if (req.path.includes('scan')) sub = 'scanned';
-    cb(null, path.join(UPLOAD_DIR, sub));
-  },
-  filename: (req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${path.extname(file.originalname)}`);
-  }
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (file.fieldname === 'profile_picture') {
@@ -46,14 +27,35 @@ function uploadPDF() {
   return upload.single('pdf');
 }
 
-function deleteFile(filePath) {
+async function uploadToSupabase(bucket, filePath, fileBuffer, contentType) {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(filePath, fileBuffer, { contentType, upsert: true });
+  if (error) throw error;
+  return data;
+}
+
+function getPublicUrl(bucket, filePath) {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+  return data?.publicUrl || null;
+}
+
+async function deleteFromSupabase(bucket, filePath) {
+  if (!filePath) return;
   try {
-    if (!filePath) return;
-    const full = filePath.startsWith('http') ? null : path.resolve(UPLOAD_DIR, '..', filePath);
-    if (full && fs.existsSync(full)) fs.unlinkSync(full);
+    await supabase.storage.from(bucket).remove([filePath]);
   } catch (e) {
-    console.warn('Failed to delete file:', e.message);
+    console.warn('Failed to delete from storage:', e.message);
   }
 }
 
-module.exports = { uploadProfilePicture, uploadPDF, deleteFile };
+async function deleteFile(filePath) {
+  if (!filePath) return;
+  if (filePath.startsWith('http')) {
+    const match = filePath.match(/storage\/v1\/object\/public\/([^/]+)\/(.+)/);
+    if (match) await deleteFromSupabase(match[1], match[2]);
+    return;
+  }
+}
+
+module.exports = { uploadProfilePicture, uploadPDF, uploadToSupabase, getPublicUrl, deleteFile, deleteFromSupabase };
