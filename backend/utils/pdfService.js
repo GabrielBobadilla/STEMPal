@@ -1,9 +1,11 @@
-const pdfParse = require('pdf-parse');
-const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-const { createWorker } = require('tesseract.js');
-const sharp = require('sharp');
+
+let pdfParse, PDFDocument, createWorker, sharp;
+try { pdfParse = require('pdf-parse'); } catch (e) { pdfParse = null; }
+try { PDFDocument = require('pdfkit'); } catch (e) { PDFDocument = null; }
+try { ({ createWorker } = require('tesseract.js')); } catch (e) { createWorker = null; }
+try { sharp = require('sharp'); } catch (e) { sharp = null; }
 
 const extractText = async (filePath) => {
   try {

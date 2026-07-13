@@ -6,7 +6,7 @@ const UPLOAD_DIR = path.join(__dirname, '../uploads');
 
 ['profiles', 'pdfs', 'scanned'].forEach(dir => {
   const dirPath = path.join(UPLOAD_DIR, dir);
-  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+  try { if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true }); } catch (e) {}
 });
 
 const storage = multer.diskStorage({

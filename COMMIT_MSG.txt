@@ -1,6 +1,4 @@
-Split Express app from socket.io server for Vercel serverless compatibility
+Fix serverless function crashes on Vercel
 
-- Create backend/app.js: Express app only (no socket.io, no HTTP server)
-- backend/server.js: imports app.js + adds socket.io for local dev
-- api/index.js: imports app.js directly (lightweight for serverless)
-- Added /api/health endpoint for debugging
+- upload.js: wrap fs.mkdirSync in try/catch for read-only filesystem
+- pdfService.js: lazy-load native modules (tesseract.js, sharp, pdf-parse, pdfkit)
