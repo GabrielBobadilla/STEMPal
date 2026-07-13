@@ -80,8 +80,12 @@ const Layout = () => {
               </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-[var(--bg-secondary)]/60 transition-all cursor-default">
-                  <div className="w-8 h-8 rounded-full hero-gradient flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0">
-                    {user?.fullname?.charAt(0)?.toUpperCase() || 'U'}
+                  <div className="w-8 h-8 rounded-full hero-gradient flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0 overflow-hidden">
+                    {user?.profile_picture ? (
+                      <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      user?.fullname?.charAt(0)?.toUpperCase() || 'U'
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{user?.fullname || 'Student'}</p>
