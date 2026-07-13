@@ -43,7 +43,7 @@ const Layout = () => {
           <div className="p-5 flex-1 overflow-y-auto scrollbar-hide">
             <Link to="/dashboard" className="flex items-center gap-3 mb-8 group" onClick={() => setSidebarOpen(false)}>
               <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                <img src="/stempal-logo.jpg" alt="STEMPal" className="w-full h-full object-cover" />
+                <img src="/stempal-logo-new.png" alt="STEMPal" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h1 className="text-xl font-bold gradient-text">STEMPal</h1>

@@ -125,7 +125,7 @@ const Dashboard = () => {
         <div className="absolute top-[-50px] right-[-30px] w-[200px] h-[200px] rounded-full bg-white/[0.08] animate-float-slow" />
         <div className="absolute bottom-[-40px] left-[15%] w-[150px] h-[150px] rounded-full bg-[#8EEBFF]/[0.10] animate-float-reverse" />
         <div className="absolute top-[20%] right-[15%] w-[100px] h-[100px] rounded-full border border-white/[0.10] animate-float" />
-        <img src="/stempal-logo.jpg" alt="STEMPal" className="absolute top-4 right-8 w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-lg animate-float" style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.15))' }} />
+        <img src="/stempal-logo-new.png" alt="STEMPal" className="absolute top-4 right-8 w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-lg animate-float" style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.15))' }} />
         <svg className="absolute bottom-4 left-8 w-20 h-20 text-white/[0.04] animate-float-delayed" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
         </svg>
