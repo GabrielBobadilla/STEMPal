@@ -147,7 +147,7 @@ const Register = () => {
           </div>
           {form.password && (
             <div className="mt-2">
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-[var(--bg-secondary)] rounded-full overflow-hidden" style={{ border: '1px solid var(--glass-border)' }}>
                 <motion.div initial={{ width: 0 }} animate={{ width: strengthInfo.width }}
                   transition={{ duration: 0.3 }} className={`h-full rounded-full ${strengthInfo.color}`} />
               </div>

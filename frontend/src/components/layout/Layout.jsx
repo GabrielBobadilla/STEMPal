@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FiGrid, FiCpu, FiLayers, FiHelpCircle, FiUsers, FiClock, FiGrid as FiGridIcon, FiCoffee, FiRefreshCw, FiUser, FiAward } from 'react-icons/fi';
+import { useTheme } from '../../context/ThemeContext';
+import { FiGrid, FiCpu, FiLayers, FiHelpCircle, FiUsers, FiClock, FiGrid as FiGridIcon, FiCoffee, FiRefreshCw, FiUser, FiStar, FiSun, FiMoon } from 'react-icons/fi';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: FiGrid, color: 'text-sky-400' },
@@ -14,12 +15,13 @@ const navItems = [
   { path: '/breaks', label: 'Break', icon: FiCoffee, color: 'text-orange-400' },
   { path: '/history', label: 'History', icon: FiRefreshCw, color: 'text-teal-400' },
   { path: '/profile', label: 'Profile', icon: FiUser, color: 'text-indigo-400' },
-  { path: '/leaderboard', label: 'Leaderboard', icon: FiAward, color: 'text-yellow-400' },
+  { path: '/leaderboard', label: 'Leaderboard', icon: FiStar, color: 'text-yellow-400' },
 ];
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -31,14 +33,14 @@ const Layout = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen flex bg-mesh">
+    <div className="min-h-screen flex">
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden transition-opacity" onClick={() => setSidebarOpen(false)} />
       )}
 
       <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 flex-shrink-0 transform transition-all duration-300 lg:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-full flex flex-col" style={{ background: 'var(--glass-bg)', backdropFilter: 'blur(24px)', borderRight: '1px solid var(--glass-border)' }}>
-          <div className="p-6 flex-1">
+        <div className="h-full flex flex-col m-3 ml-0 rounded-2xl overflow-hidden" style={{ background: 'var(--glass-bg-strong)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-lg)' }}>
+          <div className="p-5 flex-1 overflow-y-auto scrollbar-hide">
             <Link to="/dashboard" className="flex items-center gap-3 mb-8 group" onClick={() => setSidebarOpen(false)}>
               <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                 <span className="text-white font-bold text-lg">S</span>
@@ -57,12 +59,12 @@ const Layout = () => {
                     className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       active
                         ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/10 text-[var(--text-primary)] shadow-sm border border-sky-500/20'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]/60 hover:text-[var(--text-primary)]'
                     }`}>
                     {active && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-sky-400 to-violet-500" />
                     )}
-                    <item.icon className={`w-[18px] h-[18px] ${active ? item.color : 'group-hover:' + item.color}`} />
+                    <item.icon className={`w-[18px] h-[18px] ${active ? item.color : ''}`} />
                     <span className="font-medium text-sm">{item.label}</span>
                   </Link>
                 );
@@ -71,16 +73,25 @@ const Layout = () => {
           </div>
 
           <div className="p-4 border-t border-[var(--glass-border)]">
-            <div className="flex items-center gap-3 px-3 py-2 mb-2">
-              <div className="w-8 h-8 rounded-full hero-gradient flex items-center justify-center text-white text-xs font-bold shadow-md">
-                {user?.fullname?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{user?.fullname || 'Student'}</p>
-                <p className="text-[10px] text-[var(--text-secondary)] truncate">{user?.email || ''}</p>
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <button onClick={toggleTheme}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]/60 hover:text-[var(--text-primary)] transition-all">
+                {darkMode ? <FiSun className="w-4 h-4" /> : <FiMoon className="w-4 h-4" />}
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-[var(--bg-secondary)]/60 transition-all cursor-default">
+                  <div className="w-8 h-8 rounded-full hero-gradient flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0">
+                    {user?.fullname?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{user?.fullname || 'Student'}</p>
+                    <p className="text-[10px] text-[var(--text-secondary)] truncate">{user?.email || ''}</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <button onClick={handleLogout} className="w-full p-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all flex items-center justify-center gap-2">
+            <button onClick={handleLogout}
+              className="w-full p-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all flex items-center justify-center gap-2 font-medium">
               Logout
             </button>
           </div>
@@ -94,7 +105,7 @@ const Layout = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <main className="p-4 lg:p-8">
+        <main className="p-4 lg:p-6">
           <Outlet />
         </main>
       </div>

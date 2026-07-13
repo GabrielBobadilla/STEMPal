@@ -113,7 +113,7 @@ const Flashcards = () => {
             />
             <select value={count} onChange={e => setCount(Number(e.target.value))}
               className="px-3 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
-              {COUNT_OPTIONS.map((c) => <option key={c} value={c} className="text-gray-800">{c} cards</option>)}
+              {COUNT_OPTIONS.map((c) => <option key={c} value={c} className="text-[var(--text-primary)]">{c} cards</option>)}
             </select>
           </div>
 

@@ -69,7 +69,7 @@ const Login = () => {
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-sky-600
+              className="w-4 h-4 rounded border-[var(--glass-border)] text-sky-600
               focus:ring-sky-500 cursor-pointer" />
             <span className="text-sm text-[var(--text-secondary)]">Remember Me</span>
           </label>

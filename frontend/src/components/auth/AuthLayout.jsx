@@ -43,14 +43,20 @@ function getClipPath(type) {
 
 const AuthLayout = ({ children }) => (
   <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-    style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' }}>
+    style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 25%, #60A5FA 50%, #7C3AED 75%, #DBEAFE 100%)' }}>
 
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.5 }}>
+    <div className="absolute inset-0">
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-white/[0.08] -top-40 -right-40 animate-drift" />
+      <div className="absolute w-[450px] h-[450px] rounded-full bg-sky-300/[0.12] -bottom-40 -left-40 animate-drift" style={{ animationDelay: '-7s' }} />
+      <div className="absolute w-[600px] h-[600px] rounded-full bg-purple-200/[0.08] top-1/3 left-1/2 -translate-x-1/2 animate-drift" style={{ animationDelay: '-14s' }} />
+    </div>
+
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.4 }}>
       {lines.map((l, i) => (
         <motion.line key={i} x1={`${l.x1}%`} y1={`${l.y1}%`} x2={`${l.x2}%`} y2={`${l.y2}%`}
-          stroke="white" strokeWidth="2.5" strokeLinecap="round" filter="url(#glow)"
+          stroke="white" strokeWidth="2" strokeLinecap="round" filter="url(#glow)"
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: [0, 1, 0], opacity: [0, 0.9, 0] }}
+          animate={{ pathLength: [0, 1, 0], opacity: [0, 0.8, 0] }}
           transition={{ duration: 5, delay: l.delay, repeat: Infinity, ease: 'easeInOut' }} />
       ))}
       <defs>
@@ -69,17 +75,17 @@ const AuthLayout = ({ children }) => (
         style={{
           width: s.size, height: s.size,
           clipPath: getClipPath(s.type),
-          background: `linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))`,
-          border: '1px solid rgba(255,255,255,0.3)',
+          background: `linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.12))`,
+          border: '1px solid rgba(255,255,255,0.25)',
           borderRadius: s.type === 'square' ? '6px' : '0',
-          boxShadow: '0 0 20px rgba(255,255,255,0.15)',
+          boxShadow: '0 0 20px rgba(255,255,255,0.12)',
         }}
         initial={{ x: s.x, y: s.y, rotate: s.rot, opacity: 0, scale: 0.3 }}
         animate={{
           x: [s.x, `calc(${s.x} + ${120 + i * 15}px)`, `calc(${s.x} - ${80 + i * 8}px)`, s.x],
           y: [s.y, `calc(${s.y} - ${100 + i * 12}px)`, `calc(${s.y} + ${130 + i * 10}px)`, s.y],
           rotate: [s.rot, s.rot + 360, s.rot + 720],
-          opacity: [0, 0.9, 0.5, 0.9, 0],
+          opacity: [0, 0.8, 0.4, 0.8, 0],
           scale: [0.3, 1.1, 0.7, 1.1, 0.3],
         }}
         transition={{ duration: s.dur, delay: s.delay, repeat: Infinity, ease: 'easeInOut' }} />
@@ -89,31 +95,18 @@ const AuthLayout = ({ children }) => (
       <motion.div key={`p${i}`} className="absolute rounded-full"
         style={{
           width: p.size, height: p.size, left: p.x,
-          background: 'radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0.2))',
-          boxShadow: '0 0 6px rgba(255,255,255,0.4)',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0.15))',
+          boxShadow: '0 0 6px rgba(255,255,255,0.3)',
         }}
         initial={{ y: '110%', opacity: 0 }}
-        animate={{ y: ['110%', '-10%'], opacity: [0, 0.6, 0] }}
+        animate={{ y: ['110%', '-10%'], opacity: [0, 0.5, 0] }}
         transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: 'linear' }} />
     ))}
-
-    <motion.div initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: [0, 1, 1.1, 1], opacity: [0, 0.18, 0.12, 0.18] }}
-      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-white rounded-full" />
-    <motion.div initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: [0, 1, 1.15, 1], opacity: [0, 0.15, 0.08, 0.15] }}
-      transition={{ duration: 3.5, delay: 0.5, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute -bottom-40 -left-40 w-[450px] h-[450px] bg-sky-300 rounded-full" />
-    <motion.div initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: [0, 1, 1.2, 1], opacity: [0, 0.12, 0.06, 0.12] }}
-      transition={{ duration: 4, delay: 1, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-sky-200 rounded-full" />
 
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       className="w-full max-w-md relative z-10">
-      <div className="glass-card p-6 sm:p-8 md:p-10">
+      <div className="glass-modal p-6 sm:p-8 md:p-10">
         {children}
       </div>
     </motion.div>

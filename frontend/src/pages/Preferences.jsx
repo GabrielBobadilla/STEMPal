@@ -245,7 +245,7 @@ function getClipPath(type) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' }}>
+      style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 25%, #60A5FA 50%, #7C3AED 75%, #DBEAFE 100%)' }}>
       <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.5 }}>
         {lines.map((l, i) => (
           <motion.line key={i} x1={`${l.x1}%`} y1={`${l.y1}%`} x2={`${l.x2}%`} y2={`${l.y2}%`}
@@ -307,7 +307,7 @@ function getClipPath(type) {
         animate={{ scale: [0, 1, 1.2, 1], opacity: [0, 0.12, 0.06, 0.12] }}
         transition={{ duration: 4, delay: 1, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-sky-200 rounded-full" />
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-xl glass-card p-6 sm:p-8">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-xl glass-modal p-6 sm:p-8">
         <div className="flex items-center gap-2 mb-2">
           {steps.map((_, i) => (
             <div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i <= step ? 'bg-white' : 'bg-white/30'}`} />
