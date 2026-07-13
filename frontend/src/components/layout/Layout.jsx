@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FiGrid, FiCpu, FiLayers, FiHelpCircle, FiUsers, FiClock, FiGrid as FiGridIcon, FiFileText, FiCoffee, FiRefreshCw, FiUser, FiAward } from 'react-icons/fi';
+import { FiGrid, FiCpu, FiLayers, FiHelpCircle, FiUsers, FiClock, FiGrid as FiGridIcon, FiCoffee, FiRefreshCw, FiUser, FiAward } from 'react-icons/fi';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: FiGrid },
@@ -11,7 +11,6 @@ const navItems = [
   { path: '/multiplayer', label: 'Multiplayer', icon: FiUsers },
   { path: '/pomodoro', label: 'Pomodoro', icon: FiClock },
   { path: '/crossword', label: 'Crossword', icon: FiGridIcon },
-  { path: '/scan', label: 'Scan File', icon: FiFileText },
   { path: '/breaks', label: 'Break', icon: FiCoffee },
   { path: '/history', label: 'History', icon: FiRefreshCw },
   { path: '/profile', label: 'Profile', icon: FiUser },
