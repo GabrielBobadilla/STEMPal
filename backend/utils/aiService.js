@@ -260,6 +260,139 @@ function generateMockQuiz(topic, type = 'multiple_choice', count = 10) {
   return mc.slice(0, count);
 }
 
+const generateCrosswordData = async (topic, difficulty = 'medium', count = 15) => {
+  const difficultyConfig = {
+    easy: { wordCount: '8-12', wordLength: '3-6 letters mostly', clueStyle: 'simple and straightforward' },
+    medium: { wordCount: '12-18', wordLength: '4-8 letters mostly', clueStyle: 'moderate academic level' },
+    hard: { wordCount: '15-25', wordLength: '5-10 letters mostly', clueStyle: 'challenging and precise' },
+  };
+  const config = difficultyConfig[difficulty] || difficultyConfig.medium;
+
+  const prompt = `Generate a crossword puzzle for Senior High School STEM students.
+
+Topic: ${topic}
+Difficulty: ${difficulty}
+Number of words: ${count}
+
+Requirements:
+- Create ${config.wordCount} words related to "${topic}"
+- All answers must be SINGLE WORDS (no spaces, no hyphens, no multi-word answers)
+- Words should be ${config.wordLength}
+- Clues should be ${config.clueStyle}
+- Use educational STEM vocabulary
+- Every word must be a real English word related to ${topic}
+- Answers should be UPPERCASE letters only (A-Z)
+- Mix shorter words (3-4 letters) with longer words (6-10 letters) for good grid density
+
+Return ONLY valid JSON in this exact format:
+{
+  "title": "Topic Name",
+  "across": [
+    {
+      "number": 1,
+      "answer": "WORD",
+      "clue": "Clue text here"
+    }
+  ],
+  "down": [
+    {
+      "number": 2,
+      "answer": "WORD",
+      "clue": "Clue text here"
+    }
+  ]
+}
+
+IMPORTANT: All answers must be single uppercase words with only letters A-Z. No spaces, hyphens, or special characters.`;
+
+  const systemInstruction = 'You are an expert STEM educator creating crossword puzzles for high school students. You respond with valid JSON only, no markdown, no code blocks.';
+
+  try {
+    const result = await generateJSON(prompt, systemInstruction);
+    if (result && ((result.across && result.across.length > 0) || (result.down && result.down.length > 0))) {
+      const allWords = [...(result.across || []), ...(result.down || [])];
+      const cleaned = allWords.map(w => ({
+        ...w,
+        answer: (w.answer || '').toUpperCase().replace(/[^A-Z]/g, ''),
+        clue: w.clue || 'STEM concept',
+      })).filter(w => w.answer.length >= 2);
+      return { title: result.title || topic, across: cleaned.filter(w => w.number), down: [] };
+    }
+  } catch (err) {
+    console.error('Gemini crossword generation failed:', err.message);
+  }
+
+  return generateMockCrossword(topic, difficulty, count);
+};
+
+function generateMockCrossword(topic, difficulty = 'medium', count = 15) {
+  const topicWords = {
+    'Biology': {
+      across: [
+        { number: 1, answer: 'MITOSIS', clue: 'Cell division producing two identical cells' },
+        { number: 4, answer: 'NUCLEUS', clue: 'Control center of a cell' },
+        { number: 7, answer: 'RIBOSOME', clue: 'Site of protein synthesis' },
+        { number: 10, answer: 'ENZYME', clue: 'Biological catalyst that speeds up reactions' },
+        { number: 12, answer: 'CHROMOSOME', clue: 'DNA-containing structure in cells' },
+      ],
+      down: [
+        { number: 2, answer: 'DNA', clue: 'Molecule carrying genetic instructions' },
+        { number: 3, answer: 'RNA', clue: 'Messenger molecule in protein synthesis' },
+        { number: 5, answer: 'CYTOPLASM', clue: 'Jelly-like substance inside a cell' },
+        { number: 8, answer: 'GENE', clue: 'Unit of heredity' },
+        { number: 11, answer: 'MEMBRANE', clue: 'Phospholipid bilayer surrounding cells' },
+      ],
+    },
+    'Physics': {
+      across: [
+        { number: 1, answer: 'VELOCITY', clue: 'Speed in a given direction' },
+        { number: 4, answer: 'FORCE', clue: 'Push or pull on an object' },
+        { number: 7, answer: 'ENERGY', clue: 'Capacity to do work' },
+        { number: 10, answer: 'GRAVITY', clue: 'Force attracting objects with mass' },
+      ],
+      down: [
+        { number: 2, answer: 'MASS', clue: 'Amount of matter in an object' },
+        { number: 3, answer: 'WAVE', clue: 'Oscillation that transfers energy' },
+        { number: 5, answer: 'TORQUE', clue: 'Rotational equivalent of force' },
+        { number: 8, answer: 'POWER', clue: 'Rate of doing work' },
+        { number: 11, answer: 'PHOTON', clue: 'Particle of light' },
+      ],
+    },
+    'Chemistry': {
+      across: [
+        { number: 1, answer: 'PROTON', clue: 'Positively charged subatomic particle' },
+        { number: 4, answer: 'MOLECULE', clue: 'Group of bonded atoms' },
+        { number: 7, answer: 'ELEMENT', clue: 'Pure substance of one atom type' },
+        { number: 10, answer: 'BOND', clue: 'Chemical force holding atoms together' },
+      ],
+      down: [
+        { number: 2, answer: 'ACID', clue: 'Substance with pH below 7' },
+        { number: 3, answer: 'ATOM', clue: 'Smallest unit of an element' },
+        { number: 5, answer: 'ISOTOPE', clue: 'Atoms with same protons different neutrons' },
+        { number: 8, answer: 'SOLVENT', clue: 'Substance that dissolves a solute' },
+      ],
+    },
+  };
+
+  const allTopics = Object.keys(topicWords);
+  const matchedTopic = allTopics.find(t => topic.toLowerCase().includes(t.toLowerCase())) || allTopics[0];
+  const data = topicWords[matchedTopic] || topicWords['Biology'];
+
+  return {
+    title: topic || matchedTopic,
+    across: data.across,
+    down: data.down,
+  };
+}
+
+const generateAdaptiveCrossword = async (topic, weakTopics = [], difficulty = 'medium') => {
+  let targetTopic = topic;
+  if (weakTopics && weakTopics.length > 0) {
+    targetTopic = `${topic} focusing especially on: ${weakTopics.join(', ')}`;
+  }
+  return generateCrosswordData(targetTopic, difficulty, difficulty === 'easy' ? 10 : difficulty === 'hard' ? 22 : 15);
+};
+
 module.exports = {
   generateReviewer,
   generateFlashcards,
@@ -268,5 +401,7 @@ module.exports = {
   generateBreakRecommendation,
   generateAdaptiveQuestions,
   generateKeyTerms,
-  extractTextFromPDF
+  extractTextFromPDF,
+  generateCrosswordData,
+  generateAdaptiveCrossword
 };

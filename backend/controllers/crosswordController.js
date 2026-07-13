@@ -1,4 +1,65 @@
 const pool = require('../config/db');
+const { generateCrosswordData, generateAdaptiveCrossword } = require('../utils/aiService');
+const { buildCrossword, validateCrossword } = require('../utils/crosswordEngine');
+
+const generateCrossword = async (req, res) => {
+  try {
+    const { topic, difficulty = 'medium', count = 15, mode = 'solo', weakTopics } = req.body;
+
+    if (!topic) {
+      return res.status(400).json({ message: 'Topic is required.' });
+    }
+
+    let crosswordData;
+    if (mode === 'adaptive' && weakTopics && weakTopics.length > 0) {
+      crosswordData = await generateAdaptiveCrossword(topic, weakTopics, difficulty);
+    } else {
+      crosswordData = await generateCrosswordData(topic, difficulty, count);
+    }
+
+    const allWords = [...(crosswordData.across || []), ...(crosswordData.down || [])];
+
+    if (allWords.length < 4) {
+      return res.status(422).json({ message: 'Not enough words generated. Please try again.' });
+    }
+
+    const gridData = buildCrossword(allWords, 10);
+    const validation = validateCrossword(gridData);
+
+    const combinedAcross = gridData.across.map(a => ({
+      number: a.number,
+      answer: a.answer,
+      clue: a.clue,
+      row: a.row,
+      col: a.col,
+      direction: 'across',
+    }));
+
+    const combinedDown = gridData.down.map(d => ({
+      number: d.number,
+      answer: d.answer,
+      clue: d.clue,
+      row: d.row,
+      col: d.col,
+      direction: 'down',
+    }));
+
+    res.json({
+      title: crosswordData.title || topic,
+      difficulty,
+      rows: gridData.rows,
+      cols: gridData.cols,
+      grid: gridData.grid,
+      across: combinedAcross,
+      down: combinedDown,
+      totalWords: gridData.totalWords,
+      valid: validation.valid,
+    });
+  } catch (error) {
+    console.error('Generate crossword error:', error);
+    res.status(500).json({ message: 'Failed to generate crossword puzzle.' });
+  }
+};
 
 const savePuzzleResult = async (req, res) => {
   try {
@@ -43,4 +104,4 @@ const getPuzzleStats = async (req, res) => {
   }
 };
 
-module.exports = { savePuzzleResult, getPuzzleHistory, getPuzzleStats };
+module.exports = { generateCrossword, savePuzzleResult, getPuzzleHistory, getPuzzleStats };

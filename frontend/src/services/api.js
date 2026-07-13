@@ -178,6 +178,7 @@ export const gamificationAPI = {
 };
 
 export const crosswordAPI = {
+  generate: (data) => api.post('/crosswords/generate', data),
   saveScore: (data) => api.post('/crosswords/save', data),
   getHistory: () => api.get('/crosswords/history'),
   getStats: () => api.get('/crosswords/stats'),
