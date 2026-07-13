@@ -1,4 +1,4 @@
-Fix loading spinner stuck on Vercel and hardcoded localhost URLs
+Fix React hydration error #418 on Vercel
 
-- AuthContext init() now wrapped in try/catch so loading always resolves
-- Profile.jsx profile picture URL uses relative path instead of localhost:5000
+- ThemeContext: defer localStorage/window.matchMedia reads to useEffect (not useState init)
+- supabase.js: use ESM import instead of mixed CommonJS/ESM

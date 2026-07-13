@@ -6,18 +6,21 @@ const ThemeContext = createContext(null);
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      const saved = localStorage.getItem('theme');
-      if (saved) return saved === 'dark';
-    } catch {}
-    try {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    } catch {}
-    return false;
-  });
+  const [darkMode, setDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      setDarkMode(saved === 'dark');
+    } else {
+      setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const root = document.documentElement;
     if (darkMode) {
       root.classList.add('dark');
@@ -25,7 +28,7 @@ export const ThemeProvider = ({ children }) => {
       root.classList.remove('dark');
     }
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+  }, [darkMode, mounted]);
 
   const toggleTheme = async () => {
     const newTheme = !darkMode;
