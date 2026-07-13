@@ -1,5 +1,6 @@
-Fix Vercel backend - install root deps and fix serverless function
+Split Express app from socket.io server for Vercel serverless compatibility
 
-- Root package.json updated with Supabase and backend deps
-- Removed stale MySQL deps (mysql2, bcryptjs, jsonwebtoken, sql.js)
-- vercel.json: install frontend deps too, increase function memory
+- Create backend/app.js: Express app only (no socket.io, no HTTP server)
+- backend/server.js: imports app.js + adds socket.io for local dev
+- api/index.js: imports app.js directly (lightweight for serverless)
+- Added /api/health endpoint for debugging
