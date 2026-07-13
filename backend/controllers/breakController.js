@@ -1,18 +1,21 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 const aiService = require('../utils/aiService');
 
 const recommendBreak = async (req, res) => {
   try {
     const { focus_level, study_time, quiz_score } = req.body;
-    const prefSnap = await db.collection('preferences').where('user_id', '==', req.user.id).limit(1).get();
-    const preferences = !prefSnap.empty ? prefSnap.docs[0].data() : {};
+    const { data: prefRows } = await supabase
+      .from('preferences')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .limit(1);
+    const preferences = prefRows && prefRows.length > 0 ? prefRows[0] : {};
 
     const recommendation = await aiService.generateBreakRecommendation(
       focus_level || 'medium', study_time || 0, quiz_score || 0, preferences
     );
 
-    const ref = await db.collection('break_recommendations').add({
+    const { data: row } = await supabase.from('break_recommendations').insert({
       user_id: req.user.id,
       recommendation: recommendation.recommendation,
       reason: recommendation.reason,
@@ -21,10 +24,10 @@ const recommendBreak = async (req, res) => {
       study_time: study_time || 0,
       focus_level: focus_level || 'medium',
       is_taken: false,
-      created_at: FieldValue.serverTimestamp()
-    });
+      created_at: new Date().toISOString()
+    }).select().single();
 
-    res.json({ id: ref.id, ...recommendation });
+    res.json({ id: row.id, ...recommendation });
   } catch (error) {
     res.status(500).json({ message: 'Failed to generate recommendation.' });
   }
@@ -32,11 +35,13 @@ const recommendBreak = async (req, res) => {
 
 const getBreakRecommendations = async (req, res) => {
   try {
-    const snap = await db.collection('break_recommendations')
-      .where('user_id', '==', req.user.id)
-      .orderBy('created_at', 'desc').limit(20).get();
-    const breaks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json(breaks);
+    const { data: breaks } = await supabase
+      .from('break_recommendations')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    res.json(breaks || []);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -44,15 +49,19 @@ const getBreakRecommendations = async (req, res) => {
 
 const markBreakTaken = async (req, res) => {
   try {
-    const doc = await db.collection('break_recommendations').doc(req.params.id).get();
-    if (!doc.exists || doc.data().user_id !== req.user.id) {
+    const { data: doc } = await supabase
+      .from('break_recommendations')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+    if (!doc || doc.user_id !== req.user.id) {
       return res.status(404).json({ message: 'Break recommendation not found.' });
     }
-    await doc.ref.update({ is_taken: true });
-    await db.collection('study_history').add({
+    await supabase.from('break_recommendations').update({ is_taken: true }).eq('id', req.params.id);
+    await supabase.from('study_history').insert({
       user_id: req.user.id, activity: 'Took a break', activity_type: 'break',
       duration: req.body.duration || 5, date: new Date().toISOString(),
-      created_at: FieldValue.serverTimestamp()
+      created_at: new Date().toISOString()
     });
     res.json({ message: 'Break marked as taken.' });
   } catch (error) {
@@ -62,9 +71,11 @@ const markBreakTaken = async (req, res) => {
 
 const getBreakEffectiveness = async (req, res) => {
   try {
-    const snap = await db.collection('break_recommendations')
-      .where('user_id', '==', req.user.id).get();
-    const taken = snap.docs.filter(d => d.data().is_taken).map(d => d.data());
+    const { data: rows } = await supabase
+      .from('break_recommendations')
+      .select('*')
+      .eq('user_id', req.user.id);
+    const taken = (rows || []).filter(b => b.is_taken);
     const grouped = {};
     taken.forEach(b => {
       const key = b.recommendation;

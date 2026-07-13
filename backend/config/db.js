@@ -1,3 +1,3 @@
-const { db } = require('./firebase');
+const supabase = require('./supabase');
 
-module.exports = db;
+module.exports = supabase;

@@ -1,5 +1,4 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 const { generateCrosswordData, generateAdaptiveCrossword } = require('../utils/aiService');
 const { buildCrossword, validateCrossword } = require('../utils/crosswordEngine');
 
@@ -40,20 +39,26 @@ const savePuzzleResult = async (req, res) => {
   try {
     const { puzzle_data, difficulty, score, total_words, completed_words, hints_used, time_taken, completed } = req.body;
 
-    const ref = await db.collection('crossword_puzzles').add({
+    const { data: row } = await supabase.from('crossword_puzzles').insert({
       user_id: req.user.id, puzzle_data, difficulty, score, total_words, completed_words,
       hints_used, time_taken, completed,
       completed_at: completed ? new Date().toISOString() : null,
-      created_at: FieldValue.serverTimestamp()
-    });
+      created_at: new Date().toISOString()
+    }).select().single();
 
     if (completed) {
       const xpEarned = Math.round(score * 2);
-      await db.collection('xp_log').add({ user_id: req.user.id, xp_earned: xpEarned, reason: `Crossword: ${difficulty}`, created_at: FieldValue.serverTimestamp() });
-      await db.collection('users').doc(req.user.id).update({ total_xp: FieldValue.increment(xpEarned), updated_at: FieldValue.serverTimestamp() });
+      await supabase.from('xp_log').insert({
+        user_id: req.user.id, xp_earned: xpEarned,
+        reason: `Crossword: ${difficulty}`, created_at: new Date().toISOString()
+      });
+      const { data: u } = await supabase.from('users').select('total_xp').eq('id', req.user.id).single();
+      await supabase.from('users').update({
+        total_xp: (u?.total_xp || 0) + xpEarned, updated_at: new Date().toISOString()
+      }).eq('id', req.user.id);
     }
 
-    res.status(201).json({ message: 'Puzzle result saved.', id: ref.id });
+    res.status(201).json({ message: 'Puzzle result saved.', id: row.id });
   } catch (error) {
     console.error('Save crossword error:', error);
     res.status(500).json({ message: 'Server error.' });
@@ -62,11 +67,13 @@ const savePuzzleResult = async (req, res) => {
 
 const getPuzzleHistory = async (req, res) => {
   try {
-    const snap = await db.collection('crossword_puzzles')
-      .where('user_id', '==', req.user.id)
-      .orderBy('created_at', 'desc').limit(20).get();
-    const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json(puzzles);
+    const { data: puzzles } = await supabase
+      .from('crossword_puzzles')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    res.json(puzzles || []);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -74,11 +81,13 @@ const getPuzzleHistory = async (req, res) => {
 
 const getPuzzleStats = async (req, res) => {
   try {
-    const snap = await db.collection('crossword_puzzles').where('user_id', '==', req.user.id).get();
-    const puzzles = snap.docs.map(d => d.data());
-    const total_attempts = puzzles.length;
-    const completed_count = puzzles.filter(p => p.completed).length;
-    const total_score = puzzles.reduce((s, p) => s + (p.score || 0), 0);
+    const { data: puzzles } = await supabase
+      .from('crossword_puzzles')
+      .select('score,completed')
+      .eq('user_id', req.user.id);
+    const total_attempts = puzzles?.length || 0;
+    const completed_count = (puzzles || []).filter(p => p.completed).length;
+    const total_score = (puzzles || []).reduce((s, p) => s + (p.score || 0), 0);
     const avg_score = total_attempts > 0 ? total_score / total_attempts : 0;
     res.json({ total_attempts, completed_count, avg_score, total_score });
   } catch (error) {

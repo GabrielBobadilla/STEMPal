@@ -1,5 +1,4 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 const { deleteFile } = require('../middleware/upload');
 const pdfService = require('../utils/pdfService');
 const aiService = require('../utils/aiService');
@@ -10,7 +9,7 @@ const uploadPDF = async (req, res) => {
 
     const filePath = `/uploads/pdfs/${req.file.filename}`;
 
-    const ref = await db.collection('pdf_uploads').add({
+    const { data: row } = await supabase.from('pdf_uploads').insert({
       user_id: req.user.id,
       filename: req.file.filename,
       original_name: req.file.originalname,
@@ -18,10 +17,10 @@ const uploadPDF = async (req, res) => {
       file_path: filePath,
       extracted_text: null,
       ocr_used: false,
-      created_at: FieldValue.serverTimestamp()
-    });
+      created_at: new Date().toISOString()
+    }).select().single();
 
-    res.status(201).json({ message: 'PDF uploaded.', id: ref.id, filename: req.file.filename });
+    res.status(201).json({ message: 'PDF uploaded.', id: row?.id, filename: req.file.filename });
   } catch (error) {
     res.status(500).json({ message: 'Upload failed.' });
   }
@@ -30,16 +29,15 @@ const uploadPDF = async (req, res) => {
 const processPDF = async (req, res) => {
   try {
     const { id } = req.params;
-    const doc = await db.collection('pdf_uploads').doc(id).get();
-    if (!doc.exists || doc.data().user_id !== req.user.id) {
+    const { data: pdf } = await supabase.from('pdf_uploads').select('*').eq('id', id).single();
+    if (!pdf || pdf.user_id !== req.user.id) {
       return res.status(404).json({ message: 'PDF not found.' });
     }
 
-    const pdf = doc.data();
     const fullPath = require('path').resolve(__dirname, '..', pdf.file_path);
     const { text, ocrUsed } = await pdfService.extractTextWithOCR(fullPath);
 
-    await doc.ref.update({ extracted_text: text, ocr_used: ocrUsed });
+    await supabase.from('pdf_uploads').update({ extracted_text: text, ocr_used: ocrUsed }).eq('id', id);
 
     const organized = await aiService.extractTextFromPDF(text);
     res.json({ message: 'PDF processed.', extracted_text: text, organized, ocr_used: ocrUsed });
@@ -51,14 +49,14 @@ const processPDF = async (req, res) => {
 
 const getPDFs = async (req, res) => {
   try {
-    const snap = await db.collection('pdf_uploads')
-      .where('user_id', '==', req.user.id)
-      .orderBy('created_at', 'desc')
-      .get();
-    const pdfs = snap.docs.map(d => {
-      const data = d.data();
-      return { id: d.id, filename: data.filename, original_name: data.original_name, file_size: data.file_size, ocr_used: data.ocr_used, upload_date: data.created_at };
-    });
+    const { data: rows } = await supabase.from('pdf_uploads')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+    const pdfs = (rows || []).map(data => ({
+      id: data.id, filename: data.filename, original_name: data.original_name,
+      file_size: data.file_size, ocr_used: data.ocr_used, upload_date: data.created_at
+    }));
     res.json(pdfs);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -67,11 +65,11 @@ const getPDFs = async (req, res) => {
 
 const getPDF = async (req, res) => {
   try {
-    const doc = await db.collection('pdf_uploads').doc(req.params.id).get();
-    if (!doc.exists || doc.data().user_id !== req.user.id) {
+    const { data: row } = await supabase.from('pdf_uploads').select('*').eq('id', req.params.id).single();
+    if (!row || row.user_id !== req.user.id) {
       return res.status(404).json({ message: 'PDF not found.' });
     }
-    res.json({ id: doc.id, ...doc.data() });
+    res.json(row);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -79,14 +77,14 @@ const getPDF = async (req, res) => {
 
 const deletePDF = async (req, res) => {
   try {
-    const doc = await db.collection('pdf_uploads').doc(req.params.id).get();
-    if (!doc.exists || doc.data().user_id !== req.user.id) {
+    const { data: row } = await supabase.from('pdf_uploads').select('*').eq('id', req.params.id).single();
+    if (!row || row.user_id !== req.user.id) {
       return res.status(404).json({ message: 'PDF not found.' });
     }
-    if (doc.data().file_path) {
-      deleteFile(doc.data().file_path);
+    if (row.file_path) {
+      deleteFile(row.file_path);
     }
-    await doc.ref.delete();
+    await supabase.from('pdf_uploads').delete().eq('id', req.params.id);
     res.json({ message: 'PDF deleted.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

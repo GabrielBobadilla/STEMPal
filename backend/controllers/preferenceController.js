@@ -1,13 +1,16 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 
 const savePreferences = async (req, res) => {
   try {
     const { subjects, hobbies, learning_style, study_duration, preferred_break, study_goals, grade_level, school, stem_strand } = req.body;
     const userId = req.user.id;
 
-    // Check if preferences exist
-    const existing = await db.collection('preferences').where('user_id', '==', userId).limit(1).get();
+    const { data: existing } = await supabase
+      .from('preferences')
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
 
     const prefData = {
       subjects: subjects || [],
@@ -16,25 +19,25 @@ const savePreferences = async (req, res) => {
       study_duration,
       preferred_break: preferred_break || [],
       study_goals,
-      updated_at: FieldValue.serverTimestamp()
+      updated_at: new Date().toISOString()
     };
 
-    if (!existing.empty) {
-      await existing.docs[0].ref.update(prefData);
+    if (existing) {
+      await supabase.from('preferences').update(prefData).eq('id', existing.id);
     } else {
-      await db.collection('preferences').add({
+      await supabase.from('preferences').insert({
         user_id: userId,
         ...prefData,
-        created_at: FieldValue.serverTimestamp()
+        created_at: new Date().toISOString()
       });
     }
 
     if (grade_level || school || stem_strand) {
-      const updates = { updated_at: FieldValue.serverTimestamp() };
+      const updates = { updated_at: new Date().toISOString() };
       if (grade_level) updates.grade_level = grade_level;
       if (school) updates.school = school;
       if (stem_strand) updates.stem_strand = stem_strand;
-      await db.collection('users').doc(userId).update(updates);
+      await supabase.from('users').update(updates).eq('id', userId);
     }
 
     res.json({ message: 'Preferences saved successfully.' });
@@ -46,12 +49,14 @@ const savePreferences = async (req, res) => {
 
 const getPreferences = async (req, res) => {
   try {
-    const snap = await db.collection('preferences').where('user_id', '==', req.user.id).limit(1).get();
-    if (snap.empty) return res.status(404).json({ message: 'No preferences found.' });
+    const { data: pref } = await supabase
+      .from('preferences')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .limit(1)
+      .maybeSingle();
 
-    const pref = snap.docs[0].data();
-    pref.id = snap.docs[0].id;
-    // Subjects/hobbies/preferred_break are stored as arrays natively in Firestore
+    if (!pref) return res.status(404).json({ message: 'No preferences found.' });
     res.json(pref);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -60,8 +65,14 @@ const getPreferences = async (req, res) => {
 
 const checkPreferences = async (req, res) => {
   try {
-    const snap = await db.collection('preferences').where('user_id', '==', req.user.id).limit(1).get();
-    res.json({ hasPreferences: !snap.empty });
+    const { data: pref } = await supabase
+      .from('preferences')
+      .select('id')
+      .eq('user_id', req.user.id)
+      .limit(1)
+      .maybeSingle();
+
+    res.json({ hasPreferences: !!pref });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }

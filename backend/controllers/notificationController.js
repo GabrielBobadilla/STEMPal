@@ -1,13 +1,11 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 
 const getNotifications = async (req, res) => {
   try {
-    const snap = await db.collection('notifications')
-      .where('user_id', '==', req.user.id)
-      .orderBy('created_at', 'desc').limit(50).get();
-    const notifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json(notifications);
+    const { data: notifications } = await supabase.from('notifications')
+      .select('*').eq('user_id', req.user.id)
+      .order('created_at', { ascending: false }).limit(50);
+    res.json(notifications || []);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -15,10 +13,10 @@ const getNotifications = async (req, res) => {
 
 const getUnreadCount = async (req, res) => {
   try {
-    const snap = await db.collection('notifications')
-      .where('user_id', '==', req.user.id)
-      .where('is_read', '==', false).get();
-    res.json({ count: snap.size });
+    const { count } = await supabase.from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', req.user.id).eq('is_read', false);
+    res.json({ count: count || 0 });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -26,11 +24,12 @@ const getUnreadCount = async (req, res) => {
 
 const markAsRead = async (req, res) => {
   try {
-    const doc = await db.collection('notifications').doc(req.params.id).get();
-    if (!doc.exists || doc.data().user_id !== req.user.id) {
+    const { data: doc } = await supabase.from('notifications')
+      .select('user_id').eq('id', req.params.id).single();
+    if (!doc || doc.user_id !== req.user.id) {
       return res.status(404).json({ message: 'Notification not found.' });
     }
-    await doc.ref.update({ is_read: true });
+    await supabase.from('notifications').update({ is_read: true }).eq('id', req.params.id);
     res.json({ message: 'Notification marked as read.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -39,10 +38,7 @@ const markAsRead = async (req, res) => {
 
 const markAllAsRead = async (req, res) => {
   try {
-    const snap = await db.collection('notifications').where('user_id', '==', req.user.id).where('is_read', '==', false).get();
-    const batch = db.batch();
-    snap.docs.forEach(doc => batch.update(doc.ref, { is_read: true }));
-    await batch.commit();
+    await supabase.from('notifications').update({ is_read: true }).eq('user_id', req.user.id).eq('is_read', false);
     res.json({ message: 'All notifications marked as read.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -52,11 +48,11 @@ const markAllAsRead = async (req, res) => {
 const createNotification = async (req, res) => {
   try {
     const { title, message, type } = req.body;
-    const ref = await db.collection('notifications').add({
+    const { data: row } = await supabase.from('notifications').insert({
       user_id: req.user.id, title, message, type: type || 'study_reminder',
-      is_read: false, created_at: FieldValue.serverTimestamp()
-    });
-    res.status(201).json({ id: ref.id, message: 'Notification created.' });
+      is_read: false, created_at: new Date().toISOString()
+    }).select().single();
+    res.status(201).json({ id: row?.id, message: 'Notification created.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -64,11 +60,12 @@ const createNotification = async (req, res) => {
 
 const deleteNotification = async (req, res) => {
   try {
-    const doc = await db.collection('notifications').doc(req.params.id).get();
-    if (!doc.exists || doc.data().user_id !== req.user.id) {
+    const { data: doc } = await supabase.from('notifications')
+      .select('user_id').eq('id', req.params.id).single();
+    if (!doc || doc.user_id !== req.user.id) {
       return res.status(404).json({ message: 'Notification not found.' });
     }
-    await doc.ref.delete();
+    await supabase.from('notifications').delete().eq('id', req.params.id);
     res.json({ message: 'Notification deleted.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -77,9 +74,9 @@ const deleteNotification = async (req, res) => {
 
 const createSystemNotification = async (userId, title, message, type) => {
   try {
-    await db.collection('notifications').add({
+    await supabase.from('notifications').insert({
       user_id: userId, title, message, type,
-      is_read: false, created_at: FieldValue.serverTimestamp()
+      is_read: false, created_at: new Date().toISOString()
     });
   } catch (error) {
     console.error('Create notification error:', error);

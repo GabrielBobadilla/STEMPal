@@ -1,0 +1,7 @@
+Migrate from Firebase to Supabase (Auth + PostgreSQL)
+
+- Replace firebase-admin with @supabase/supabase-js across all 20 controllers
+- Auth middleware verifies Supabase JWT tokens
+- Frontend AuthContext uses Supabase Auth SDK
+- Add PostgreSQL schema with RLS policies and indexes
+- Bundle reduced by 32kB

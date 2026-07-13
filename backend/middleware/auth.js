@@ -1,4 +1,4 @@
-const { auth, db } = require('../config/firebase');
+const supabase = require('../config/supabase');
 
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -8,23 +8,21 @@ const authenticate = async (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decodedToken = await auth.verifyIdToken(token);
-    const uid = decodedToken.uid;
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      return res.status(401).json({ message: 'Invalid token.' });
+    }
 
-    const userDoc = await db.collection('users').doc(uid).get();
-    if (!userDoc.exists) {
+    const { data: profile, error: profileError } = await supabase
+      .from('users').select('*').eq('id', user.id).single();
+
+    if (profileError || !profile) {
       return res.status(401).json({ message: 'User not found.' });
     }
 
-    req.user = { id: uid, ...userDoc.data() };
+    req.user = { id: user.id, ...profile };
     next();
   } catch (error) {
-    if (error.code === 'auth/id-token-expired') {
-      return res.status(401).json({ message: 'Token expired.' });
-    }
-    if (error.code === 'auth/id-token-revoked') {
-      return res.status(401).json({ message: 'Token revoked.' });
-    }
     return res.status(401).json({ message: 'Invalid token.' });
   }
 };
@@ -44,13 +42,13 @@ const optionalAuth = async (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decodedToken = await auth.verifyIdToken(token);
-    const uid = decodedToken.uid;
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return next();
 
-    const userDoc = await db.collection('users').doc(uid).get();
-    if (userDoc.exists) {
-      req.user = { id: uid, ...userDoc.data() };
-    }
+    const { data: profile } = await supabase
+      .from('users').select('*').eq('id', user.id).single();
+
+    if (profile) req.user = { id: user.id, ...profile };
   } catch (error) {
     // Token invalid but optional, continue without user
   }

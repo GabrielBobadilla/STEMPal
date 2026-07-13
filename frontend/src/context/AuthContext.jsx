@@ -1,35 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  updatePassword,
-  sendPasswordResetEmail,
-  signInWithCredential,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import { authAPI, userAPI, preferenceAPI } from '../services/api';
-
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
-
-let firebaseApp;
-let firebaseAuth;
-try {
-  firebaseApp = initializeApp(firebaseConfig);
-  firebaseAuth = getAuth(firebaseApp);
-} catch (e) {
-  console.warn('Firebase init failed:', e.message);
-}
+import supabase from '../supabase';
+import { userAPI, preferenceAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -39,61 +10,66 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasPreferences, setHasPreferences] = useState(false);
-  const [firebaseUser, setFirebaseUser] = useState(null);
+  const [supabaseUser, setSupabaseUser] = useState(null);
 
   useEffect(() => {
-    if (!firebaseAuth) {
-      setLoading(false);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(firebaseAuth, async (fbUser) => {
-      if (fbUser) {
-        setFirebaseUser(fbUser);
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setSupabaseUser(session.user);
+        try { localStorage.setItem('token', session.access_token); } catch {}
         try {
-          const token = await fbUser.getIdToken();
-          try { localStorage.setItem('token', token); } catch {}
-
-          try {
-            const res = await userAPI.getProfile();
-            const userData = { id: fbUser.uid, ...res.data };
-            try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
-            setUser(userData);
-            checkPreferences();
-          } catch {
-            // Profile not found yet, use minimal data
-            const userData = {
-              id: fbUser.uid,
-              fullname: fbUser.displayName || '',
-              email: fbUser.email,
-              role: 'student',
-            };
-            try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
-            setUser(userData);
-          }
-        } catch (e) {
-          console.error('Error getting token:', e);
+          const res = await userAPI.getProfile();
+          const userData = { id: session.user.id, ...res.data };
+          try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
+          setUser(userData);
+          checkPreferences();
+        } catch {
+          const userData = {
+            id: session.user.id,
+            fullname: session.user.user_metadata?.fullname || '',
+            email: session.user.email,
+            role: 'student',
+          };
+          try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
+          setUser(userData);
         }
-      } else {
-        setFirebaseUser(null);
+      }
+      setLoading(false);
+    };
+
+    init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setSupabaseUser(session.user);
+        try { localStorage.setItem('token', session.access_token); } catch {}
+        try {
+          const res = await userAPI.getProfile();
+          const userData = { id: session.user.id, ...res.data };
+          try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
+          setUser(userData);
+          checkPreferences();
+        } catch {
+          const userData = {
+            id: session.user.id,
+            fullname: session.user.user_metadata?.fullname || '',
+            email: session.user.email,
+            role: 'student',
+          };
+          try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
+          setUser(userData);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setSupabaseUser(null);
         setUser(null);
         try { localStorage.removeItem('token'); } catch {}
         try { localStorage.removeItem('user'); } catch {}
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
-
-  const getIdToken = async () => {
-    if (firebaseUser) {
-      const token = await firebaseUser.getIdToken(true);
-      try { localStorage.setItem('token', token); } catch {}
-      return token;
-    }
-    return null;
-  };
 
   const checkPreferences = async () => {
     try {
@@ -105,46 +81,51 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    if (!firebaseAuth) throw new Error('Firebase not initialized');
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
 
-    const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-    const token = await userCredential.user.getIdToken();
-    try { localStorage.setItem('token', token); } catch {}
+    try { localStorage.setItem('token', data.session.access_token); } catch {}
 
     const res = await userAPI.getProfile();
-    const userData = { id: userCredential.user.uid, ...res.data };
+    const userData = { id: data.user.id, ...res.data };
     try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
     setUser(userData);
+    setSupabaseUser(data.user);
     checkPreferences();
     return userData;
   };
 
-  const register = async (data) => {
-    if (!firebaseAuth) throw new Error('Firebase not initialized');
+  const register = async (regData) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: regData.email,
+      password: regData.password,
+      options: { data: { fullname: regData.fullname } }
+    });
+    if (error) throw error;
 
-    const userCredential = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password);
-    const token = await userCredential.user.getIdToken();
-    try { localStorage.setItem('token', token); } catch {}
+    try { localStorage.setItem('token', data.session?.access_token || ''); } catch {}
 
-    // Create user profile on backend
-    await authAPI.register(data);
+    await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : '/api')}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(regData),
+    });
 
     const res = await userAPI.getProfile();
-    const userData = { id: userCredential.user.uid, ...res.data };
+    const userData = { id: data.user.id, ...res.data };
     try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
     setUser(userData);
+    setSupabaseUser(data.user);
     setHasPreferences(false);
     return userData;
   };
 
   const logout = async () => {
-    if (firebaseAuth) {
-      try { await firebaseSignOut(firebaseAuth); } catch {}
-    }
+    await supabase.auth.signOut();
     try { localStorage.removeItem('token'); } catch {}
     try { localStorage.removeItem('user'); } catch {}
     setUser(null);
-    setFirebaseUser(null);
+    setSupabaseUser(null);
     setHasPreferences(false);
   };
 
@@ -156,10 +137,9 @@ export const AuthProvider = ({ children }) => {
 
   const refreshProfile = async () => {
     try {
-      // Refresh Firebase ID token first
-      if (firebaseUser) {
-        const token = await firebaseUser.getIdToken(true);
-        try { localStorage.setItem('token', token); } catch {}
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        try { localStorage.setItem('token', session.access_token); } catch {}
       }
       const res = await userAPI.getProfile();
       const updated = { ...user, ...res.data };
@@ -169,22 +149,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   const changePassword = async (newPassword) => {
-    if (firebaseUser) {
-      await updatePassword(firebaseUser, newPassword);
-    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
   };
 
   const resetPassword = async (email) => {
-    if (firebaseAuth) {
-      await sendPasswordResetEmail(firebaseAuth, email);
-    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
   };
 
   return (
     <AuthContext.Provider value={{
-      user, loading, hasPreferences, firebaseUser,
+      user, loading, hasPreferences, supabaseUser,
       login, register, logout, updateUser, refreshProfile, checkPreferences,
-      changePassword, resetPassword, getIdToken
+      changePassword, resetPassword
     }}>
       {children}
     </AuthContext.Provider>

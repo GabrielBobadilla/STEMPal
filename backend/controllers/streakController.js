@@ -1,5 +1,4 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 
 const checkAchievements = (streak) => {
   const badges = [];
@@ -14,17 +13,20 @@ const checkAchievements = (streak) => {
 const updateStreak = async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const snap = await db.collection('streaks').where('user_id', '==', req.user.id).limit(1).get();
+    const { data: snap } = await supabase
+      .from('streaks')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .limit(1);
 
-    if (snap.empty) {
-      await db.collection('streaks').add({
+    if (!snap || snap.length === 0) {
+      await supabase.from('streaks').insert({
         user_id: req.user.id, current_streak: 1, longest_streak: 1, last_active_date: today
       });
       return res.json({ current_streak: 1, longest_streak: 1, message: 'Streak started!' });
     }
 
-    const streakDoc = snap.docs[0];
-    const streak = streakDoc.data();
+    const streak = snap[0];
     const lastDate = streak.last_active_date || null;
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
@@ -35,25 +37,37 @@ const updateStreak = async (req, res) => {
     let newStreak = lastDate === yesterday ? streak.current_streak + 1 : 1;
     const newLongest = Math.max(newStreak, streak.longest_streak);
 
-    await streakDoc.ref.update({ current_streak: newStreak, longest_streak: newLongest, last_active_date: today });
+    await supabase.from('streaks').update({
+      current_streak: newStreak, longest_streak: newLongest, last_active_date: today
+    }).eq('id', streak.id);
 
     const achievements = checkAchievements(newStreak);
     for (const badge of achievements) {
-      const existing = await db.collection('achievements')
-        .where('user_id', '==', req.user.id).where('badge_name', '==', badge.name).limit(1).get();
-      if (existing.empty) {
-        await db.collection('achievements').add({
+      const { data: existing } = await supabase
+        .from('achievements')
+        .select('id')
+        .eq('user_id', req.user.id)
+        .eq('badge_name', badge.name)
+        .limit(1);
+      if (!existing || existing.length === 0) {
+        await supabase.from('achievements').insert({
           user_id: req.user.id, badge_name: badge.name, badge_type: badge.type,
           description: badge.description, unlocked_date: new Date().toISOString(),
-          created_at: FieldValue.serverTimestamp()
+          created_at: new Date().toISOString()
         });
       }
     }
 
     if (newStreak >= 3) {
       const xpBonus = newStreak * 2;
-      await db.collection('xp_log').add({ user_id: req.user.id, xp_earned: xpBonus, reason: `Streak bonus: ${newStreak} days`, created_at: FieldValue.serverTimestamp() });
-      await db.collection('users').doc(req.user.id).update({ total_xp: FieldValue.increment(xpBonus), updated_at: FieldValue.serverTimestamp() });
+      await supabase.from('xp_log').insert({
+        user_id: req.user.id, xp_earned: xpBonus,
+        reason: `Streak bonus: ${newStreak} days`, created_at: new Date().toISOString()
+      });
+      const { data: u } = await supabase.from('users').select('total_xp').eq('id', req.user.id).single();
+      await supabase.from('users').update({
+        total_xp: (u?.total_xp || 0) + xpBonus, updated_at: new Date().toISOString()
+      }).eq('id', req.user.id);
     }
 
     res.json({ current_streak: newStreak, longest_streak: newLongest, achievements, message: 'Streak updated!' });
@@ -65,9 +79,13 @@ const updateStreak = async (req, res) => {
 
 const getStreak = async (req, res) => {
   try {
-    const snap = await db.collection('streaks').where('user_id', '==', req.user.id).limit(1).get();
-    if (snap.empty) return res.json({ current_streak: 0, longest_streak: 0 });
-    res.json(snap.docs[0].data());
+    const { data: snap } = await supabase
+      .from('streaks')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .limit(1);
+    if (!snap || snap.length === 0) return res.json({ current_streak: 0, longest_streak: 0 });
+    res.json(snap[0]);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }

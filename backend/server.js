@@ -7,9 +7,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-// Firebase Admin SDK initialized on first require of config/firebase.js
-require('./config/firebase');
-
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const preferenceRoutes = require('./routes/preferences');

@@ -1,14 +1,15 @@
-const db = require('../config/db');
-const { FieldValue } = require('firebase-admin').firestore;
+const supabase = require('../config/supabase');
 const { deleteFile } = require('../middleware/upload');
-const { auth } = require('../config/firebase');
 const path = require('path');
 
 const getProfile = async (req, res) => {
   try {
-    const userDoc = await db.collection('users').doc(req.user.id).get();
-    if (!userDoc.exists) return res.status(404).json({ message: 'User not found.' });
-    const data = userDoc.data();
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.user.id)
+      .single();
+    if (error || !data) return res.status(404).json({ message: 'User not found.' });
     res.json({
       id: req.user.id,
       fullname: data.fullname,
@@ -32,10 +33,10 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { fullname, phone, grade_level, school, stem_strand } = req.body;
-    await db.collection('users').doc(req.user.id).update({
+    await supabase.from('users').update({
       fullname, phone, grade_level, school, stem_strand,
-      updated_at: FieldValue.serverTimestamp()
-    });
+      updated_at: new Date().toISOString()
+    }).eq('id', req.user.id);
     res.json({ message: 'Profile updated successfully.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -46,20 +47,23 @@ const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
 
-    const userDoc = await db.collection('users').doc(req.user.id).get();
-    const userData = userDoc.data();
+    const { data: userData } = await supabase
+      .from('users')
+      .select('profile_picture')
+      .eq('id', req.user.id)
+      .single();
 
-    if (userData.profile_picture) {
+    if (userData && userData.profile_picture) {
       deleteFile(userData.profile_picture);
     }
 
     const filename = req.file.filename;
     const filePath = `/uploads/profiles/${filename}`;
 
-    await db.collection('users').doc(req.user.id).update({
+    await supabase.from('users').update({
       profile_picture: filePath,
-      updated_at: FieldValue.serverTimestamp()
-    });
+      updated_at: new Date().toISOString()
+    }).eq('id', req.user.id);
 
     res.json({ message: 'Profile picture updated.', filename: filePath });
   } catch (error) {
@@ -70,12 +74,11 @@ const uploadProfilePicture = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
-    try {
-      await auth.updateUser(req.user.id, { password: newPassword });
-      res.json({ message: 'Password changed successfully.' });
-    } catch (e) {
+    const { error } = await supabase.auth.admin.updateUser(req.user.id, { password: newPassword });
+    if (error) {
       return res.status(400).json({ message: 'Failed to change password.' });
     }
+    res.json({ message: 'Password changed successfully.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -85,10 +88,10 @@ const updateTheme = async (req, res) => {
   try {
     const { theme } = req.body;
     if (!['light', 'dark'].includes(theme)) return res.status(400).json({ message: 'Invalid theme.' });
-    await db.collection('users').doc(req.user.id).update({
+    await supabase.from('users').update({
       theme_preference: theme,
-      updated_at: FieldValue.serverTimestamp()
-    });
+      updated_at: new Date().toISOString()
+    }).eq('id', req.user.id);
     res.json({ message: `Theme changed to ${theme}.` });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -98,10 +101,10 @@ const updateTheme = async (req, res) => {
 const updateNotificationSettings = async (req, res) => {
   try {
     const { enabled } = req.body;
-    await db.collection('users').doc(req.user.id).update({
+    await supabase.from('users').update({
       notification_enabled: enabled,
-      updated_at: FieldValue.serverTimestamp()
-    });
+      updated_at: new Date().toISOString()
+    }).eq('id', req.user.id);
     res.json({ message: 'Notification settings updated.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

@@ -1,4 +1,4 @@
-const { auth, db } = require('../config/firebase');
+const supabase = require('../config/supabase');
 
 const register = async (req, res) => {
   try {
@@ -14,24 +14,31 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 6 characters.' });
     }
 
-    // Check if user already exists in Firebase Auth
-    try {
-      await auth.getUserByEmail(email);
+    // Check if user already exists in users table
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+    if (existingUser) {
       return res.status(409).json({ message: 'Email already registered.' });
-    } catch (e) {
-      // User doesn't exist, proceed
     }
 
-    // Create Firebase Auth user
-    const userRecord = await auth.createUser({
+    // Create Supabase Auth user
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      displayName: fullname,
+      email_confirm: true,
+      user_metadata: { fullname }
     });
+    if (authError) {
+      return res.status(409).json({ message: 'Email already registered.' });
+    }
+    const uid = authData.user.id;
 
-    // Create Firestore user document
-    const { FieldValue } = require('firebase-admin').firestore;
-    await db.collection('users').doc(userRecord.uid).set({
+    // Insert into users table
+    await supabase.from('users').insert({
+      id: uid,
       fullname,
       email,
       phone: phone || null,
@@ -44,21 +51,21 @@ const register = async (req, res) => {
       stem_strand: null,
       total_xp: 0,
       level: 1,
-      created_at: FieldValue.serverTimestamp(),
-      updated_at: FieldValue.serverTimestamp(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     });
 
-    // Create streak document
-    await db.collection('streaks').add({
-      user_id: userRecord.uid,
+    // Insert into streaks
+    await supabase.from('streaks').insert({
+      user_id: uid,
       current_streak: 0,
       longest_streak: 0,
-      last_active_date: null,
+      last_active_date: null
     });
 
     res.status(201).json({
       message: 'Registration successful.',
-      user: { id: userRecord.uid, fullname, email, role: 'student' }
+      user: { id: uid, fullname, email, role: 'student' }
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -73,26 +80,21 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    // Firebase Auth handles password verification client-side via Firebase SDK
-    // This endpoint is kept for backward compatibility - frontend should use Firebase Auth directly
-    // For API consumers, we verify the user exists and return profile data
-    let userRecord;
-    try {
-      userRecord = await auth.getUserByEmail(email);
-    } catch (e) {
+    // Supabase handles password verification client-side via the SDK
+    // This endpoint checks user exists and returns profile data
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+    if (userError || !userData) {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    const userDoc = await db.collection('users').doc(userRecord.uid).get();
-    if (!userDoc.exists) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
-    }
-
-    const userData = userDoc.data();
     res.json({
       message: 'Login successful.',
       user: {
-        id: userRecord.uid,
+        id: userData.id,
         fullname: userData.fullname,
         email: userData.email,
         role: userData.role,
@@ -109,17 +111,18 @@ const login = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    let userRecord;
-    try {
-      userRecord = await auth.getUserByEmail(email);
-    } catch (e) {
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+    if (userError || !userData) {
       return res.status(404).json({ message: 'Email not found.' });
     }
 
-    // Firebase Auth handles password reset via client SDK
-    // Generate a reset link via Firebase Admin
-    const link = await auth.generatePasswordResetLink(email);
-    res.json({ message: 'Password reset link sent.', resetToken: link });
+    // Supabase handles password reset via client SDK (supabase.auth.resetPasswordForEmail)
+    // Acknowledge the request so the frontend can initiate the flow
+    res.json({ message: 'Password reset link sent.' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ message: 'Server error.' });
@@ -129,21 +132,16 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
-    // With Firebase, password reset is handled via the link from forgotPassword
-    // This endpoint accepts the newPassword and applies it via Admin SDK
-    // The token from forgotPassword is actually a Firebase reset link
-    // For backward compatibility, if a uid is provided directly, update password
     if (!token) {
       return res.status(400).json({ message: 'Invalid reset token.' });
     }
 
-    // Try to interpret token as uid for direct reset (backward compat)
-    try {
-      await auth.updateUser(token, { password: newPassword });
-      res.json({ message: 'Password reset successful.' });
-    } catch (e) {
+    // token is interpreted as the user's uid for direct reset (backward compat)
+    const { error } = await supabase.auth.admin.updateUser(token, { password: newPassword });
+    if (error) {
       return res.status(400).json({ message: 'Invalid reset token.' });
     }
+    res.json({ message: 'Password reset successful.' });
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ message: 'Server error.' });

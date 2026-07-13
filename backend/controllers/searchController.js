@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const supabase = require('../config/supabase');
 
 const search = async (req, res) => {
   try {
@@ -9,13 +9,12 @@ const search = async (req, res) => {
     const queryLower = q.toLowerCase();
 
     if (!type || type === 'human' || type === 'both') {
-      const snap = await db.collection('notes').where('user_id', '==', req.user.id).get();
-      snap.docs.forEach(d => {
-        const data = d.data();
+      const { data: rows } = await supabase.from('notes').select('*').eq('user_id', req.user.id);
+      (rows || []).forEach(data => {
         if ((data.title && data.title.toLowerCase().includes(queryLower)) ||
             (data.content && data.content.toLowerCase().includes(queryLower))) {
           results.push({
-            id: d.id, title: data.title, preview: (data.content || '').substring(0, 200),
+            id: data.id, title: data.title, preview: (data.content || '').substring(0, 200),
             category: data.category, source: data.source, difficulty: data.difficulty,
             created_at: data.created_at, result_type: 'note'
           });
@@ -24,13 +23,12 @@ const search = async (req, res) => {
     }
 
     if (!type || type === 'ai' || type === 'both') {
-      const snap = await db.collection('generated_reviewers').where('user_id', '==', req.user.id).get();
-      snap.docs.forEach(d => {
-        const data = d.data();
+      const { data: rows } = await supabase.from('generated_reviewers').select('*').eq('user_id', req.user.id);
+      (rows || []).forEach(data => {
         if ((data.title && data.title.toLowerCase().includes(queryLower)) ||
             (data.topic && data.topic.toLowerCase().includes(queryLower))) {
           results.push({
-            id: d.id, title: data.title, topic: data.topic, reviewer_type: data.reviewer_type,
+            id: data.id, title: data.title, topic: data.topic, reviewer_type: data.reviewer_type,
             created_at: data.created_at, result_type: 'reviewer'
           });
         }
@@ -38,13 +36,12 @@ const search = async (req, res) => {
     }
 
     if (!type || type === 'both') {
-      const snap = await db.collection('flashcards').where('user_id', '==', req.user.id).get();
-      snap.docs.forEach(d => {
-        const data = d.data();
+      const { data: rows } = await supabase.from('flashcards').select('*').eq('user_id', req.user.id);
+      (rows || []).forEach(data => {
         if ((data.question && data.question.toLowerCase().includes(queryLower)) ||
             (data.answer && data.answer.toLowerCase().includes(queryLower))) {
           results.push({
-            id: d.id, title: data.question, preview: data.answer, topic: data.topic,
+            id: data.id, title: data.question, preview: data.answer, topic: data.topic,
             difficulty: data.difficulty, created_at: data.created_at, result_type: 'flashcard'
           });
         }
@@ -52,8 +49,8 @@ const search = async (req, res) => {
     }
 
     results.sort((a, b) => {
-      const dateA = a.created_at?.toDate?.() || new Date(a.created_at || 0);
-      const dateB = b.created_at?.toDate?.() || new Date(b.created_at || 0);
+      const dateA = new Date(a.created_at || 0);
+      const dateB = new Date(b.created_at || 0);
       return dateB - dateA;
     });
 
