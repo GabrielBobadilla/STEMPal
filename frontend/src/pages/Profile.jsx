@@ -314,7 +314,7 @@ const Profile = () => {
             <span className="text-xs text-[var(--text-secondary)]">{levelInfo.currentXp} / {levelInfo.maxXp} XP</span>
           </div>
           <div className="w-full h-2.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-violet-400 transition-all duration-500"
+            <div className="h-full rounded-full bg-gradient-to-r from-sky-400 via-blue-400 to-cyan-400 transition-all duration-500"
               style={{ width: `${Math.min(xpProgress, 100)}%` }} />
           </div>
           <div className="flex justify-between text-[10px] text-[var(--text-secondary)]/50 mt-1">

@@ -58,11 +58,11 @@ const Layout = () => {
                   <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       active
-                        ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/10 text-[var(--text-primary)] shadow-sm border border-sky-500/20'
+                        ? 'bg-gradient-to-r from-sky-500/15 to-blue-500/10 text-[var(--text-primary)] shadow-sm border border-sky-500/20'
                         : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]/60 hover:text-[var(--text-primary)]'
                     }`}>
                     {active && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-sky-400 to-violet-500" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-sky-400 to-cyan-400" />
                     )}
                     <item.icon className={`w-[18px] h-[18px] ${active ? item.color : ''}`} />
                     <span className="font-medium text-sm">{item.label}</span>

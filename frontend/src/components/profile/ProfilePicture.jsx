@@ -2,7 +2,7 @@ import React from 'react';
 
 const ProfilePicture = ({ user, fullname, uploading, onUpload }) => (
   <div className="relative">
-    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 p-1">
+    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary-500 to-cyan-500 p-1">
       <div className="w-full h-full rounded-full bg-[var(--bg-primary)] flex items-center justify-center overflow-hidden">
         {user?.profile_picture ? (
           <img src={user.profile_picture} alt="Profile" className="w-full h-full object-cover" />

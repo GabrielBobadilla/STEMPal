@@ -26,7 +26,7 @@ const quickCards = [
 
 const statColors = [
   { bg: 'from-blue-500/10 to-indigo-500/5', icon: 'text-blue-500', ring: 'ring-blue-500/20' },
-  { bg: 'from-violet-500/10 to-purple-500/5', icon: 'text-violet-500', ring: 'ring-violet-500/20' },
+  { bg: 'from-sky-500/10 to-blue-500/5', icon: 'text-sky-500', ring: 'ring-sky-500/20' },
   { bg: 'from-cyan-500/10 to-teal-500/5', icon: 'text-cyan-500', ring: 'ring-cyan-500/20' },
   { bg: 'from-amber-500/10 to-orange-500/5', icon: 'text-amber-500', ring: 'ring-amber-500/20' },
   { bg: 'from-emerald-500/10 to-green-500/5', icon: 'text-emerald-500', ring: 'ring-emerald-500/20' },
@@ -238,7 +238,7 @@ const Dashboard = () => {
           className="glass-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <FiAward className="w-5 h-5 text-violet-500" /> Recent Quizzes
+              <FiAward className="w-5 h-5 text-sky-500" /> Recent Quizzes
             </h3>
             {completedQuizzes.length > 0 && (
               <Link to="/quiz" className="text-xs text-sky-500 hover:text-sky-400 font-medium flex items-center gap-1">
@@ -248,8 +248,8 @@ const Dashboard = () => {
           </div>
           {completedQuizzes.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/10 to-purple-500/5 flex items-center justify-center mx-auto mb-3">
-                <FiHelpCircle className="w-7 h-7 text-violet-400" />
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500/10 to-blue-500/5 flex items-center justify-center mx-auto mb-3">
+                <FiHelpCircle className="w-7 h-7 text-sky-400" />
               </div>
               <p className="text-sm text-[var(--text-secondary)]">No quizzes taken yet</p>
               <Link to="/quiz" className="text-xs text-sky-500 hover:text-sky-400 font-medium mt-1 inline-block">Start one now</Link>
@@ -291,7 +291,7 @@ const Dashboard = () => {
           <div className="space-y-3">
             {[
               { tip: 'Take short breaks every 25 minutes', icon: '⏱️', color: 'from-blue-500/10 to-cyan-500/5' },
-              { tip: 'Review flashcards before sleep', icon: '🧠', color: 'from-violet-500/10 to-purple-500/5' },
+              { tip: 'Review flashcards before sleep', icon: '🧠', color: 'from-sky-500/10 to-blue-500/5' },
               { tip: 'Stay hydrated while studying', icon: '💧', color: 'from-cyan-500/10 to-teal-500/5' },
               { tip: 'Use active recall, not passive reading', icon: '📝', color: 'from-amber-500/10 to-orange-500/5' },
             ].map((t, i) => (

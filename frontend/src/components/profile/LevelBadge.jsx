@@ -19,7 +19,7 @@ const LevelBadge = ({ levelInfo, ranking }) => (
     )}
     {levelInfo && (
       <div className="mt-2 w-full max-w-xs bg-[var(--glass-bg)] rounded-full h-2 overflow-hidden">
-        <div className="h-full bg-gradient-to-r from-primary-500 to-purple-500 rounded-full transition-all duration-500"
+        <div className="h-full bg-gradient-to-r from-primary-500 to-cyan-500 rounded-full transition-all duration-500"
           style={{ width: `${Math.min(100, (levelInfo.xp / levelInfo.xpToNext) * 100)}%` }} />
       </div>
     )}

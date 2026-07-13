@@ -32,7 +32,7 @@ const UserTable = ({ users, searchQuery, onSearchChange, onRoleUpdate, onDelete,
               <tr key={u._id} className="border-b border-[var(--glass-border)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
                 <td className="py-3 px-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
                       {(u.fullname || u.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <span className="font-medium">{u.fullname || u.name || 'N/A'}</span>

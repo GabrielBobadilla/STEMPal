@@ -7,10 +7,10 @@ const BreakForm = ({ focusLevel, studyTime, quizScore, loading, onFocusLevelChan
         <label className="block text-sm font-medium mb-2">Focus Level (1-10)</label>
         <input type="range" min="1" max="10" value={focusLevel}
           onChange={(e) => onFocusLevelChange(Number(e.target.value))}
-          className="w-full accent-purple-500" />
+          className="w-full accent-sky-500" />
         <div className="flex justify-between text-xs text-[var(--text-secondary)] mt-1">
           <span>Low</span>
-          <span className="font-bold text-purple-500">{focusLevel}/10</span>
+          <span className="font-bold text-sky-500">{focusLevel}/10</span>
           <span>High</span>
         </div>
       </div>

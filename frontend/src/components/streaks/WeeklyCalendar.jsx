@@ -27,7 +27,7 @@ const WeeklyCalendar = ({ activeDays }) => {
             </span>
             <motion.div whileHover={{ scale: 1.15 }}
               className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all duration-200 ${
-                active ? 'gradient-bg text-white shadow-md' : isToday ? 'border-2 border-purple-400' : 'bg-[var(--bg-secondary)]'
+                active ? 'gradient-bg text-white shadow-md' : isToday ? 'border-2 border-sky-400' : 'bg-[var(--bg-secondary)]'
               }`}
             >
               {active ? '🔥' : '○'}

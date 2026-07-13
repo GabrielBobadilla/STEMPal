@@ -21,7 +21,7 @@ const MonthlyCalendar = ({ currentMonth, currentYear, activeDays, onNavigate }) 
     days.push(
       <motion.div key={day} whileHover={{ scale: 1.2 }}
         className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-all duration-200 ${
-          active ? 'gradient-bg text-white shadow-md' : isToday ? 'border-2 border-purple-400 text-[var(--text-primary)]' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+          active ? 'gradient-bg text-white shadow-md' : isToday ? 'border-2 border-sky-400 text-[var(--text-primary)]' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
         }`}
       >
         {day}
@@ -35,9 +35,9 @@ const MonthlyCalendar = ({ currentMonth, currentYear, activeDays, onNavigate }) 
         <h2 className="text-lg font-semibold gradient-text">{MONTHS[currentMonth]} {currentYear}</h2>
         <div className="flex gap-2">
           <button onClick={() => onNavigate(-1)}
-            className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center text-sm hover:text-purple-500 transition-colors">←</button>
+            className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center text-sm hover:text-sky-500 transition-colors">←</button>
           <button onClick={() => onNavigate(1)}
-            className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center text-sm hover:text-purple-500 transition-colors">→</button>
+            className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center text-sm hover:text-sky-500 transition-colors">→</button>
         </div>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-2">
