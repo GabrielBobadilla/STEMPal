@@ -119,43 +119,53 @@ const Dashboard = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-3xl overflow-hidden p-6 sm:p-8 hero-gradient text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.20),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(142,235,255,0.18),transparent_55%)]" />
-        <div className="absolute top-[-50px] right-[-30px] w-[200px] h-[200px] rounded-full bg-white/[0.08] animate-float-slow" />
-        <div className="absolute bottom-[-40px] left-[15%] w-[150px] h-[150px] rounded-full bg-[#8EEBFF]/[0.10] animate-float-reverse" />
-        <div className="absolute top-[20%] right-[15%] w-[100px] h-[100px] rounded-full border border-white/[0.10] animate-float" />
-        <img src="/stempal-logo-new.png" alt="STEMPal" className="absolute top-4 right-8 w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-lg animate-float" style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.15))' }} />
-        <svg className="absolute bottom-4 left-8 w-20 h-20 text-white/[0.04] animate-float-delayed" viewBox="0 0 24 24" fill="currentColor">
+        className="relative rounded-3xl overflow-hidden hero-gradient text-white">
+        {/* ── Decorative background ── */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.18),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(142,235,255,0.14),transparent_55%)]" />
+        <div className="absolute top-[-60px] right-[-40px] w-[200px] h-[200px] rounded-full bg-white/[0.04] animate-float-slow" />
+        <div className="absolute bottom-[-50px] left-[10%] w-[180px] h-[180px] rounded-full bg-[#8EEBFF]/[0.05] animate-float-reverse" />
+        <div className="absolute top-[30%] right-[10%] w-[90px] h-[90px] rounded-full border border-white/[0.05] animate-float" />
+        <svg className="absolute bottom-6 left-6 w-16 h-16 text-white/[0.03] animate-float-delayed" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
         </svg>
 
-        <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-white/60 text-sm font-medium mb-1">{getGreeting()}</p>
-              <h1 className="text-2xl sm:text-3xl font-bold">
-                {user?.fullname?.split(' ')[0] || 'Student'} 👋
-              </h1>
-              <p className="text-white/50 text-sm mt-1">
-                {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-2 flex items-center gap-2 border border-white/10">
-                <FiClock className="w-4 h-4 text-white/60" />
-                <span className="font-mono text-sm font-medium">
-                  {time.toLocaleTimeString()}
-                </span>
-              </div>
-              <button onClick={toggleTheme} className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center hover:bg-white/25 transition-all border border-white/10">
-                {darkMode ? <FiSun className="w-4 h-4" /> : <FiMoon className="w-4 h-4" />}
-              </button>
+        {/* ── Content: two-column layout ── */}
+        <div className="relative z-10 flex flex-col lg:flex-row gap-6 p-6 sm:p-8">
+          {/* ── Left column (70%) ── */}
+          <div className="flex-1 lg:w-[70%] flex flex-col justify-center min-w-0">
+            <p className="text-white/60 text-sm font-medium mb-2">{getGreeting()}</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+              {user?.fullname?.split(' ')[0] || 'Student'} 👋
+            </h1>
+            <p className="text-white/50 text-sm mb-6">
+              {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+            </p>
+
+            {/* ── Quote ── */}
+            <div className="bg-white/[0.08] backdrop-blur-md rounded-2xl px-5 py-4 border border-white/[0.12] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-w-md">
+              <p className="text-sm italic text-white/70 leading-relaxed">&ldquo;{quote}&rdquo;</p>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/10 max-w-xl">
-            <p className="text-sm italic text-white/70">&ldquo;{quote}&rdquo;</p>
+          {/* ── Right column (30%) ── */}
+          <div className="flex lg:flex-col items-center lg:items-end justify-center lg:w-[30%] gap-4 lg:gap-5 shrink-0">
+            {/* ── Clock + Theme toggle ── */}
+            <div className="flex items-center gap-2 bg-white/[0.08] backdrop-blur-md rounded-2xl px-4 py-2.5 border border-white/[0.12] shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+              <FiClock className="w-4 h-4 text-white/50" />
+              <span className="font-mono text-sm font-medium tracking-wide">
+                {time.toLocaleTimeString()}
+              </span>
+              <div className="w-px h-5 bg-white/15 mx-1" />
+              <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/10">
+                {darkMode ? <FiSun className="w-3.5 h-3.5" /> : <FiMoon className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {/* ── Logo in glass container ── */}
+            <div className="bg-white/[0.06] backdrop-blur-md rounded-3xl p-3 border border-white/[0.10] shadow-[0_8px_32px_rgba(0,0,0,0.10)]">
+              <img src="/stempal-logo-new.png" alt="STEMPal" className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 object-contain animate-float opacity-[0.88]" style={{ filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.12))' }} />
+            </div>
           </div>
         </div>
       </motion.div>
