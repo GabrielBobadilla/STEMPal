@@ -1,5 +1,5 @@
 const supabase = require('../config/supabase');
-const { deleteFile, uploadToSupabase, getPublicUrl } = require('../middleware/upload');
+const { deleteFile, uploadToSupabase, getPublicUrl, createSignedUrl, extractStoragePath } = require('../middleware/upload');
 const pdfService = require('../utils/pdfService');
 const aiService = require('../utils/aiService');
 
@@ -9,20 +9,24 @@ const uploadPDF = async (req, res) => {
 
     const filePath = `${req.user.id}/${Date.now()}-${req.file.originalname}`;
     await uploadToSupabase('pdfs', filePath, req.file.buffer, req.file.mimetype);
-    const publicUrl = getPublicUrl('pdfs', filePath);
 
-    const { data: row } = await supabase.from('pdf_uploads').insert({
+    const { data: row, error } = await supabase.from('pdf_uploads').insert({
       user_id: req.user.id,
       filename: req.file.originalname,
       original_name: req.file.originalname,
       file_size: req.file.size,
-      file_path: publicUrl,
+      file_path: filePath,
       extracted_text: null,
       ocr_used: false,
       created_at: new Date().toISOString()
     }).select().single();
 
-    res.status(201).json({ message: 'PDF uploaded.', id: row?.id, filename: req.file.originalname });
+    if (error) {
+      console.error('Insert PDF record error:', error);
+      return res.status(500).json({ message: 'Failed to save PDF record.' });
+    }
+
+    res.status(201).json({ message: 'PDF uploaded.', id: row.id, filename: req.file.originalname });
   } catch (error) {
     console.error('Upload PDF error:', error);
     res.status(500).json({ message: 'Upload failed.' });
@@ -44,8 +48,14 @@ const processPDF = async (req, res) => {
       text = pdf.extracted_text;
     } else if (pdfService.extractTextWithOCR) {
       try {
-        if (pdf.file_path && pdf.file_path.startsWith('http')) {
-          const response = await fetch(pdf.file_path);
+        if (pdf.file_path) {
+          let downloadUrl;
+          if (pdf.file_path.startsWith('http')) {
+            downloadUrl = pdf.file_path;
+          } else {
+            downloadUrl = await createSignedUrl('pdfs', pdf.file_path, 600);
+          }
+          const response = await fetch(downloadUrl);
           const buffer = Buffer.from(await response.arrayBuffer());
           const tmpPath = `/tmp/${Date.now()}.pdf`;
           require('fs').writeFileSync(tmpPath, buffer);
@@ -106,7 +116,7 @@ const deletePDF = async (req, res) => {
       return res.status(404).json({ message: 'PDF not found.' });
     }
     if (row.file_path) {
-      await deleteFile(row.file_path);
+      await deleteFile(row.file_path, 'pdfs');
     }
     await supabase.from('pdf_uploads').delete().eq('id', req.params.id);
     res.json({ message: 'PDF deleted.' });

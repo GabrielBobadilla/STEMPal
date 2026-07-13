@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS preferences (
   subjects JSONB DEFAULT '[]',
   hobbies JSONB DEFAULT '[]',
   learning_style TEXT,
-  study_duration INTEGER DEFAULT 25,
+  study_duration TEXT DEFAULT '25min',
   preferred_break JSONB DEFAULT '[]',
   study_goals TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

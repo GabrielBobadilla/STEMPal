@@ -115,8 +115,9 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await userAPI.updateProfile(form);
-      updateUser(res.data);
+      await userAPI.updateProfile(form);
+      const { data: fresh } = await userAPI.getProfile();
+      if (fresh) updateUser(fresh);
       toast.success('Profile updated');
       setEditing(false);
     } catch {
@@ -133,8 +134,9 @@ const Profile = () => {
     try {
       const fd = new FormData();
       fd.append('profile_picture', file);
-      const res = await userAPI.uploadProfilePicture(fd);
-      updateUser(res.data);
+      await userAPI.uploadProfilePicture(fd);
+      const { data: fresh } = await userAPI.getProfile();
+      if (fresh) updateUser(fresh);
       toast.success('Profile picture updated');
     } catch {
       toast.error('Failed to upload picture');

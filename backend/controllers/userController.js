@@ -32,12 +32,19 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { fullname, phone, grade_level, school, stem_strand } = req.body;
-    await supabase.from('users').update({
+    const { error } = await supabase.from('users').update({
       fullname, phone, grade_level, school, stem_strand,
       updated_at: new Date().toISOString()
     }).eq('id', req.user.id);
-    res.json({ message: 'Profile updated successfully.' });
+    if (error) {
+      console.error('Update profile error:', error);
+      return res.status(500).json({ message: 'Failed to update profile.' });
+    }
+    const { data: updated } = await supabase
+      .from('users').select('*').eq('id', req.user.id).single();
+    res.json(updated || { fullname, phone, grade_level, school, stem_strand });
   } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({ message: 'Server error.' });
   }
 };
@@ -61,12 +68,18 @@ const uploadProfilePicture = async (req, res) => {
     await uploadToSupabase('profiles', filePath, req.file.buffer, req.file.mimetype);
     const publicUrl = getPublicUrl('profiles', filePath);
 
-    await supabase.from('users').update({
+    const { error } = await supabase.from('users').update({
       profile_picture: publicUrl,
       updated_at: new Date().toISOString()
     }).eq('id', req.user.id);
+    if (error) {
+      console.error('Update profile picture error:', error);
+      return res.status(500).json({ message: 'Failed to save picture.' });
+    }
 
-    res.json({ message: 'Profile picture updated.', filename: publicUrl });
+    const { data: updated } = await supabase
+      .from('users').select('*').eq('id', req.user.id).single();
+    res.json(updated || { profile_picture: publicUrl });
   } catch (error) {
     console.error('Upload profile picture error:', error);
     res.status(500).json({ message: 'Server error.' });
@@ -102,12 +115,12 @@ const updateTheme = async (req, res) => {
 
 const updateNotificationSettings = async (req, res) => {
   try {
-    const { enabled } = req.body;
+    const enabled = req.body.enabled ?? req.body.notifications ?? req.body.notification_enabled;
     await supabase.from('users').update({
       notification_enabled: enabled,
       updated_at: new Date().toISOString()
     }).eq('id', req.user.id);
-    res.json({ message: 'Notification settings updated.' });
+    res.json({ message: 'Notification settings updated.', notification_enabled: enabled });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }

@@ -40,6 +40,21 @@ function getPublicUrl(bucket, filePath) {
   return data?.publicUrl || null;
 }
 
+async function createSignedUrl(bucket, filePath, expiresIn = 3600) {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(filePath, expiresIn);
+  if (error) throw error;
+  return data?.signedUrl || null;
+}
+
+function extractStoragePath(url) {
+  if (!url || !url.startsWith('http')) return url;
+  const match = url.match(/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
+  if (match) return { bucket: match[1], path: match[2] };
+  return null;
+}
+
 async function deleteFromSupabase(bucket, filePath) {
   if (!filePath) return;
   try {
@@ -49,13 +64,16 @@ async function deleteFromSupabase(bucket, filePath) {
   }
 }
 
-async function deleteFile(filePath) {
+async function deleteFile(filePath, bucket) {
   if (!filePath) return;
   if (filePath.startsWith('http')) {
     const match = filePath.match(/storage\/v1\/object\/public\/([^/]+)\/(.+)/);
     if (match) await deleteFromSupabase(match[1], match[2]);
     return;
   }
+  if (bucket) {
+    await deleteFromSupabase(bucket, filePath);
+  }
 }
 
-module.exports = { uploadProfilePicture, uploadPDF, uploadToSupabase, getPublicUrl, deleteFile, deleteFromSupabase };
+module.exports = { uploadProfilePicture, uploadPDF, uploadToSupabase, getPublicUrl, createSignedUrl, extractStoragePath, deleteFile, deleteFromSupabase };
