@@ -191,7 +191,7 @@ const Profile = () => {
             <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#60C5FF] to-[#8EEBFF] p-0.5">
               <div className="w-full h-full rounded-full bg-[var(--bg-secondary)] overflow-hidden">
                 {user?.profile_picture && user.profile_picture !== 'default.png' ? (
-                  <img src={`http://localhost:5000/uploads/profiles/${user.profile_picture}`}
+                  <img src={`${window.location.origin}/uploads/profiles/${user.profile_picture}`}
                     alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-[#60C5FF]">

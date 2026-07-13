@@ -14,26 +14,30 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setSupabaseUser(session.user);
-        try { localStorage.setItem('token', session.access_token); } catch {}
-        try {
-          const res = await userAPI.getProfile();
-          const userData = { id: session.user.id, ...res.data };
-          try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
-          setUser(userData);
-          checkPreferences();
-        } catch {
-          const userData = {
-            id: session.user.id,
-            fullname: session.user.user_metadata?.fullname || '',
-            email: session.user.email,
-            role: 'student',
-          };
-          try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
-          setUser(userData);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setSupabaseUser(session.user);
+          try { localStorage.setItem('token', session.access_token); } catch {}
+          try {
+            const res = await userAPI.getProfile();
+            const userData = { id: session.user.id, ...res.data };
+            try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
+            setUser(userData);
+            checkPreferences();
+          } catch {
+            const userData = {
+              id: session.user.id,
+              fullname: session.user.user_metadata?.fullname || '',
+              email: session.user.email,
+              role: 'student',
+            };
+            try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
+            setUser(userData);
+          }
         }
+      } catch (e) {
+        console.warn('Auth init error:', e);
       }
       setLoading(false);
     };
