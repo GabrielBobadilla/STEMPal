@@ -245,7 +245,7 @@ function getClipPath(type) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 25%, #60A5FA 50%, #7C3AED 75%, #DBEAFE 100%)' }}>
+      style={{ background: 'linear-gradient(135deg, #BFDBFE 0%, #93C5FD 25%, #60A5FA 50%, #7C3AED 75%, #BFDBFE 100%)' }}>
       <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.5 }}>
         {lines.map((l, i) => (
           <motion.line key={i} x1={`${l.x1}%`} y1={`${l.y1}%`} x2={`${l.x2}%`} y2={`${l.y2}%`}

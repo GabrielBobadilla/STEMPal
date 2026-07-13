@@ -101,12 +101,12 @@ function App() {
         <Router>
           <div className="min-h-screen text-[var(--text-primary)] transition-colors duration-300 relative">
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-              <div className="stem-deco-blob w-[600px] h-[600px] bg-blue-400/[0.07] top-[-10%] left-[-5%] animate-drift" />
-              <div className="stem-deco-blob w-[500px] h-[500px] bg-purple-400/[0.06] top-[30%] right-[-8%] animate-drift" style={{ animationDelay: '-7s' }} />
-              <div className="stem-deco-blob w-[450px] h-[450px] bg-cyan-300/[0.06] bottom-[-5%] left-[20%] animate-drift" style={{ animationDelay: '-14s' }} />
-              <div className="stem-deco-circle w-[300px] h-[300px] border border-blue-300/[0.06] top-[15%] left-[60%] animate-float-slow" />
-              <div className="stem-deco-circle w-[200px] h-[200px] border border-purple-300/[0.05] top-[60%] left-[10%] animate-float-reverse" />
-              <div className="stem-deco-circle w-[150px] h-[150px] border border-cyan-300/[0.06] bottom-[20%] right-[25%] animate-float" />
+              <div className="stem-deco-blob w-[600px] h-[600px] bg-blue-500/[0.12] top-[-10%] left-[-5%] animate-drift" />
+              <div className="stem-deco-blob w-[500px] h-[500px] bg-indigo-400/[0.10] top-[30%] right-[-8%] animate-drift" style={{ animationDelay: '-7s' }} />
+              <div className="stem-deco-blob w-[450px] h-[450px] bg-sky-400/[0.10] bottom-[-5%] left-[20%] animate-drift" style={{ animationDelay: '-14s' }} />
+              <div className="stem-deco-circle w-[300px] h-[300px] border border-blue-400/[0.10] top-[15%] left-[60%] animate-float-slow" />
+              <div className="stem-deco-circle w-[200px] h-[200px] border border-violet-400/[0.08] top-[60%] left-[10%] animate-float-reverse" />
+              <div className="stem-deco-circle w-[150px] h-[150px] border border-cyan-400/[0.10] bottom-[20%] right-[25%] animate-float" />
               <svg className="stem-deco w-24 h-24 top-[10%] left-[5%] animate-float-slow" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
               </svg>

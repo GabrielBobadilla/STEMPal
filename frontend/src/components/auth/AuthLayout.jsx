@@ -43,7 +43,7 @@ function getClipPath(type) {
 
 const AuthLayout = ({ children }) => (
   <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-    style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 25%, #60A5FA 50%, #7C3AED 75%, #DBEAFE 100%)' }}>
+    style={{ background: 'linear-gradient(135deg, #BFDBFE 0%, #93C5FD 25%, #60A5FA 50%, #7C3AED 75%, #BFDBFE 100%)' }}>
 
     <div className="absolute inset-0">
       <div className="absolute w-[500px] h-[500px] rounded-full bg-white/[0.08] -top-40 -right-40 animate-drift" />

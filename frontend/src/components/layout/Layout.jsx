@@ -39,7 +39,7 @@ const Layout = () => {
       )}
 
       <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 flex-shrink-0 transform transition-all duration-300 lg:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-full flex flex-col m-3 ml-0 rounded-2xl overflow-hidden" style={{ background: 'var(--glass-bg-strong)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-lg)' }}>
+        <div className="h-full flex flex-col m-3 ml-0 rounded-2xl overflow-hidden" style={{ background: 'var(--glass-bg-strong)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.25)' }}>
           <div className="p-5 flex-1 overflow-y-auto scrollbar-hide">
             <Link to="/dashboard" className="flex items-center gap-3 mb-8 group" onClick={() => setSidebarOpen(false)}>
               <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
