@@ -41,7 +41,7 @@ const Login = () => {
   return (
     <AuthLayout>
       <div className="text-center mb-8">
-        <img src="/stempal-logo.jpg" alt="STEMPal Logo" className="w-20 h-20 mx-auto mb-4" />
+        <img src="/stempal-logo-new.png" alt="STEMPal Logo" className="w-20 h-20 mx-auto mb-4 object-contain rounded-2xl" />
         <h1 className="text-3xl font-bold gradient-text">STEMPal</h1>
         <p className="text-[var(--text-secondary)] mt-1">Welcome back! Sign in to continue</p>
       </div>
