@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const { FieldValue } = require('firebase-admin').firestore;
-const { uploadToStorage, deleteFromStorage, BUCKETS } = require('../middleware/upload');
+const { deleteFile } = require('../middleware/upload');
 const pdfService = require('../utils/pdfService');
 const aiService = require('../utils/aiService');
 
@@ -8,21 +8,20 @@ const uploadPDF = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No PDF file uploaded.' });
 
-    const destination = `pdfs/${req.user.id}/${Date.now()}_${req.file.originalname}`;
-    const url = await uploadToStorage(req.file, BUCKETS.pdfs, destination);
+    const filePath = `/uploads/pdfs/${req.file.filename}`;
 
     const ref = await db.collection('pdf_uploads').add({
       user_id: req.user.id,
-      filename: destination,
+      filename: req.file.filename,
       original_name: req.file.originalname,
-      file_size: req.file.buffer.length,
-      file_path: url,
+      file_size: req.file.size,
+      file_path: filePath,
       extracted_text: null,
       ocr_used: false,
       created_at: FieldValue.serverTimestamp()
     });
 
-    res.status(201).json({ message: 'PDF uploaded.', id: ref.id, filename: destination });
+    res.status(201).json({ message: 'PDF uploaded.', id: ref.id, filename: req.file.filename });
   } catch (error) {
     res.status(500).json({ message: 'Upload failed.' });
   }
@@ -37,7 +36,8 @@ const processPDF = async (req, res) => {
     }
 
     const pdf = doc.data();
-    const { text, ocrUsed } = await pdfService.extractTextWithOCR(pdf.file_path);
+    const fullPath = require('path').resolve(__dirname, '..', pdf.file_path);
+    const { text, ocrUsed } = await pdfService.extractTextWithOCR(fullPath);
 
     await doc.ref.update({ extracted_text: text, ocr_used: ocrUsed });
 
@@ -84,7 +84,7 @@ const deletePDF = async (req, res) => {
       return res.status(404).json({ message: 'PDF not found.' });
     }
     if (doc.data().file_path) {
-      await deleteFromStorage(doc.data().file_path);
+      deleteFile(doc.data().file_path);
     }
     await doc.ref.delete();
     res.json({ message: 'PDF deleted.' });

@@ -1,7 +1,8 @@
 const db = require('../config/db');
 const { FieldValue } = require('firebase-admin').firestore;
-const { uploadToStorage, deleteFromStorage, BUCKETS } = require('../middleware/upload');
+const { deleteFile } = require('../middleware/upload');
 const { auth } = require('../config/firebase');
+const path = require('path');
 
 const getProfile = async (req, res) => {
   try {
@@ -48,21 +49,19 @@ const uploadProfilePicture = async (req, res) => {
     const userDoc = await db.collection('users').doc(req.user.id).get();
     const userData = userDoc.data();
 
-    // Delete old picture from storage
-    if (userData.profile_picture && !userData.profile_picture.includes('default')) {
-      await deleteFromStorage(userData.profile_picture);
+    if (userData.profile_picture) {
+      deleteFile(userData.profile_picture);
     }
 
-    // Upload new picture
-    const destination = `profiles/${req.user.id}/${Date.now()}_${req.file.originalname}`;
-    const url = await uploadToStorage(req.file, BUCKETS.profiles, destination);
+    const filename = req.file.filename;
+    const filePath = `/uploads/profiles/${filename}`;
 
     await db.collection('users').doc(req.user.id).update({
-      profile_picture: url,
+      profile_picture: filePath,
       updated_at: FieldValue.serverTimestamp()
     });
 
-    res.json({ message: 'Profile picture updated.', filename: url });
+    res.json({ message: 'Profile picture updated.', filename: filePath });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -70,9 +69,7 @@ const uploadProfilePicture = async (req, res) => {
 
 const changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    // With Firebase Auth, password changes are done via client SDK
-    // This endpoint uses Admin SDK to update password directly
+    const { newPassword } = req.body;
     try {
       await auth.updateUser(req.user.id, { password: newPassword });
       res.json({ message: 'Password changed successfully.' });

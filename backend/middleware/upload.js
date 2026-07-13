@@ -1,85 +1,59 @@
-const Busboy = require('busboy');
-const { storage, db } = require('../config/firebase');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-const BUCKETS = {
-  pdfs: 'stemPal-pdfs',
-  scanned: 'stemPal-scanned',
-  profiles: 'stemPal-profiles',
+const UPLOAD_DIR = path.join(__dirname, '../uploads');
+
+['profiles', 'pdfs', 'scanned'].forEach(dir => {
+  const dirPath = path.join(UPLOAD_DIR, dir);
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+});
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    let sub = 'pdfs';
+    if (req.path.includes('profile')) sub = 'profiles';
+    else if (req.path.includes('scan')) sub = 'scanned';
+    cb(null, path.join(UPLOAD_DIR, sub));
+  },
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}${path.extname(file.originalname)}`);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === 'profile_picture') {
+    cb(null, /jpeg|jpg|png|gif|webp/i.test(file.mimetype));
+  } else if (file.fieldname === 'pdf') {
+    cb(null, file.mimetype === 'application/pdf');
+  } else {
+    cb(null, true);
+  }
 };
 
-function parseMultipart(req) {
-  return new Promise((resolve, reject) => {
-    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 50 * 1024 * 1024 } });
-    const fields = {};
-    const files = [];
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 }
+});
 
-    busboy.on('field', (name, value) => { fields[name] = value; });
-    busboy.on('file', (name, stream, info) => {
-      const chunks = [];
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.on('end', () => {
-        files.push({
-          fieldname: name,
-          originalname: info.filename,
-          mimetype: info.mimeType,
-          buffer: Buffer.concat(chunks),
-        });
-      });
-    });
-    busboy.on('finish', () => resolve({ fields, files }));
-    busboy.on('error', reject);
-    req.pipe(busboy);
-  });
-}
-
-async function uploadToStorage(file, bucketName, destination) {
-  const bucket = storage.bucket(bucketName);
-  const blob = bucket.file(destination);
-  await blob.save(file.buffer, { metadata: { contentType: file.mimetype } });
-  await blob.makePublic();
-  return `https://storage.googleapis.com/${bucketName}/${encodeURIComponent(destination)}`;
-}
-
-async function deleteFromStorage(url) {
-  try {
-    const decoded = decodeURIComponent(url);
-    const match = decoded.match(/\/([^/]+)\/(.+)$/);
-    if (!match) return;
-    const bucket = storage.bucket(match[1]);
-    await bucket.file(match[2]).delete();
-  } catch (error) {
-    console.warn('Failed to delete from storage:', error.message);
-  }
+function uploadProfilePicture() {
+  return upload.single('profile_picture');
 }
 
 function uploadPDF() {
-  return async (req, res, next) => {
-    try {
-      const { fields, files } = await parseMultipart(req);
-      Object.assign(req.body, fields);
-      if (files.length > 0) {
-        req.file = files[0];
-      }
-      next();
-    } catch (error) {
-      res.status(400).json({ message: 'Failed to parse upload', error: error.message });
-    }
-  };
+  return upload.single('pdf');
 }
 
-function uploadProfilePicture() {
-  return async (req, res, next) => {
-    try {
-      const { fields, files } = await parseMultipart(req);
-      Object.assign(req.body, fields);
-      if (files.length > 0) {
-        req.file = files[0];
-      }
-      next();
-    } catch (error) {
-      res.status(400).json({ message: 'Failed to parse upload', error: error.message });
-    }
-  };
+function deleteFile(filePath) {
+  try {
+    if (!filePath) return;
+    const full = filePath.startsWith('http') ? null : path.resolve(UPLOAD_DIR, '..', filePath);
+    if (full && fs.existsSync(full)) fs.unlinkSync(full);
+  } catch (e) {
+    console.warn('Failed to delete file:', e.message);
+  }
 }
 
-module.exports = { uploadPDF, uploadProfilePicture, uploadToStorage, deleteFromStorage, parseMultipart, BUCKETS };
+module.exports = { uploadProfilePicture, uploadPDF, deleteFile };
