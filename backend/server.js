@@ -7,6 +7,9 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
+// Firebase Admin SDK initialized on first require of config/firebase.js
+require('./config/firebase');
+
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const preferenceRoutes = require('./routes/preferences');
@@ -29,30 +32,25 @@ const multiplayerRoutes = require('./routes/multiplayer');
 const pomodoroRoutes = require('./routes/pomodoro');
 
 const app = express();
-const isVercel = process.env.VERCEL === '1';
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: process.env.FRONTEND_URL || true, credentials: true },
+});
+const setupSocketHandlers = require('./socket/handlers');
+setupSocketHandlers(io);
 
-let io;
-if (!isVercel) {
-  const http = require('http');
-  const { Server } = require('socket.io');
-  const server = http.createServer(app);
-  io = new Server(server, {
-    cors: { origin: process.env.FRONTEND_URL || true, credentials: true },
+const PORT = process.env.PORT || 5000;
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`STEMPal Server running on port ${PORT}`);
   });
-  const setupSocketHandlers = require('./socket/handlers');
-  setupSocketHandlers(io);
-
-  const PORT = process.env.PORT || 5000;
-  if (require.main === module) {
-    server.listen(PORT, () => {
-      console.log(`STEMPal Server running on port ${PORT}`);
-    });
-  }
 }
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(compression());
-if (!isVercel) app.use(morgan('dev'));
+app.use(morgan('dev'));
 app.use(cors({
   origin: process.env.FRONTEND_URL || true,
   credentials: true
@@ -60,21 +58,12 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-app.use((req, res, next) => {
-  if (req.path.startsWith('/_/backend')) {
-    req.url = req.url.replace('/_/backend', '');
-  }
-  next();
-});
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: { message: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

@@ -1,11 +1,12 @@
-const pool = require('../config/db');
+const db = require('../config/db');
+const { FieldValue } = require('firebase-admin').firestore;
 
 const getAchievements = async (req, res) => {
   try {
-    const [achievements] = await pool.query(
-      'SELECT * FROM achievements WHERE user_id = ? ORDER BY unlocked_date DESC',
-      [req.user.id]
-    );
+    const snap = await db.collection('achievements')
+      .where('user_id', '==', req.user.id)
+      .orderBy('unlocked_date', 'desc').get();
+    const achievements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json(achievements);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -14,31 +15,42 @@ const getAchievements = async (req, res) => {
 
 const checkAndAward = async (req, res) => {
   try {
-    const [stats] = await pool.query(
-      'SELECT COUNT(*) as quiz_count, COALESCE(AVG(score), 0) as avg_score FROM quizzes WHERE user_id = ?',
-      [req.user.id]
-    );
-    const [streakData] = await pool.query('SELECT current_streak FROM streaks WHERE user_id = ?', [req.user.id]);
-    const [xpData] = await pool.query('SELECT total_xp FROM users WHERE id = ?', [req.user.id]);
+    const userId = req.user.id;
+    const quizSnap = await db.collection('quizzes').where('user_id', '==', userId).get();
+    const quizCount = quizSnap.size;
+    let avgScore = 0;
+    if (quizCount > 0) {
+      avgScore = quizSnap.docs.reduce((s, d) => s + (d.data().score || 0), 0) / quizCount;
+    }
 
-    const streak = streakData.length > 0 ? streakData[0].current_streak : 0;
-    const totalXp = xpData[0]?.total_xp || 0;
+    const streakSnap = await db.collection('streaks').where('user_id', '==', userId).limit(1).get();
+    const streak = !streakSnap.empty ? (streakSnap.docs[0].data().current_streak || 0) : 0;
+
+    const userDoc = await db.collection('users').doc(userId).get();
+    const totalXp = userDoc.data()?.total_xp || 0;
+
     const newBadges = [];
 
-    if (stats[0].quiz_count >= 10) {
-      const [exists] = await pool.query('SELECT id FROM achievements WHERE user_id = ? AND badge_name = ?', [req.user.id, 'Quiz Master']);
-      if (exists.length === 0) {
-        await pool.query('INSERT INTO achievements (user_id, badge_name, badge_type, description) VALUES (?, ?, ?, ?)',
-          [req.user.id, 'Quiz Master', 'gold', 'Completed 10 quizzes']);
+    if (quizCount >= 10) {
+      const exists = await db.collection('achievements').where('user_id', '==', userId).where('badge_name', '==', 'Quiz Master').limit(1).get();
+      if (exists.empty) {
+        await db.collection('achievements').add({
+          user_id: userId, badge_name: 'Quiz Master', badge_type: 'gold',
+          description: 'Completed 10 quizzes', unlocked_date: new Date().toISOString(),
+          created_at: FieldValue.serverTimestamp()
+        });
         newBadges.push({ name: 'Quiz Master', type: 'gold' });
       }
     }
 
     if (totalXp >= 1000) {
-      const [exists] = await pool.query('SELECT id FROM achievements WHERE user_id = ? AND badge_name = ?', [req.user.id, 'XP Champion']);
-      if (exists.length === 0) {
-        await pool.query('INSERT INTO achievements (user_id, badge_name, badge_type, description) VALUES (?, ?, ?, ?)',
-          [req.user.id, 'XP Champion', 'platinum', 'Earned 1000 XP']);
+      const exists = await db.collection('achievements').where('user_id', '==', userId).where('badge_name', '==', 'XP Champion').limit(1).get();
+      if (exists.empty) {
+        await db.collection('achievements').add({
+          user_id: userId, badge_name: 'XP Champion', badge_type: 'platinum',
+          description: 'Earned 1000 XP', unlocked_date: new Date().toISOString(),
+          created_at: FieldValue.serverTimestamp()
+        });
         newBadges.push({ name: 'XP Champion', type: 'platinum' });
       }
     }

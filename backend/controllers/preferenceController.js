@@ -1,29 +1,40 @@
-const pool = require('../config/db');
+const db = require('../config/db');
+const { FieldValue } = require('firebase-admin').firestore;
 
 const savePreferences = async (req, res) => {
   try {
     const { subjects, hobbies, learning_style, study_duration, preferred_break, study_goals, grade_level, school, stem_strand } = req.body;
     const userId = req.user.id;
 
-    const [existing] = await pool.query('SELECT id FROM preferences WHERE user_id = ?', [userId]);
+    // Check if preferences exist
+    const existing = await db.collection('preferences').where('user_id', '==', userId).limit(1).get();
 
-    if (existing.length > 0) {
-      await pool.query(
-        `UPDATE preferences SET subjects = ?, hobbies = ?, learning_style = ?, study_duration = ?, preferred_break = ?, study_goals = ? WHERE user_id = ?`,
-        [JSON.stringify(subjects), JSON.stringify(hobbies), learning_style, study_duration, JSON.stringify(preferred_break), study_goals, userId]
-      );
+    const prefData = {
+      subjects: subjects || [],
+      hobbies: hobbies || [],
+      learning_style,
+      study_duration,
+      preferred_break: preferred_break || [],
+      study_goals,
+      updated_at: FieldValue.serverTimestamp()
+    };
+
+    if (!existing.empty) {
+      await existing.docs[0].ref.update(prefData);
     } else {
-      await pool.query(
-        `INSERT INTO preferences (user_id, subjects, hobbies, learning_style, study_duration, preferred_break, study_goals) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [userId, JSON.stringify(subjects), JSON.stringify(hobbies), learning_style, study_duration, JSON.stringify(preferred_break), study_goals]
-      );
+      await db.collection('preferences').add({
+        user_id: userId,
+        ...prefData,
+        created_at: FieldValue.serverTimestamp()
+      });
     }
 
     if (grade_level || school || stem_strand) {
-      await pool.query(
-        'UPDATE users SET grade_level = COALESCE(?, grade_level), school = COALESCE(?, school), stem_strand = COALESCE(?, stem_strand) WHERE id = ?',
-        [grade_level || null, school || null, stem_strand || null, userId]
-      );
+      const updates = { updated_at: FieldValue.serverTimestamp() };
+      if (grade_level) updates.grade_level = grade_level;
+      if (school) updates.school = school;
+      if (stem_strand) updates.stem_strand = stem_strand;
+      await db.collection('users').doc(userId).update(updates);
     }
 
     res.json({ message: 'Preferences saved successfully.' });
@@ -35,14 +46,12 @@ const savePreferences = async (req, res) => {
 
 const getPreferences = async (req, res) => {
   try {
-    const [prefs] = await pool.query('SELECT * FROM preferences WHERE user_id = ?', [req.user.id]);
-    if (prefs.length === 0) return res.status(404).json({ message: 'No preferences found.' });
+    const snap = await db.collection('preferences').where('user_id', '==', req.user.id).limit(1).get();
+    if (snap.empty) return res.status(404).json({ message: 'No preferences found.' });
 
-    const pref = prefs[0];
-    pref.subjects = JSON.parse(pref.subjects || '[]');
-    pref.hobbies = JSON.parse(pref.hobbies || '[]');
-    pref.preferred_break = JSON.parse(pref.preferred_break || '[]');
-
+    const pref = snap.docs[0].data();
+    pref.id = snap.docs[0].id;
+    // Subjects/hobbies/preferred_break are stored as arrays natively in Firestore
     res.json(pref);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -51,8 +60,8 @@ const getPreferences = async (req, res) => {
 
 const checkPreferences = async (req, res) => {
   try {
-    const [prefs] = await pool.query('SELECT id FROM preferences WHERE user_id = ?', [req.user.id]);
-    res.json({ hasPreferences: prefs.length > 0 });
+    const snap = await db.collection('preferences').where('user_id', '==', req.user.id).limit(1).get();
+    res.json({ hasPreferences: !snap.empty });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }

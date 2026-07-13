@@ -1,13 +1,22 @@
-const pool = require('../config/db');
+const db = require('../config/db');
+const { FieldValue } = require('firebase-admin').firestore;
 
 const createNote = async (req, res) => {
   try {
     const { title, content, category, source, difficulty, tags } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO notes (user_id, title, content, category, source, difficulty, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [req.user.id, title, content, category, source || 'ai', difficulty || 'medium', JSON.stringify(tags || [])]
-    );
-    res.status(201).json({ message: 'Note created.', id: result.insertId });
+    const ref = await db.collection('notes').add({
+      user_id: req.user.id,
+      title,
+      content,
+      category,
+      source: source || 'ai',
+      difficulty: difficulty || 'medium',
+      tags: tags || [],
+      is_saved: false,
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp()
+    });
+    res.status(201).json({ message: 'Note created.', id: ref.id });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -16,16 +25,14 @@ const createNote = async (req, res) => {
 const getNotes = async (req, res) => {
   try {
     const { category, source, difficulty } = req.query;
-    let query = 'SELECT * FROM notes WHERE user_id = ?';
-    const params = [req.user.id];
+    let query = db.collection('notes').where('user_id', '==', req.user.id);
 
-    if (category) { query += ' AND category = ?'; params.push(category); }
-    if (source) { query += ' AND source = ?'; params.push(source); }
-    if (difficulty) { query += ' AND difficulty = ?'; params.push(difficulty); }
+    if (category) query = query.where('category', '==', category);
+    if (source) query = query.where('source', '==', source);
+    if (difficulty) query = query.where('difficulty', '==', difficulty);
 
-    query += ' ORDER BY created_at DESC';
-
-    const [notes] = await pool.query(query, params);
+    const snap = await query.orderBy('created_at', 'desc').get();
+    const notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json(notes);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -34,9 +41,11 @@ const getNotes = async (req, res) => {
 
 const getNote = async (req, res) => {
   try {
-    const [notes] = await pool.query('SELECT * FROM notes WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-    if (notes.length === 0) return res.status(404).json({ message: 'Note not found.' });
-    res.json(notes[0]);
+    const doc = await db.collection('notes').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ message: 'Note not found.' });
+    const data = doc.data();
+    if (data.user_id !== req.user.id) return res.status(404).json({ message: 'Note not found.' });
+    res.json({ id: doc.id, ...data });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -45,10 +54,14 @@ const getNote = async (req, res) => {
 const updateNote = async (req, res) => {
   try {
     const { title, content, category, difficulty, tags } = req.body;
-    await pool.query(
-      'UPDATE notes SET title = ?, content = ?, category = ?, difficulty = ?, tags = ? WHERE id = ? AND user_id = ?',
-      [title, content, category, difficulty, JSON.stringify(tags || []), req.params.id, req.user.id]
-    );
+    const doc = await db.collection('notes').doc(req.params.id).get();
+    if (!doc.exists || doc.data().user_id !== req.user.id) {
+      return res.status(404).json({ message: 'Note not found.' });
+    }
+    await doc.ref.update({
+      title, content, category, difficulty, tags: tags || [],
+      updated_at: FieldValue.serverTimestamp()
+    });
     res.json({ message: 'Note updated.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -57,7 +70,11 @@ const updateNote = async (req, res) => {
 
 const deleteNote = async (req, res) => {
   try {
-    await pool.query('DELETE FROM notes WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+    const doc = await db.collection('notes').doc(req.params.id).get();
+    if (!doc.exists || doc.data().user_id !== req.user.id) {
+      return res.status(404).json({ message: 'Note not found.' });
+    }
+    await doc.ref.delete();
     res.json({ message: 'Note deleted.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -66,7 +83,11 @@ const deleteNote = async (req, res) => {
 
 const saveNote = async (req, res) => {
   try {
-    await pool.query('UPDATE notes SET is_saved = TRUE WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+    const doc = await db.collection('notes').doc(req.params.id).get();
+    if (!doc.exists || doc.data().user_id !== req.user.id) {
+      return res.status(404).json({ message: 'Note not found.' });
+    }
+    await doc.ref.update({ is_saved: true, updated_at: FieldValue.serverTimestamp() });
     res.json({ message: 'Note saved.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -75,7 +96,12 @@ const saveNote = async (req, res) => {
 
 const getSavedNotes = async (req, res) => {
   try {
-    const [notes] = await pool.query('SELECT * FROM notes WHERE user_id = ? AND is_saved = TRUE ORDER BY updated_at DESC', [req.user.id]);
+    const snap = await db.collection('notes')
+      .where('user_id', '==', req.user.id)
+      .where('is_saved', '==', true)
+      .orderBy('updated_at', 'desc')
+      .get();
+    const notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json(notes);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

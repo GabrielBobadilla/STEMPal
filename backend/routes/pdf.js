@@ -4,7 +4,7 @@ const pdfController = require('../controllers/pdfController');
 const { authenticate } = require('../middleware/auth');
 const { uploadPDF } = require('../middleware/upload');
 
-router.post('/upload', authenticate, uploadPDF.single('pdf'), pdfController.uploadPDF);
+router.post('/upload', authenticate, uploadPDF(), pdfController.uploadPDF);
 router.post('/:id/process', authenticate, pdfController.processPDF);
 router.get('/', authenticate, pdfController.getPDFs);
 router.get('/:id', authenticate, pdfController.getPDF);

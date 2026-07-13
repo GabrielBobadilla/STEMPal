@@ -1,25 +1,30 @@
-const pool = require('../config/db');
+const db = require('../config/db');
+const { FieldValue } = require('firebase-admin').firestore;
 const aiService = require('../utils/aiService');
 
 const recommendBreak = async (req, res) => {
   try {
     const { focus_level, study_time, quiz_score } = req.body;
-    const [prefs] = await pool.query('SELECT subjects, hobbies, preferred_break FROM preferences WHERE user_id = ?', [req.user.id]);
-    const preferences = prefs.length > 0 ? prefs[0] : {};
+    const prefSnap = await db.collection('preferences').where('user_id', '==', req.user.id).limit(1).get();
+    const preferences = !prefSnap.empty ? prefSnap.docs[0].data() : {};
 
     const recommendation = await aiService.generateBreakRecommendation(
-      focus_level || 'medium',
-      study_time || 0,
-      quiz_score || 0,
-      preferences
+      focus_level || 'medium', study_time || 0, quiz_score || 0, preferences
     );
 
-    const [result] = await pool.query(
-      'INSERT INTO break_recommendations (user_id, recommendation, reason, benefits, duration, study_time, focus_level) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [req.user.id, recommendation.recommendation, recommendation.reason, JSON.stringify(recommendation.benefits || []), recommendation.duration || 5, study_time || 0, focus_level || 'medium']
-    );
+    const ref = await db.collection('break_recommendations').add({
+      user_id: req.user.id,
+      recommendation: recommendation.recommendation,
+      reason: recommendation.reason,
+      benefits: recommendation.benefits || [],
+      duration: recommendation.duration || 5,
+      study_time: study_time || 0,
+      focus_level: focus_level || 'medium',
+      is_taken: false,
+      created_at: FieldValue.serverTimestamp()
+    });
 
-    res.json({ id: result.insertId, ...recommendation });
+    res.json({ id: ref.id, ...recommendation });
   } catch (error) {
     res.status(500).json({ message: 'Failed to generate recommendation.' });
   }
@@ -27,10 +32,10 @@ const recommendBreak = async (req, res) => {
 
 const getBreakRecommendations = async (req, res) => {
   try {
-    const [breaks] = await pool.query(
-      'SELECT * FROM break_recommendations WHERE user_id = ? ORDER BY created_at DESC LIMIT 20',
-      [req.user.id]
-    );
+    const snap = await db.collection('break_recommendations')
+      .where('user_id', '==', req.user.id)
+      .orderBy('created_at', 'desc').limit(20).get();
+    const breaks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json(breaks);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -39,11 +44,16 @@ const getBreakRecommendations = async (req, res) => {
 
 const markBreakTaken = async (req, res) => {
   try {
-    await pool.query('UPDATE break_recommendations SET is_taken = TRUE WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-
-    await pool.query('INSERT INTO study_history (user_id, activity, activity_type, duration) VALUES (?, ?, ?, ?)',
-      [req.user.id, 'Took a break', 'break', req.body.duration || 5]);
-
+    const doc = await db.collection('break_recommendations').doc(req.params.id).get();
+    if (!doc.exists || doc.data().user_id !== req.user.id) {
+      return res.status(404).json({ message: 'Break recommendation not found.' });
+    }
+    await doc.ref.update({ is_taken: true });
+    await db.collection('study_history').add({
+      user_id: req.user.id, activity: 'Took a break', activity_type: 'break',
+      duration: req.body.duration || 5, date: new Date().toISOString(),
+      created_at: FieldValue.serverTimestamp()
+    });
     res.json({ message: 'Break marked as taken.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -52,12 +62,20 @@ const markBreakTaken = async (req, res) => {
 
 const getBreakEffectiveness = async (req, res) => {
   try {
-    const [stats] = await pool.query(
-      `SELECT recommendation, COUNT(*) as times_taken, AVG(duration) as avg_duration
-      FROM break_recommendations WHERE user_id = ? AND is_taken = TRUE
-      GROUP BY recommendation ORDER BY times_taken DESC LIMIT 10`,
-      [req.user.id]
-    );
+    const snap = await db.collection('break_recommendations')
+      .where('user_id', '==', req.user.id).get();
+    const taken = snap.docs.filter(d => d.data().is_taken).map(d => d.data());
+    const grouped = {};
+    taken.forEach(b => {
+      const key = b.recommendation;
+      if (!grouped[key]) grouped[key] = { recommendation: key, times_taken: 0, total_duration: 0 };
+      grouped[key].times_taken++;
+      grouped[key].total_duration += b.duration || 0;
+    });
+    const stats = Object.values(grouped)
+      .map(g => ({ ...g, avg_duration: g.total_duration / g.times_taken }))
+      .sort((a, b) => b.times_taken - a.times_taken)
+      .slice(0, 10);
     res.json(stats);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

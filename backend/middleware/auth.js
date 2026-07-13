@@ -1,7 +1,4 @@
-const jwt = require('jsonwebtoken');
-const pool = require('../config/db');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'stempal_jwt_secret_key_2024_change_in_production';
+const { auth, db } = require('../config/firebase');
 
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -10,25 +7,54 @@ const authenticate = async (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const [users] = await pool.query('SELECT id, fullname, email, role, profile_picture, theme_preference FROM users WHERE id = ?', [decoded.id]);
-    if (users.length === 0) {
+    const decodedToken = await auth.verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
       return res.status(401).json({ message: 'User not found.' });
     }
-    req.user = users[0];
+
+    req.user = { id: uid, ...userDoc.data() };
     next();
   } catch (error) {
+    if (error.code === 'auth/id-token-expired') {
+      return res.status(401).json({ message: 'Token expired.' });
+    }
+    if (error.code === 'auth/id-token-revoked') {
+      return res.status(401).json({ message: 'Token revoked.' });
+    }
     return res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
-const authorizeAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Access denied. Admin only.' });
+const requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Admin access required' });
   }
   next();
 };
 
-module.exports = { authenticate, authorizeAdmin };
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decodedToken = await auth.verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (userDoc.exists) {
+      req.user = { id: uid, ...userDoc.data() };
+    }
+  } catch (error) {
+    // Token invalid but optional, continue without user
+  }
+  next();
+};
+
+module.exports = { authenticate, requireAdmin, optionalAuth };

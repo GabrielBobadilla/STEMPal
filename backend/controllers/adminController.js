@@ -1,18 +1,35 @@
-const pool = require('../config/db');
+const db = require('../config/db');
+const { FieldValue } = require('firebase-admin').firestore;
+const { auth } = require('../config/firebase');
 
 const getDashboardStats = async (req, res) => {
   try {
-    const [[{ totalUsers }]] = await pool.query('SELECT COUNT(*) as totalUsers FROM users');
-    const [[{ todayUsers }]] = await pool.query("SELECT COUNT(*) as todayUsers FROM users WHERE DATE(created_at) = CURDATE()");
-    const [[{ totalReviewers }]] = await pool.query('SELECT COUNT(*) as totalReviewers FROM generated_reviewers');
-    const [[{ totalQuizzes }]] = await pool.query('SELECT COUNT(*) as totalQuizzes FROM quizzes');
-    const [[{ totalPDFs }]] = await pool.query('SELECT COUNT(*) as totalPDFs FROM pdf_uploads');
-    const [[{ totalFlashcards }]] = await pool.query('SELECT COUNT(*) as totalFlashcards FROM flashcards');
+    const usersSnap = await db.collection('users').get();
+    const totalUsers = usersSnap.size;
 
-    const [recentUsers] = await pool.query('SELECT id, fullname, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 10');
-    const [recentQuizzes] = await pool.query(
-      'SELECT q.id, q.topic, q.score, q.date, u.fullname FROM quizzes q JOIN users u ON q.user_id = u.id ORDER BY q.date DESC LIMIT 10'
-    );
+    const todayStr = new Date().toISOString().split('T')[0];
+    let todayUsers = 0;
+    usersSnap.docs.forEach(d => {
+      const created = d.data().created_at?.toDate?.()?.toISOString()?.split('T')[0];
+      if (created === todayStr) todayUsers++;
+    });
+
+    const totalReviewers = (await db.collection('generated_reviewers').get()).size;
+    const totalQuizzes = (await db.collection('quizzes').get()).size;
+    const totalPDFs = (await db.collection('pdf_uploads').get()).size;
+    const totalFlashcards = (await db.collection('flashcards').get()).size;
+
+    const recentUsersSnap = await db.collection('users').orderBy('created_at', 'desc').limit(10).get();
+    const recentUsers = recentUsersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const recentQuizzesSnap = await db.collection('quizzes').orderBy('created_at', 'desc').limit(10).get();
+    const recentQuizzes = [];
+    for (const doc of recentQuizzesSnap.docs) {
+      const qData = doc.data();
+      let fullname = 'Unknown';
+      try { const uDoc = await db.collection('users').doc(qData.user_id).get(); if (uDoc.exists) fullname = uDoc.data().fullname; } catch (e) {}
+      recentQuizzes.push({ id: doc.id, topic: qData.topic, score: qData.score, date: qData.date, fullname });
+    }
 
     res.json({ totalUsers, todayUsers, totalReviewers, totalQuizzes, totalPDFs, totalFlashcards, recentUsers, recentQuizzes });
   } catch (error) {
@@ -23,21 +40,19 @@ const getDashboardStats = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const { search, page = 1, limit = 20 } = req.query;
+    const snap = await db.collection('users').orderBy('created_at', 'desc').get();
+    let users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (search) {
+      const q = search.toLowerCase();
+      users = users.filter(u => (u.fullname || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q));
+    }
+
+    const total = users.length;
     const offset = (page - 1) * limit;
-    let query = 'SELECT id, fullname, email, phone, role, total_xp, level, created_at FROM users';
-    const params = [];
+    users = users.slice(offset, offset + parseInt(limit));
 
-    if (search) { query += ' WHERE fullname LIKE ? OR email LIKE ?'; params.push(`%${search}%`, `%${search}%`); }
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
-
-    const [[{ total }]] = await pool.query(
-      'SELECT COUNT(*) as total FROM users' + (search ? ' WHERE fullname LIKE ? OR email LIKE ?' : ''),
-      search ? [`%${search}%`, `%${search}%`] : []
-    );
-
-    const [users] = await pool.query(query, params);
-    res.json({ users, total, page: parseInt(page), pages: Math.ceil(total / limit) });
+    res.json({ users, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -47,7 +62,7 @@ const updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
     if (!['student', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role.' });
-    await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id]);
+    await db.collection('users').doc(req.params.id).update({ role, updated_at: FieldValue.serverTimestamp() });
     res.json({ message: 'User role updated.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -56,7 +71,8 @@ const updateUserRole = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
+    await db.collection('users').doc(req.params.id).delete();
+    try { await auth.deleteUser(req.params.id); } catch (e) {}
     res.json({ message: 'User deleted.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -65,10 +81,14 @@ const deleteUser = async (req, res) => {
 
 const getQuizStats = async (req, res) => {
   try {
-    const [stats] = await pool.query(
-      `SELECT q.id, q.topic, q.score, q.accuracy, q.difficulty, q.date, u.fullname, u.email
-      FROM quizzes q JOIN users u ON q.user_id = u.id ORDER BY q.date DESC LIMIT 50`
-    );
+    const qSnap = await db.collection('quizzes').orderBy('created_at', 'desc').limit(50).get();
+    const stats = [];
+    for (const doc of qSnap.docs) {
+      const qData = doc.data();
+      let fullname = 'Unknown', email = '';
+      try { const uDoc = await db.collection('users').doc(qData.user_id).get(); if (uDoc.exists) { fullname = uDoc.data().fullname; email = uDoc.data().email; } } catch (e) {}
+      stats.push({ id: doc.id, topic: qData.topic, score: qData.score, accuracy: qData.accuracy, difficulty: qData.difficulty, date: qData.date, fullname, email });
+    }
     res.json(stats);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -77,18 +97,30 @@ const getQuizStats = async (req, res) => {
 
 const getUserReports = async (req, res) => {
   try {
-    const [users] = await pool.query(
-      `SELECT u.id, u.fullname, u.email, u.total_xp, u.level,
-        COALESCE(s.current_streak, 0) as current_streak,
-        (SELECT COUNT(*) FROM quizzes WHERE user_id = u.id) as quiz_count,
-        (SELECT COALESCE(AVG(score), 0) FROM quizzes WHERE user_id = u.id) as avg_score,
-        (SELECT COUNT(*) FROM study_history WHERE user_id = u.id) as study_sessions,
-        (SELECT COALESCE(SUM(duration), 0) FROM study_history WHERE user_id = u.id) as total_study_time
-      FROM users u
-      LEFT JOIN streaks s ON u.id = s.user_id
-      ORDER BY u.total_xp DESC`
-    );
-    res.json(users);
+    const usersSnap = await db.collection('users').get();
+    const reports = [];
+    for (const uDoc of usersSnap.docs) {
+      const uData = uDoc.data();
+      const streakSnap = await db.collection('streaks').where('user_id', '==', uDoc.id).limit(1).get();
+      const current_streak = !streakSnap.empty ? (streakSnap.docs[0].data().current_streak || 0) : 0;
+
+      const quizSnap = await db.collection('quizzes').where('user_id', '==', uDoc.id).get();
+      const quiz_count = quizSnap.size;
+      const avg_score = quiz_count > 0 ? quizSnap.docs.reduce((s, d) => s + (d.data().score || 0), 0) / quiz_count : 0;
+
+      const studySnap = await db.collection('study_history').where('user_id', '==', uDoc.id).get();
+      const study_sessions = studySnap.size;
+      const total_study_time = studySnap.docs.reduce((s, d) => s + (d.data().duration || 0), 0);
+
+      reports.push({
+        id: uDoc.id, fullname: uData.fullname, email: uData.email,
+        total_xp: uData.total_xp || 0, level: uData.level || 1,
+        current_streak, quiz_count, avg_score: Math.round(avg_score),
+        study_sessions, total_study_time
+      });
+    }
+    reports.sort((a, b) => (b.total_xp || 0) - (a.total_xp || 0));
+    res.json(reports);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -96,7 +128,7 @@ const getUserReports = async (req, res) => {
 
 const deleteNote = async (req, res) => {
   try {
-    await pool.query('DELETE FROM notes WHERE id = ?', [req.params.id]);
+    await db.collection('notes').doc(req.params.id).delete();
     res.json({ message: 'Note deleted.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

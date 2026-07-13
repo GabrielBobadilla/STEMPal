@@ -1,54 +1,85 @@
-const multer = require('multer');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const Busboy = require('busboy');
+const { storage, db } = require('../config/firebase');
 
-const uploadDir = process.env.VERCEL === '1' ? '/tmp' : path.join(__dirname, '..');
-
-const profileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(uploadDir, 'uploads/profiles'));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `profile_${uuidv4()}${ext}`);
-  }
-});
-
-const pdfStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(uploadDir, 'uploads/pdfs'));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `pdf_${uuidv4()}${ext}`);
-  }
-});
-
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and PDF are allowed.'), false);
-  }
+const BUCKETS = {
+  pdfs: 'stemPal-pdfs',
+  scanned: 'stemPal-scanned',
+  profiles: 'stemPal-profiles',
 };
 
-const uploadProfile = multer({
-  storage: profileStorage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
-});
+function parseMultipart(req) {
+  return new Promise((resolve, reject) => {
+    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 50 * 1024 * 1024 } });
+    const fields = {};
+    const files = [];
 
-const uploadPDF = multer({
-  storage: pdfStorage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files are allowed.'), false);
+    busboy.on('field', (name, value) => { fields[name] = value; });
+    busboy.on('file', (name, stream, info) => {
+      const chunks = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('end', () => {
+        files.push({
+          fieldname: name,
+          originalname: info.filename,
+          mimetype: info.mimeType,
+          buffer: Buffer.concat(chunks),
+        });
+      });
+    });
+    busboy.on('finish', () => resolve({ fields, files }));
+    busboy.on('error', reject);
+    req.pipe(busboy);
+  });
+}
+
+async function uploadToStorage(file, bucketName, destination) {
+  const bucket = storage.bucket(bucketName);
+  const blob = bucket.file(destination);
+  await blob.save(file.buffer, { metadata: { contentType: file.mimetype } });
+  await blob.makePublic();
+  return `https://storage.googleapis.com/${bucketName}/${encodeURIComponent(destination)}`;
+}
+
+async function deleteFromStorage(url) {
+  try {
+    const decoded = decodeURIComponent(url);
+    const match = decoded.match(/\/([^/]+)\/(.+)$/);
+    if (!match) return;
+    const bucket = storage.bucket(match[1]);
+    await bucket.file(match[2]).delete();
+  } catch (error) {
+    console.warn('Failed to delete from storage:', error.message);
+  }
+}
+
+function uploadPDF() {
+  return async (req, res, next) => {
+    try {
+      const { fields, files } = await parseMultipart(req);
+      Object.assign(req.body, fields);
+      if (files.length > 0) {
+        req.file = files[0];
+      }
+      next();
+    } catch (error) {
+      res.status(400).json({ message: 'Failed to parse upload', error: error.message });
     }
-  },
-  limits: { fileSize: 10 * 1024 * 1024 }
-});
+  };
+}
 
-module.exports = { uploadProfile, uploadPDF };
+function uploadProfilePicture() {
+  return async (req, res, next) => {
+    try {
+      const { fields, files } = await parseMultipart(req);
+      Object.assign(req.body, fields);
+      if (files.length > 0) {
+        req.file = files[0];
+      }
+      next();
+    } catch (error) {
+      res.status(400).json({ message: 'Failed to parse upload', error: error.message });
+    }
+  };
+}
+
+module.exports = { uploadPDF, uploadProfilePicture, uploadToStorage, deleteFromStorage, parseMultipart, BUCKETS };

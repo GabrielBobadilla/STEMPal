@@ -1,4 +1,3 @@
-const pool = require('../config/db');
 const { generateCrosswordData } = require('../utils/aiService');
 const { buildCrossword } = require('../utils/crosswordEngine');
 

@@ -1,16 +1,28 @@
-const bcrypt = require('bcryptjs');
-const pool = require('../config/db');
-const path = require('path');
-const fs = require('fs');
+const db = require('../config/db');
+const { FieldValue } = require('firebase-admin').firestore;
+const { uploadToStorage, deleteFromStorage, BUCKETS } = require('../middleware/upload');
+const { auth } = require('../config/firebase');
 
 const getProfile = async (req, res) => {
   try {
-    const [users] = await pool.query(
-      'SELECT id, fullname, email, phone, profile_picture, grade_level, school, stem_strand, theme_preference, notification_enabled, total_xp, level, created_at FROM users WHERE id = ?',
-      [req.user.id]
-    );
-    if (users.length === 0) return res.status(404).json({ message: 'User not found.' });
-    res.json(users[0]);
+    const userDoc = await db.collection('users').doc(req.user.id).get();
+    if (!userDoc.exists) return res.status(404).json({ message: 'User not found.' });
+    const data = userDoc.data();
+    res.json({
+      id: req.user.id,
+      fullname: data.fullname,
+      email: data.email,
+      phone: data.phone,
+      profile_picture: data.profile_picture,
+      grade_level: data.grade_level,
+      school: data.school,
+      stem_strand: data.stem_strand,
+      theme_preference: data.theme_preference,
+      notification_enabled: data.notification_enabled,
+      total_xp: data.total_xp,
+      level: data.level,
+      created_at: data.created_at
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -19,10 +31,10 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { fullname, phone, grade_level, school, stem_strand } = req.body;
-    await pool.query(
-      'UPDATE users SET fullname = ?, phone = ?, grade_level = ?, school = ?, stem_strand = ? WHERE id = ?',
-      [fullname, phone, grade_level, school, stem_strand, req.user.id]
-    );
+    await db.collection('users').doc(req.user.id).update({
+      fullname, phone, grade_level, school, stem_strand,
+      updated_at: FieldValue.serverTimestamp()
+    });
     res.json({ message: 'Profile updated successfully.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -33,14 +45,24 @@ const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
 
-    const [users] = await pool.query('SELECT profile_picture FROM users WHERE id = ?', [req.user.id]);
-    if (users[0].profile_picture && users[0].profile_picture !== 'default.png') {
-      const oldPath = path.join(__dirname, '../uploads/profiles', users[0].profile_picture);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    const userDoc = await db.collection('users').doc(req.user.id).get();
+    const userData = userDoc.data();
+
+    // Delete old picture from storage
+    if (userData.profile_picture && !userData.profile_picture.includes('default')) {
+      await deleteFromStorage(userData.profile_picture);
     }
 
-    await pool.query('UPDATE users SET profile_picture = ? WHERE id = ?', [req.file.filename, req.user.id]);
-    res.json({ message: 'Profile picture updated.', filename: req.file.filename });
+    // Upload new picture
+    const destination = `profiles/${req.user.id}/${Date.now()}_${req.file.originalname}`;
+    const url = await uploadToStorage(req.file, BUCKETS.profiles, destination);
+
+    await db.collection('users').doc(req.user.id).update({
+      profile_picture: url,
+      updated_at: FieldValue.serverTimestamp()
+    });
+
+    res.json({ message: 'Profile picture updated.', filename: url });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -49,16 +71,14 @@ const uploadProfilePicture = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-
-    const [users] = await pool.query('SELECT password FROM users WHERE id = ?', [req.user.id]);
-    const isMatch = await bcrypt.compare(currentPassword, users[0].password);
-    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect.' });
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
-
-    res.json({ message: 'Password changed successfully.' });
+    // With Firebase Auth, password changes are done via client SDK
+    // This endpoint uses Admin SDK to update password directly
+    try {
+      await auth.updateUser(req.user.id, { password: newPassword });
+      res.json({ message: 'Password changed successfully.' });
+    } catch (e) {
+      return res.status(400).json({ message: 'Failed to change password.' });
+    }
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -68,8 +88,10 @@ const updateTheme = async (req, res) => {
   try {
     const { theme } = req.body;
     if (!['light', 'dark'].includes(theme)) return res.status(400).json({ message: 'Invalid theme.' });
-
-    await pool.query('UPDATE users SET theme_preference = ? WHERE id = ?', [theme, req.user.id]);
+    await db.collection('users').doc(req.user.id).update({
+      theme_preference: theme,
+      updated_at: FieldValue.serverTimestamp()
+    });
     res.json({ message: `Theme changed to ${theme}.` });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -79,7 +101,10 @@ const updateTheme = async (req, res) => {
 const updateNotificationSettings = async (req, res) => {
   try {
     const { enabled } = req.body;
-    await pool.query('UPDATE users SET notification_enabled = ? WHERE id = ?', [enabled, req.user.id]);
+    await db.collection('users').doc(req.user.id).update({
+      notification_enabled: enabled,
+      updated_at: FieldValue.serverTimestamp()
+    });
     res.json({ message: 'Notification settings updated.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

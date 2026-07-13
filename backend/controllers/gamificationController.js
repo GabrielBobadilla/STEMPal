@@ -1,40 +1,31 @@
-const pool = require('../config/db');
+const db = require('../config/db');
 
 const getLeaderboard = async (req, res) => {
   try {
     const { period, limit = 20 } = req.query;
+    const lim = parseInt(limit);
 
-    if (period === 'weekly') {
-      const [data] = await pool.query(
-        `SELECT u.id, u.fullname, u.profile_picture,
-          COALESCE(SUM(x.xp_earned), 0) as xp_earned
-        FROM users u
-        LEFT JOIN xp_log x ON u.id = x.user_id AND x.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-        GROUP BY u.id, u.fullname, u.profile_picture
-        ORDER BY xp_earned DESC LIMIT ?`,
-        [parseInt(limit)]
-      );
-      return res.json(data);
+    if (period === 'weekly' || period === 'monthly') {
+      const days = period === 'weekly' ? 7 : 30;
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days); cutoff.setHours(0,0,0,0);
+      const usersSnap = await db.collection('users').get();
+      const data = [];
+      for (const uDoc of usersSnap.docs) {
+        const uData = uDoc.data();
+        const xpSnap = await db.collection('xp_log').where('user_id', '==', uDoc.id).get();
+        let xpEarned = 0;
+        xpSnap.docs.forEach(d => {
+          const created = d.data().created_at?.toDate?.() || new Date(d.data().created_at || 0);
+          if (created >= cutoff) xpEarned += d.data().xp_earned || 0;
+        });
+        data.push({ id: uDoc.id, fullname: uData.fullname, profile_picture: uData.profile_picture, xp_earned: xpEarned });
+      }
+      data.sort((a, b) => b.xp_earned - a.xp_earned);
+      return res.json(data.slice(0, lim));
     }
 
-    if (period === 'monthly') {
-      const [data] = await pool.query(
-        `SELECT u.id, u.fullname, u.profile_picture,
-          COALESCE(SUM(x.xp_earned), 0) as xp_earned
-        FROM users u
-        LEFT JOIN xp_log x ON u.id = x.user_id AND x.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY u.id, u.fullname, u.profile_picture
-        ORDER BY xp_earned DESC LIMIT ?`,
-        [parseInt(limit)]
-      );
-      return res.json(data);
-    }
-
-    const [data] = await pool.query(
-      'SELECT id, fullname, profile_picture, total_xp, level FROM users ORDER BY total_xp DESC LIMIT ?',
-      [parseInt(limit)]
-    );
-    res.json(data);
+    const snap = await db.collection('users').orderBy('total_xp', 'desc').limit(lim).get();
+    res.json(snap.docs.map(d => ({ id: d.id, fullname: d.data().fullname, profile_picture: d.data().profile_picture, total_xp: d.data().total_xp || 0, level: d.data().level || 1 })));
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -42,14 +33,11 @@ const getLeaderboard = async (req, res) => {
 
 const getUserRanking = async (req, res) => {
   try {
-    const [allUsers] = await pool.query(
-      'SELECT id, total_xp FROM users ORDER BY total_xp DESC'
-    );
+    const snap = await db.collection('users').orderBy('total_xp', 'desc').get();
+    const allUsers = snap.docs.map(d => ({ id: d.id, total_xp: d.data().total_xp || 0 }));
     const rank = allUsers.findIndex(u => u.id === req.user.id) + 1;
-    const total = allUsers.length;
     const user = allUsers.find(u => u.id === req.user.id);
-
-    res.json({ rank, total, total_xp: user?.total_xp || 0 });
+    res.json({ rank, total: allUsers.length, total_xp: user?.total_xp || 0 });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
@@ -57,21 +45,26 @@ const getUserRanking = async (req, res) => {
 
 const getLevelInfo = async (req, res) => {
   try {
-    const [levels] = await pool.query('SELECT * FROM levels ORDER BY min_xp ASC');
-    const [user] = await pool.query('SELECT total_xp, level FROM users WHERE id = ?', [req.user.id]);
+    const levelsSnap = await db.collection('levels').orderBy('min_xp', 'asc').get();
+    const levels = levelsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    const currentLevel = levels.find(l => user[0]?.total_xp >= l.min_xp && user[0]?.total_xp <= l.max_xp) || levels[0];
-    const nextLevel = levels[levels.indexOf(currentLevel) + 1];
+    const userDoc = await db.collection('users').doc(req.user.id).get();
+    const userData = userDoc.data() || {};
+    const totalXp = userData.total_xp || 0;
+
+    const currentLevel = levels.find(l => totalXp >= l.min_xp && totalXp <= l.max_xp) || levels[0];
+    const currentIdx = levels.indexOf(currentLevel);
+    const nextLevel = levels[currentIdx + 1];
 
     res.json({
-      currentXp: user[0]?.total_xp || 0,
+      currentXp: totalXp,
       currentLevel: currentLevel?.level_name || 'Beginner',
-      currentLevelNum: user[0]?.level || 1,
+      currentLevelNum: userData.level || 1,
       minXp: currentLevel?.min_xp || 0,
       maxXp: currentLevel?.max_xp || 99,
       nextLevelName: nextLevel?.level_name || 'Max level',
       nextLevelXp: nextLevel?.min_xp || currentLevel?.max_xp || 99,
-      progress: nextLevel ? ((user[0]?.total_xp - currentLevel.min_xp) / (nextLevel.min_xp - currentLevel.min_xp)) * 100 : 100
+      progress: nextLevel ? ((totalXp - currentLevel.min_xp) / (nextLevel.min_xp - currentLevel.min_xp)) * 100 : 100
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -80,10 +73,8 @@ const getLevelInfo = async (req, res) => {
 
 const getXpHistory = async (req, res) => {
   try {
-    const [logs] = await pool.query(
-      'SELECT * FROM xp_log WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
-      [req.user.id]
-    );
+    const snap = await db.collection('xp_log').where('user_id', '==', req.user.id).orderBy('created_at', 'desc').limit(50).get();
+    const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json(logs);
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -92,20 +83,21 @@ const getXpHistory = async (req, res) => {
 
 const checkLevelUp = async (req, res) => {
   try {
-    const [user] = await pool.query('SELECT total_xp, level FROM users WHERE id = ?', [req.user.id]);
-    const [levels] = await pool.query('SELECT * FROM levels ORDER BY min_xp ASC');
+    const userDoc = await db.collection('users').doc(req.user.id).get();
+    const userData = userDoc.data();
+    const totalXp = userData.total_xp || 0;
+
+    const levelsSnap = await db.collection('levels').orderBy('min_xp', 'asc').get();
+    const levels = levelsSnap.docs.map(d => d.data());
 
     let newLevel = 1;
-    for (const l of levels) {
-      if (user[0].total_xp >= l.min_xp) newLevel = levels.indexOf(l) + 1;
-    }
+    levels.forEach((l, i) => { if (totalXp >= l.min_xp) newLevel = i + 1; });
 
-    if (newLevel > user[0].level) {
-      await pool.query('UPDATE users SET level = ? WHERE id = ?', [newLevel, req.user.id]);
+    if (newLevel > (userData.level || 1)) {
+      await db.collection('users').doc(req.user.id).update({ level: newLevel, updated_at: new Date().toISOString() });
       return res.json({ leveledUp: true, newLevel, levelName: levels[newLevel - 1]?.level_name });
     }
-
-    res.json({ leveledUp: false, currentLevel: user[0].level });
+    res.json({ leveledUp: false, currentLevel: userData.level || 1 });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }
