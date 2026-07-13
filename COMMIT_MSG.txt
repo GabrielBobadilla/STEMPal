@@ -1,4 +1,5 @@
-Fix React hydration error #418 on Vercel
+Fix Vercel backend - install root deps and fix serverless function
 
-- ThemeContext: defer localStorage/window.matchMedia reads to useEffect (not useState init)
-- supabase.js: use ESM import instead of mixed CommonJS/ESM
+- Root package.json updated with Supabase and backend deps
+- Removed stale MySQL deps (mysql2, bcryptjs, jsonwebtoken, sql.js)
+- vercel.json: install frontend deps too, increase function memory
