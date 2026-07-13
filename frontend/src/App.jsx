@@ -101,27 +101,27 @@ function App() {
         <Router>
           <div className="min-h-screen text-[var(--text-primary)] transition-colors duration-300 relative">
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-              <div className="stem-deco-blob w-[600px] h-[600px] bg-blue-400/[0.12] top-[-10%] left-[-5%] animate-drift" />
-              <div className="stem-deco-blob w-[500px] h-[500px] bg-sky-400/[0.10] top-[30%] right-[-8%] animate-drift" style={{ animationDelay: '-7s' }} />
-              <div className="stem-deco-blob w-[450px] h-[450px] bg-cyan-400/[0.10] bottom-[-5%] left-[20%] animate-drift" style={{ animationDelay: '-14s' }} />
-              <div className="stem-deco-circle w-[300px] h-[300px] border border-blue-400/[0.10] top-[15%] left-[60%] animate-float-slow" />
-              <div className="stem-deco-circle w-[200px] h-[200px] border border-sky-300/[0.08] top-[60%] left-[10%] animate-float-reverse" />
-              <div className="stem-deco-circle w-[150px] h-[150px] border border-cyan-300/[0.10] bottom-[20%] right-[25%] animate-float" />
-              <svg className="stem-deco w-24 h-24 top-[10%] left-[5%] animate-float-slow" viewBox="0 0 24 24" fill="currentColor">
+              <div className="stem-deco-blob w-[600px] h-[600px] bg-blue-400/[0.22] top-[-10%] left-[-5%] animate-drift" />
+              <div className="stem-deco-blob w-[500px] h-[500px] bg-sky-400/[0.18] top-[30%] right-[-8%] animate-drift" style={{ animationDelay: '-7s' }} />
+              <div className="stem-deco-blob w-[450px] h-[450px] bg-cyan-400/[0.16] bottom-[-5%] left-[20%] animate-drift" style={{ animationDelay: '-14s' }} />
+              <div className="stem-deco-circle w-[300px] h-[300px] border-2 border-blue-400/[0.18] top-[15%] left-[60%] animate-float-slow" />
+              <div className="stem-deco-circle w-[200px] h-[200px] border-2 border-sky-300/[0.15] top-[60%] left-[10%] animate-float-reverse" />
+              <div className="stem-deco-circle w-[150px] h-[150px] border-2 border-cyan-300/[0.18] bottom-[20%] right-[25%] animate-float" />
+              <svg className="stem-deco w-24 h-24 top-[10%] left-[5%] animate-float-slow" style={{ opacity: 0.09 }} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
               </svg>
-              <svg className="stem-deco w-16 h-16 bottom-[15%] right-[8%] animate-float-reverse" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="stem-deco w-16 h-16 bottom-[15%] right-[8%] animate-float-reverse" style={{ opacity: 0.08 }} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
               </svg>
-              <svg className="stem-deco w-20 h-20 top-[45%] right-[3%] animate-float" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="stem-deco w-20 h-20 top-[45%] right-[3%] animate-float" style={{ opacity: 0.09 }} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.6 3.6 0 0112 15.6z"/>
               </svg>
-              <svg className="stem-deco w-14 h-14 top-[70%] left-[40%] animate-float-slow" style={{ animationDelay: '-4s' }} viewBox="0 0 24 24" fill="currentColor">
+              <svg className="stem-deco w-14 h-14 top-[70%] left-[40%] animate-float-slow" style={{ opacity: 0.08, animationDelay: '-4s' }} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
               </svg>
-              <div className="stem-deco w-[1px] h-40 bg-gradient-to-b from-transparent via-blue-300/10 to-transparent top-[20%] left-[35%] rotate-45" />
-              <div className="stem-deco w-[1px] h-32 bg-gradient-to-b from-transparent via-sky-300/8 to-transparent top-[50%] right-[40%] -rotate-30" />
-              <div className="stem-deco w-[1px] h-36 bg-gradient-to-b from-transparent via-cyan-300/8 to-transparent bottom-[10%] left-[55%] rotate-12" />
+              <div className="stem-deco w-[1px] h-40 bg-gradient-to-b from-transparent via-blue-300/20 to-transparent top-[20%] left-[35%] rotate-45" />
+              <div className="stem-deco w-[1px] h-32 bg-gradient-to-b from-transparent via-sky-300/15 to-transparent top-[50%] right-[40%] -rotate-30" />
+              <div className="stem-deco w-[1px] h-36 bg-gradient-to-b from-transparent via-cyan-300/15 to-transparent bottom-[10%] left-[55%] rotate-12" />
             </div>
             <div className="relative z-10">
               <AppRoutes />

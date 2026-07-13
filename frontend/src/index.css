@@ -11,7 +11,7 @@
 
   body {
     @apply font-sans antialiased;
-    background: linear-gradient(135deg, #F7FBFF 0%, #EFF6FF 15%, #E8F4FD 30%, #DBEAFE 50%, #D6EEFF 65%, #CFEFFF 80%, #DBEAFE 100%);
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 15%, #B3D8FC 30%, #93C5FD 50%, #7EC8F8 65%, #67B8F5 80%, #93C5FD 100%);
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -32,10 +32,10 @@
     --success: #34D399;
     --warning: #FBBF24;
     --danger: #EF4444;
-    --glass-bg: rgba(255, 255, 255, 0.18);
-    --glass-bg-strong: rgba(255, 255, 255, 0.28);
-    --glass-border: rgba(255, 255, 255, 0.22);
-    --glass-border-strong: rgba(255, 255, 255, 0.35);
+    --glass-bg: rgba(219, 234, 254, 0.35);
+    --glass-bg-strong: rgba(219, 234, 254, 0.50);
+    --glass-border: rgba(255, 255, 255, 0.40);
+    --glass-border-strong: rgba(255, 255, 255, 0.55);
     --shadow: 0 8px 32px rgba(96, 165, 250, 0.10);
     --shadow-lg: 0 16px 48px rgba(96, 165, 250, 0.14);
     --shadow-xl: 0 24px 64px rgba(96, 165, 250, 0.18);
@@ -307,7 +307,7 @@
     position: fixed;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.04;
+    opacity: 0.07;
   }
 
   .stem-deco-circle {
