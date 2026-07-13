@@ -5,10 +5,15 @@ const aiService = require('../utils/aiService');
 
 const uploadPDF = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: 'No PDF file uploaded.' });
+    if (!req.file) return res.status(400).json({ message: 'No PDF file uploaded. Make sure the field name is "pdf".' });
 
     const filePath = `${req.user.id}/${Date.now()}-${req.file.originalname}`;
-    await uploadToSupabase('pdfs', filePath, req.file.buffer, req.file.mimetype);
+    try {
+      await uploadToSupabase('pdfs', filePath, req.file.buffer, req.file.mimetype);
+    } catch (uploadErr) {
+      console.error('Supabase storage upload error:', uploadErr);
+      return res.status(500).json({ message: 'Failed to store PDF file.', detail: uploadErr.message });
+    }
 
     const { data: row, error } = await supabase.from('pdf_uploads').insert({
       user_id: req.user.id,
@@ -23,13 +28,13 @@ const uploadPDF = async (req, res) => {
 
     if (error) {
       console.error('Insert PDF record error:', error);
-      return res.status(500).json({ message: 'Failed to save PDF record.' });
+      return res.status(500).json({ message: 'Failed to save PDF record.', detail: error.message });
     }
 
     res.status(201).json({ message: 'PDF uploaded.', id: row.id, filename: req.file.originalname });
   } catch (error) {
     console.error('Upload PDF error:', error);
-    res.status(500).json({ message: 'Upload failed.' });
+    res.status(500).json({ message: 'Upload failed.', detail: error.message });
   }
 };
 

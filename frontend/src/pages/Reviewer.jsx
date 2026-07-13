@@ -150,7 +150,7 @@ const Reviewer = () => {
       const res = await pdfAPI.upload(fd);
       setActivePdf(res.data);
       toast.success('File uploaded');
-    } catch { toast.error('Failed to upload file'); } finally { setUploading(false); }
+    } catch (err) { toast.error(err?.response?.data?.detail || err?.response?.data?.message || 'Failed to upload file'); } finally { setUploading(false); }
   };
 
   const handleProcess = async () => {
@@ -226,7 +226,7 @@ const Reviewer = () => {
         toast.success('PDF processed - ready to generate reviewer');
       } catch { toast.error('Failed to process scanned PDF'); } finally { setProcessing(false); }
     } catch (err) {
-      toast.error('Upload failed');
+      toast.error(err?.response?.data?.detail || err?.response?.data?.message || 'Upload failed');
     } finally { setScanUploading(false); }
   };
 

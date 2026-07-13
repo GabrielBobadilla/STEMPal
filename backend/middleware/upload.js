@@ -28,6 +28,15 @@ function uploadPDF() {
 }
 
 async function uploadToSupabase(bucket, filePath, fileBuffer, contentType) {
+  const { data: buckets } = await supabase.storage.listBuckets();
+  const exists = buckets?.some(b => b.name === bucket);
+  if (!exists) {
+    const isPublic = bucket === 'profiles';
+    const { error: createErr } = await supabase.storage.createBucket(bucket, { public: isPublic });
+    if (createErr && !createErr.message?.includes('already exists')) {
+      throw createErr;
+    }
+  }
   const { data, error } = await supabase.storage
     .from(bucket)
     .upload(filePath, fileBuffer, { contentType, upsert: true });
