@@ -1,4 +1,1 @@
-Fix serverless function crashes on Vercel
-
-- upload.js: wrap fs.mkdirSync in try/catch for read-only filesystem
-- pdfService.js: lazy-load native modules (tesseract.js, sharp, pdf-parse, pdfkit)
+Fix admin routes import: authorizeAdmin -> requireAdmin
