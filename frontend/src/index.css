@@ -11,11 +11,13 @@
 
   body {
     @apply font-sans antialiased;
-    background:
-      radial-gradient(ellipse at 20% 20%, rgba(142,235,255,0.10) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(96,197,255,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(135,202,255,0.06) 0%, transparent 60%),
-      linear-gradient(135deg, #EAF6FF 0%, #DDF2FF 18%, #D2ECFF 36%, #CFEAFF 52%, #BFE3FF 70%, #A9D8FF 85%, #98D1FF 100%);
+    background-color: #B8DEFF;
+    background-image:
+      radial-gradient(ellipse at 15% 15%, rgba(96,197,255,0.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 20%, rgba(142,235,255,0.30) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 80%, rgba(56,189,248,0.25) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 80%, rgba(96,197,255,0.20) 0%, transparent 50%),
+      linear-gradient(135deg, #D2ECFF 0%, #C6E7FF 15%, #B8DEFF 30%, #A9D8FF 45%, #98D1FF 60%, #87CAFF 75%, #72BBFF 90%, #60C5FF 100%);
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -27,9 +29,9 @@
     --accent: #8EEBFF;
     --accent-azure: #60C5FF;
     --bg-primary: transparent;
-    --bg-secondary: #BFE3FF;
+    --bg-secondary: #C6E7FF;
     --text-primary: #0F2B3D;
-    --text-secondary: #4A7A94;
+    --text-secondary: #2E6A8A;
     --success: #34D399;
     --warning: #FBBF24;
     --danger: #EF4444;

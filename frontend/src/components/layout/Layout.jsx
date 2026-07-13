@@ -42,8 +42,8 @@ const Layout = () => {
         <div className="h-full flex flex-col m-3 ml-0 rounded-3xl overflow-hidden glass-panel" style={{ boxShadow: 'var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.20)' }}>
           <div className="p-5 flex-1 overflow-y-auto scrollbar-hide">
             <Link to="/dashboard" className="flex items-center gap-3 mb-8 group" onClick={() => setSidebarOpen(false)}>
-              <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                <span className="text-white font-bold text-lg">S</span>
+              <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <img src="/stempal-logo.jpg" alt="STEMPal" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h1 className="text-xl font-bold gradient-text">STEMPal</h1>
