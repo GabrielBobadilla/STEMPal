@@ -42,7 +42,7 @@ const types = [
     ),
     color: 'from-amber-400 to-orange-600',
     desc: 'Exam-focused with practice',
-    features: ['Mock Questions', 'Common Mistakes', 'Formulas'],
+    features: ['Practice Questions', 'Common Mistakes', 'Formulas'],
   },
 ];
 
