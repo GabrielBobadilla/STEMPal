@@ -32,8 +32,8 @@ const generateFlashcards = async (req, res) => {
 
     res.status(201).json({ message: 'Flashcards generated.', count: cardArray.length, flashcards: cardArray });
   } catch (error) {
-    console.error('Generate flashcards error:', error);
-    res.status(500).json({ message: 'Failed to generate flashcards.' });
+    console.error('Generate flashcards error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate flashcards.' });
   }
 };
 

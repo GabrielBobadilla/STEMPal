@@ -30,8 +30,8 @@ const generateCrossword = async (req, res) => {
       totalWords: gridData.totalWords, valid: validation.valid,
     });
   } catch (error) {
-    console.error('Generate crossword error:', error);
-    res.status(500).json({ message: 'Failed to generate crossword puzzle.' });
+    console.error('Generate crossword error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate crossword puzzle.' });
   }
 };
 

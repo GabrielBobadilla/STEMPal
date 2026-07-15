@@ -40,8 +40,8 @@ const generateReviewer = async (req, res) => {
 
     res.status(201).json({ message: 'Reviewer generated.', id: reviewer.id, content });
   } catch (error) {
-    console.error('Generate reviewer error:', error);
-    res.status(500).json({ message: 'Failed to generate reviewer.' });
+    console.error('Generate reviewer error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate reviewer.' });
   }
 };
 
@@ -55,6 +55,7 @@ const getReviewers = async (req, res) => {
     if (error) throw error;
     res.json(reviewers || []);
   } catch (error) {
+    console.error('Get reviewers error:', error.message);
     res.status(500).json({ message: 'Server error.' });
   }
 };
@@ -71,6 +72,7 @@ const getReviewer = async (req, res) => {
     }
     res.json(data);
   } catch (error) {
+    console.error('Get reviewer error:', error.message);
     res.status(500).json({ message: 'Server error.' });
   }
 };
@@ -88,6 +90,7 @@ const deleteReviewer = async (req, res) => {
     await supabase.from('generated_reviewers').delete().eq('id', req.params.id);
     res.json({ message: 'Reviewer deleted.' });
   } catch (error) {
+    console.error('Delete reviewer error:', error.message);
     res.status(500).json({ message: 'Server error.' });
   }
 };
@@ -99,7 +102,8 @@ const generateFormulaSheet = async (req, res) => {
     const formulas = await aiService.generateFormulaSheet(topic);
     res.json({ formulas });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to generate formula sheet.' });
+    console.error('Generate formula sheet error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate formula sheet.' });
   }
 };
 
@@ -110,7 +114,8 @@ const generateKeyTerms = async (req, res) => {
     const terms = await aiService.generateKeyTerms(topic);
     res.json({ terms });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to generate key terms.' });
+    console.error('Generate key terms error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate key terms.' });
   }
 };
 

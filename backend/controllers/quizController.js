@@ -3,12 +3,13 @@ const aiService = require('../utils/aiService');
 
 const generateQuiz = async (req, res) => {
   try {
-    const { topic, type, count } = req.body;
+    const { topic, category, type, count, difficulty } = req.body;
     if (!topic) return res.status(400).json({ message: 'Topic is required.' });
     const questions = await aiService.generateQuiz(topic, type || 'multiple_choice', count || 10);
-    res.json({ message: 'Quiz generated.', questions, topic, type: type || 'multiple_choice' });
+    res.json({ message: 'Quiz generated.', questions, topic, category, type: type || 'multiple_choice' });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to generate quiz.' });
+    console.error('Generate quiz error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate quiz.' });
   }
 };
 
@@ -104,11 +105,14 @@ const getWeakTopics = async (req, res) => {
 
 const generateAdaptiveQuiz = async (req, res) => {
   try {
-    const { topic, weakTopics, difficulty } = req.body;
-    const questions = await aiService.generateAdaptiveQuestions(topic, weakTopics || [], difficulty || 'medium');
+    const { topic, topics, weakTopics, difficulty } = req.body;
+    const targetTopic = topic || (topics && topics[0]) || 'General';
+    const targetWeakTopics = weakTopics || topics || [];
+    const questions = await aiService.generateAdaptiveQuestions(targetTopic, targetWeakTopics, difficulty || 'medium');
     res.json({ questions });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to generate adaptive quiz.' });
+    console.error('Generate adaptive quiz error:', error.message);
+    res.status(500).json({ message: error.message || 'Failed to generate adaptive quiz.' });
   }
 };
 

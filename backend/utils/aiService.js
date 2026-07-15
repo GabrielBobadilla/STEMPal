@@ -3,6 +3,53 @@ const { generateContent, generateJSON } = require('../config/gemini');
 const SYSTEM_TUTOR = 'You are an expert STEM tutor creating high-quality study materials for university-level students. Generate completely original educational content. Do not reuse previous questions or generic templates. Create unique, topic-specific content every request. Respond with valid JSON only.';
 const SYSTEM_WELLNESS = 'You are a study wellness expert focused on student health and productivity. Generate completely original personalized recommendations every time. Respond with valid JSON only.';
 
+const parseAIJson = (text) => {
+  if (!text || typeof text !== 'string') {
+    throw new Error('AI returned empty or invalid response');
+  }
+
+  let cleaned = text.replace(/```json|```/g, '').trim();
+
+  const firstBracket = cleaned.indexOf('[');
+  const firstBrace = cleaned.indexOf('{');
+
+  let startIdx = -1;
+  if (firstBracket >= 0 && firstBrace >= 0) {
+    startIdx = Math.min(firstBracket, firstBrace);
+  } else if (firstBracket >= 0) {
+    startIdx = firstBracket;
+  } else if (firstBrace >= 0) {
+    startIdx = firstBrace;
+  }
+
+  if (startIdx >= 0) {
+    cleaned = cleaned.substring(startIdx);
+  }
+
+  const lastBracket = cleaned.lastIndexOf(']');
+  const lastBrace = cleaned.lastIndexOf('}');
+  let endIdx = -1;
+  if (lastBracket >= 0 && lastBrace >= 0) {
+    endIdx = Math.max(lastBracket, lastBrace) + 1;
+  } else if (lastBracket >= 0) {
+    endIdx = lastBracket + 1;
+  } else if (lastBrace >= 0) {
+    endIdx = lastBrace + 1;
+  }
+
+  if (endIdx > startIdx) {
+    cleaned = cleaned.substring(0, endIdx);
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error('JSON parse failed. Raw text (first 500 chars):', text.substring(0, 500));
+    console.error('Cleaned text (first 500 chars):', cleaned.substring(0, 500));
+    throw new Error(`AI returned invalid JSON. Please try again. Details: ${e.message}`);
+  }
+};
+
 const generateReviewer = async (topic, type = 'basic') => {
   const prompts = {
     basic: `Generate completely original study materials for "${topic}". Create a unique reviewer with accurate, topic-specific content. Do not use generic templates. Return valid JSON with keys: summary (detailed paragraph about ${topic}), key_concepts (array of {term, definition} with 5+ real concepts), important_definitions (array of {term, definition} with 4+ real definitions).`,
@@ -14,7 +61,7 @@ const generateReviewer = async (topic, type = 'basic') => {
   console.log(`Sending prompt for topic: "${topic}", type: ${type}`);
 
   const text = await generateContent(prompts[type] || prompts.basic, SYSTEM_TUTOR);
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log('Gemini Response Received - Reviewer Generated');
   return result;
@@ -28,7 +75,7 @@ const generateFlashcards = async (topic, count = 10) => {
     `Generate ${count} completely unique and original flashcards about "${topic}" for STEM students. Each flashcard must be different and specific to ${topic}. Do not create generic flashcards. Include a mix of definitions, formulas, and concepts. Create a new question set every request. Return a JSON array of objects with "question", "answer", and "difficulty" (easy/medium/hard) fields.`,
     SYSTEM_TUTOR
   );
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log(`Gemini Response Received - ${Array.isArray(result) ? result.length : '?'} Flashcards Generated`);
   return result;
@@ -49,7 +96,7 @@ const generateQuiz = async (topic, type = 'multiple_choice', count = 10) => {
     `Generate ${count} completely unique and original ${typeInstructions[type] || typeInstructions.multiple_choice} about "${topic}" for STEM students. Each question must be different and specific to ${topic}. Avoid duplicate questions. Create a new question set every request. Include difficulty level (easy/medium/hard) for each question. Return a JSON array of question objects.`,
     SYSTEM_TUTOR
   );
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log(`Gemini Response Received - ${Array.isArray(result) ? result.length : '?'} Questions Generated`);
   return result;
@@ -63,7 +110,7 @@ const generateFormulaSheet = async (topic) => {
     `Generate a comprehensive formula sheet for "${topic}" covering all important formulas. Only include real, accurate formulas that are actually used in ${topic}. Return a JSON array of objects with "name", "formula", and "description" fields.`,
     SYSTEM_TUTOR
   );
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log('Gemini Response Received - Formula Sheet Generated');
   return result;
@@ -90,7 +137,7 @@ const generateAdaptiveQuestions = async (topic, weakTopics, difficulty) => {
     `Topic: "${topic}". Weak areas: ${JSON.stringify(weakTopics)}. Difficulty: ${difficulty}. Generate 5 completely unique adaptive questions targeting the weak areas to improve understanding. Each question must be specific and different. Return a JSON array of question objects.`,
     SYSTEM_TUTOR
   );
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log(`Gemini Response Received - ${Array.isArray(result) ? result.length : '?'} Adaptive Questions Generated`);
   return result;
@@ -104,7 +151,7 @@ const generateKeyTerms = async (topic) => {
     `Generate key terms and definitions for "${topic}" that every STEM student should know. Only include real, accurate terms used in ${topic}. Return a JSON array of objects with "term" and "definition" fields.`,
     SYSTEM_TUTOR
   );
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log('Gemini Response Received - Key Terms Generated');
   return result;
@@ -217,7 +264,7 @@ Return a JSON array of objects with this exact format:
 The "answer" field must be the index (0-3) of the correct option. All questions must have exactly 4 options.`,
     SYSTEM_TUTOR
   );
-  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  const result = parseAIJson(text);
 
   console.log(`Gemini Response Received - ${Array.isArray(result) ? result.length : '?'} Multiplayer Questions Generated`);
   return result;
