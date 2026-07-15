@@ -73,6 +73,7 @@ const Crossword = () => {
 
   const timerRef = useRef(null);
   const socketRef = useRef(null);
+  const gridRef = useRef(null);
 
   // Multiplayer state
   const [mpView, setMpView] = useState('lobby');
@@ -239,8 +240,10 @@ const Crossword = () => {
   }, [hintsUsed, maxHints, revealedCells, mode, mpRoomCode]);
 
   const handleCheckAnswers = useCallback(() => {
-    if (!puzzle) return;
+    if (!puzzle || !gridRef.current) return;
     setCheckMode(true);
+    const gridState = gridRef.current.getGrid();
+    if (!gridState) return;
     const wrong = new Set();
     let allCorrect = true;
 
@@ -248,6 +251,27 @@ const Crossword = () => {
       for (let i = 0; i < entry.answer.length; i++) {
         const r = entry.row;
         const c = entry.col + i;
+        const cell = gridState[r]?.[c];
+        const userLetter = (cell?.userLetter || '').toUpperCase();
+        const correctLetter = entry.answer[i];
+        if (!userLetter || userLetter !== correctLetter) {
+          wrong.add(`${r}-${c}`);
+          allCorrect = false;
+        }
+      }
+    }
+
+    for (const entry of puzzle.down || []) {
+      for (let i = 0; i < entry.answer.length; i++) {
+        const r = entry.row + i;
+        const c = entry.col;
+        const cell = gridState[r]?.[c];
+        const userLetter = (cell?.userLetter || '').toUpperCase();
+        const correctLetter = entry.answer[i];
+        if (!userLetter || userLetter !== correctLetter) {
+          wrong.add(`${r}-${c}`);
+          allCorrect = false;
+        }
       }
     }
 
@@ -260,6 +284,7 @@ const Crossword = () => {
   }, [puzzle]);
 
   const handleManualComplete = useCallback(async () => {
+    handleCheckAnswers();
     setTimerRunning(false);
     setPuzzleCompleted(true);
     const finalScore = calculateScore();
@@ -280,7 +305,7 @@ const Crossword = () => {
       fetchStats();
       checkBadges(finalScore);
     } catch { toast.error('Failed to save score'); }
-  }, [puzzle, difficulty, totalWords, completedWords, hintsUsed, timeElapsed, calculateScore]);
+  }, [puzzle, difficulty, totalWords, completedWords, hintsUsed, timeElapsed, calculateScore, handleCheckAnswers]);
 
   const checkBadges = (finalScore) => {
     const newBadges = [];
@@ -857,6 +882,7 @@ const Crossword = () => {
             </div>
 
             <CrosswordGrid
+              ref={gridRef}
               puzzle={puzzle}
               onCellChange={handleCellChange}
               onWordCompleted={handleWordCompleted}
@@ -868,10 +894,12 @@ const Crossword = () => {
               onDirectionChange={setDirection}
               cellHighlights={cellHighlights}
               userId={user?.id}
+              checkMode={checkMode}
+              wrongCells={wrongCells}
             />
 
             <div className="flex flex-wrap gap-2 mt-4">
-              <button onClick={() => handleClueClick(puzzle.across?.[0] || puzzle.down?.[0])}
+              <button onClick={handleCheckAnswers}
                 className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
                 <FiEye className="w-3 h-3" /> Check
               </button>

@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 
-const CrosswordGrid = ({
+const CrosswordGrid = forwardRef(({
   puzzle,
   onCellChange,
   onWordCompleted,
@@ -14,13 +14,19 @@ const CrosswordGrid = ({
   readOnly = false,
   cellHighlights,
   userId,
-}) => {
+  checkMode = false,
+  wrongCells = new Set(),
+}, ref) => {
   const [grid, setGrid] = useState([]);
   const [activeCell, setActiveCell] = useState(null);
   const [direction, setDirection] = useState('across');
   const [revealed, setRevealed] = useState(new Set());
   const [completed, setCompleted] = useState(new Set());
   const gridRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    getGrid: () => grid,
+  }));
 
   useEffect(() => {
     if (!puzzle || !puzzle.grid) return;
@@ -353,8 +359,11 @@ const CrosswordGrid = ({
             else if (isInWord) bgClass = 'bg-primary-500/10';
             else if (highlight) bgClass = 'bg-primary-500/15';
 
+            const isWrong = checkMode && wrongCells.has(`${r}-${c}`);
+
             let textClass = 'text-[var(--text-primary)]';
-            if (isCompletedWord && cell.userLetter) textClass = 'text-emerald-500 font-bold';
+            if (isWrong && cell.userLetter) textClass = 'text-red-500 font-bold';
+            else if (isCompletedWord && cell.userLetter) textClass = 'text-emerald-500 font-bold';
             else if (isRevealed) textClass = 'text-amber-500';
             else if (!cell.userLetter) textClass = 'text-transparent';
 
@@ -393,6 +402,6 @@ const CrosswordGrid = ({
       </p>
     </div>
   );
-};
+});
 
 export default CrosswordGrid;
